@@ -1,13 +1,13 @@
 name:          profunctors
 category:      Control, Categories
-version:       0.1
+version:       0.1.0.2
 license:       BSD3
 cabal-version: >= 1.6
 license-file:  LICENSE
 author:        Edward A. Kmett
 maintainer:    Edward A. Kmett <ekmett@gmail.com>
 stability:     experimental
-homepage:      git://github.com/ekmett/profunctors/
+homepage:      http://github.com/ekmett/profunctors/
 copyright:     Copyright (C) 2011 Edward A. Kmett
 synopsis:      Haskell 98 Profunctors
 description:   Haskell 98 Profunctors
