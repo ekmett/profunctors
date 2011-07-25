@@ -19,7 +19,7 @@ instance Profunctor (->) where
   lmap = flip (.)
   rmap = (.)
 
-newtype UpStar f d c = UpStar (d -> f c)
+newtype UpStar f d c = UpStar { runUpStar :: d -> f c } 
 instance Functor f => Profunctor (UpStar f) where
   lmap k (UpStar f) = UpStar (f . k)
   rmap k (UpStar f) = UpStar (fmap k . f)
@@ -27,7 +27,7 @@ instance Functor f => Profunctor (UpStar f) where
 instance Functor f => Functor (UpStar f a) where
   fmap = rmap 
 
-newtype DownStar f d c = DownStar (f d -> c)
+newtype DownStar f d c = DownStar { runDownStar :: f d -> c } 
 instance Functor f => Profunctor (DownStar f) where
   lmap k (DownStar f) = DownStar (f . fmap k)
   rmap k (DownStar f) = DownStar (k . f)
