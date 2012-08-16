@@ -1,4 +1,4 @@
-module Data.Profunctor 
+module Data.Profunctor
   ( Profunctor(..)
   , UpStar(..)
   , DownStar(..)
