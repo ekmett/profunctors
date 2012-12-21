@@ -29,9 +29,6 @@ library
   if impl(ghc)
     cpp-options: -DGHC_TYPEABLE
 
-  if impl(ghc >= 7.4.1)
-    extension: PolyKinds
-
   extensions: CPP
 
   exposed-modules:
