@@ -9,6 +9,7 @@ import Control.Arrow
 import Control.Category
 import Control.Comonad (Cokleisli(..))
 import Control.Monad (liftM)
+import Data.Tagged
 import Prelude hiding (id,(.))
 
 class Profunctor h where
@@ -18,6 +19,10 @@ class Profunctor h where
 instance Profunctor (->) where
   lmap = flip (.)
   rmap = (.)
+
+instance Profunctor Tagged where
+  lmap _ = retag
+  rmap = fmap
 
 newtype UpStar f d c = UpStar { runUpStar :: d -> f c } 
 instance Functor f => Profunctor (UpStar f) where

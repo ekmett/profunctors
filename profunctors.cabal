@@ -1,6 +1,6 @@
 name:          profunctors
 category:      Control, Categories
-version:       3.0.1
+version:       3.1
 license:       BSD3
 cabal-version: >= 1.6
 license-file:  LICENSE
@@ -23,7 +23,8 @@ library
   build-depends:
     base          == 4.*,
     semigroupoids == 3.0.*,
-    comonad       == 3.0.*
+    comonad       == 3.0.*,
+    tagged        >= 0.4.4 && < 0.5
 
   if impl(ghc)
     cpp-options: -DGHC_TYPEABLE
