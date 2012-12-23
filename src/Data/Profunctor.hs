@@ -21,8 +21,8 @@ module Data.Profunctor
   -- * Profunctors
     Profunctor(..)
   -- ** Profunctorial Strength
-  , Prismatic(..)
   , Lenticular(..)
+  , Prismatic(..)
   -- ** Common Profunctors
   , UpStar(..)
   , DownStar(..)
@@ -217,6 +217,31 @@ instance Arrow p => Profunctor (WrappedArrow p) where
   {-# INLINE rmap #-}
 
 ------------------------------------------------------------------------------
+-- Lenticular
+------------------------------------------------------------------------------
+
+-- | Generalizing upstar of a strong 'Functor'
+--
+-- /Note:/ Every 'Functor' in Haskell is strong.
+class Profunctor p => Lenticular p where
+  lenticular :: p a b -> p a (a, b)
+
+instance Lenticular (->) where
+  lenticular f a = (a, f a)
+  {-# INLINE lenticular #-}
+
+instance Monad m => Lenticular (Kleisli m) where
+  lenticular (Kleisli f) = Kleisli $ \ a -> do
+     b <- f a
+     return (a, b)
+  {-# INLINE lenticular #-}
+
+instance Functor m => Lenticular (UpStar m) where
+  lenticular (UpStar f) = UpStar $ \ a -> (,) a <$> f a
+  {-# INLINE lenticular #-}
+
+
+------------------------------------------------------------------------------
 -- Prismatic
 ------------------------------------------------------------------------------
 
@@ -244,26 +269,6 @@ instance Traversable w => Prismatic (DownStar w) where
   prismatic (DownStar wab) = DownStar (either id wab . sequence)
   {-# INLINE prismatic #-}
 
-------------------------------------------------------------------------------
--- Lenticular
-------------------------------------------------------------------------------
-
--- | Generalizing upstar of a strong 'Functor'
---
--- /Note:/ Every 'Functor' in Haskell is strong.
-class Profunctor p => Lenticular p where
-  lenticular :: p a b -> p a (a, b)
-
-instance Lenticular (->) where
-  lenticular f a = (a, f a)
-  {-# INLINE lenticular #-}
-
-instance Monad m => Lenticular (Kleisli m) where
-  lenticular (Kleisli f) = Kleisli $ \ a -> do
-     b <- f a
-     return (a, b)
-  {-# INLINE lenticular #-}
-
-instance Functor m => Lenticular (UpStar m) where
-  lenticular (UpStar f) = UpStar $ \ a -> (,) a <$> f a
-  {-# INLINE lenticular #-}
+instance Prismatic Tagged where
+  prismatic = retag
+  {-# INLINE prismatic #-}
