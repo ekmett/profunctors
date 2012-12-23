@@ -1,6 +1,6 @@
 name:          profunctors
 category:      Control, Categories
-version:       3.1
+version:       3.1.1
 license:       BSD3
 cabal-version: >= 1.6
 license-file:  LICENSE
@@ -13,7 +13,12 @@ copyright:     Copyright (C) 2011 Edward A. Kmett
 synopsis:      Haskell 98 Profunctors
 description:   Haskell 98 Profunctors
 build-type:    Simple
-extra-source-files: .travis.yml
+extra-source-files:
+  .travis.yml
+  .ghci
+  .vim.custom
+  README.markdown
+  CHANGELOG.markdown
 
 source-repository head
   type: git
@@ -26,12 +31,6 @@ library
     comonad       == 3.0.*,
     tagged        >= 0.4.4 && < 0.5
 
-  if impl(ghc)
-    cpp-options: -DGHC_TYPEABLE
-
-  extensions: CPP
-
-  exposed-modules:
-    Data.Profunctor
-
-  ghc-options:      -Wall
+  hs-source-dirs:  src
+  exposed-modules: Data.Profunctor
+  ghc-options:     -Wall
