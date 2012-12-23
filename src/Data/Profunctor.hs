@@ -17,12 +17,16 @@
 -- <http://comonad.com/reader/2008/deriving-strength-from-laziness/>
 ----------------------------------------------------------------------------
 module Data.Profunctor
-  ( Profunctor(..)
+  (
+  -- * Profunctors
+    Profunctor(..)
+  -- ** Profunctorial Strength
+  , Prismatic(..)
+  , Lenticular(..)
+  -- ** Common Profunctors
   , UpStar(..)
   , DownStar(..)
   , WrappedArrow(..)
-  , Prismatic(..)
-  , Lenticular(..)
   ) where
 
 import Control.Applicative hiding (WrappedArrow(..))
@@ -216,7 +220,9 @@ instance Arrow p => Profunctor (WrappedArrow p) where
 -- Prismatic
 ------------------------------------------------------------------------------
 
--- | Generalization of downstar of a costrong functor
+-- | The generalization of 'DownStar' of a \"Costrong\" 'Functor'
+--
+-- Here we use 'Traversable' as an approximate costrength.
 class Profunctor p => Prismatic p where
   prismatic :: p a b -> p (Either b a) b
 
@@ -239,6 +245,8 @@ instance Traversable w => Prismatic (DownStar w) where
 ------------------------------------------------------------------------------
 
 -- | Generalizing upstar of a strong 'Functor'
+--
+-- | Every 'Functor' in Haskell is strong.
 class Profunctor p => Lenticular p where
   lenticular :: p a b -> p a (a, b)
 
@@ -250,6 +258,5 @@ instance Monad m => Lenticular (Kleisli m) where
      b <- f a
      return (a, b)
 
--- | Every 'Functor' in Haskell is strong.
 instance Functor m => Lenticular (UpStar m) where
   lenticular (UpStar f) = UpStar $ \ a -> (,) a <$> f a
