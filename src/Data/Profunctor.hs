@@ -47,17 +47,19 @@ import Prelude hiding (id,(.),sequence)
 --
 -- If you supply 'lmap' and 'rmap', ensure:
 --
--- @'lmap' 'id' = 'id'@
--- @'rmap' 'id' = 'id'@
+-- @
+-- 'lmap' 'id' = 'id'
+-- 'rmap' 'id' = 'id'
+-- @
 --
 -- If you supply both, you should also ensure:
 --
--- @'dimap' f g = 'lmap' f . 'rmap' g
+-- @'dimap' f g = 'lmap' f . 'rmap' g@
 --
 -- These ensure by parametricity:
 --
 -- @
--- dimap (f . g) (h . i) = dimap g h . dimap f i@
+-- dimap (f . g) (h . i) = dimap g h . dimap f i
 -- lmap (f . g) == lmap g . lmap f
 -- rmap (f . g) == rmap f . rmap g
 -- @
@@ -71,14 +73,14 @@ class Profunctor p where
 
   -- | Map the first argument contravariantly
   --
-  -- @'lmap' f = 'dimap' f id@
+  -- @'lmap' f = 'dimap' f 'id'@
   lmap :: (a -> b) -> p b c -> p a c
   lmap f = dimap f id
   {-# INLINE lmap #-}
 
   -- | Map the second argument covariantly
   --
-  -- @'rmap' = 'dimap' id@
+  -- @'rmap' = 'dimap' 'id'@
   rmap :: (b -> c) -> p a b -> p a c
   rmap = dimap id
   {-# INLINE rmap #-}
