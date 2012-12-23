@@ -27,7 +27,6 @@ source-repository head
 library
   build-depends:
     base          == 4.*,
-    semigroupoids == 3.0.*,
     comonad       == 3.0.*,
     tagged        >= 0.4.4 && < 0.5
 
