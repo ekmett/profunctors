@@ -11,6 +11,10 @@
 -- For a good explanation of profunctors in Haskell see Dan Piponi's article:
 --
 -- <http://blog.sigfpe.com/2011/07/profunctors-in-haskell.html>
+--
+-- For more information on strength and costrength, see:
+--
+-- <http://comonad.com/reader/2008/deriving-strength-from-laziness/>
 ----------------------------------------------------------------------------
 module Data.Profunctor
   ( Profunctor(..)
