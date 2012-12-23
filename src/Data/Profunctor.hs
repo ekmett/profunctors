@@ -222,23 +222,27 @@ instance Arrow p => Profunctor (WrappedArrow p) where
 
 -- | The generalization of 'DownStar' of a \"Costrong\" 'Functor'
 --
--- Here we use 'Traversable' as an approximate costrength.
+-- /Note:/ Here we use 'Traversable' as an approximate costrength.
 class Profunctor p => Prismatic p where
   prismatic :: p a b -> p (Either b a) b
 
 instance Prismatic (->) where
   prismatic = either id
+  {-# INLINE prismatic #-}
 
 instance Monad m => Prismatic (Kleisli m) where
   prismatic (Kleisli pab) = Kleisli (either return pab)
+  {-# INLINE prismatic #-}
 
 -- | 'sequence' approximates 'costrength'
 instance Traversable w => Prismatic (Cokleisli w) where
   prismatic (Cokleisli wab) = Cokleisli (either id wab . sequence)
+  {-# INLINE prismatic #-}
 
 -- | 'sequence' approximates 'costrength'
 instance Traversable w => Prismatic (DownStar w) where
   prismatic (DownStar wab) = DownStar (either id wab . sequence)
+  {-# INLINE prismatic #-}
 
 ------------------------------------------------------------------------------
 -- Lenticular
@@ -246,17 +250,20 @@ instance Traversable w => Prismatic (DownStar w) where
 
 -- | Generalizing upstar of a strong 'Functor'
 --
--- | Every 'Functor' in Haskell is strong.
+-- /Note:/ Every 'Functor' in Haskell is strong.
 class Profunctor p => Lenticular p where
   lenticular :: p a b -> p a (a, b)
 
 instance Lenticular (->) where
   lenticular f a = (a, f a)
+  {-# INLINE lenticular #-}
 
 instance Monad m => Lenticular (Kleisli m) where
   lenticular (Kleisli f) = Kleisli $ \ a -> do
      b <- f a
      return (a, b)
+  {-# INLINE lenticular #-}
 
 instance Functor m => Lenticular (UpStar m) where
   lenticular (UpStar f) = UpStar $ \ a -> (,) a <$> f a
+  {-# INLINE lenticular #-}
