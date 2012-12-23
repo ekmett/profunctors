@@ -274,3 +274,6 @@ instance Traversable w => Prismatic (DownStar w) where
 instance Prismatic Tagged where
   prismatic = retag
   {-# INLINE prismatic #-}
+
+instance ArrowChoice p => Prismatic (WrappedArrow p) where
+  prismatic (WrapArrow k) = WrapArrow (id ||| k)
