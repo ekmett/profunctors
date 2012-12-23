@@ -242,6 +242,7 @@ instance Functor m => Lenticular (UpStar m) where
 
 instance Arrow p => Lenticular (WrappedArrow p) where
   lenticular (WrapArrow k) = WrapArrow (id &&& k)
+  {-# INLINE lenticular #-}
 
 ------------------------------------------------------------------------------
 -- Prismatic
@@ -277,3 +278,4 @@ instance Prismatic Tagged where
 
 instance ArrowChoice p => Prismatic (WrappedArrow p) where
   prismatic (WrapArrow k) = WrapArrow (id ||| k)
+  {-# INLINE prismatic #-}
