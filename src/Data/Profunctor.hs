@@ -67,9 +67,9 @@ import Prelude hiding (id,(.),sequence)
 -- These ensure by parametricity:
 --
 -- @
--- 'dimap' (f . g) (h . i) ≡ 'dimap' g h '.' 'dimap' f i
--- 'lmap' (f . g) ≡ 'lmap' g '.' 'lmap' f
--- 'rmap' (f . g) ≡ 'rmap' f '.' 'rmap' g
+-- 'dimap' (f '.' g) (h '.' i) ≡ 'dimap' g h '.' 'dimap' f i
+-- 'lmap' (f '.' g) ≡ 'lmap' g '.' 'lmap' f
+-- 'rmap' (f '.' g) ≡ 'rmap' f '.' 'rmap' g
 -- @
 class Profunctor p where
   -- | Map over both arguments at the same time.
