@@ -240,6 +240,8 @@ instance Functor m => Lenticular (UpStar m) where
   lenticular (UpStar f) = UpStar $ \ a -> (,) a <$> f a
   {-# INLINE lenticular #-}
 
+instance Arrow p => Lenticular (WrappedArrow p) where
+  lenticular (WrapArrow k) = WrapArrow (id &&& k)
 
 ------------------------------------------------------------------------------
 -- Prismatic
