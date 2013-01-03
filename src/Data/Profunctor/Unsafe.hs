@@ -47,7 +47,7 @@ infixl 8 .#
 -- Profunctors
 ----------------------------------------------------------------------------
 
--- | Formally, 'Profunctor' represents a 'profunctor' from @Hask@ -> @Hask@
+-- | Formally, the class 'Profunctor' represents a profunctor from @Hask@ -> @Hask@
 --
 -- Intuitively it is a bifunctor where the first argument is contravariant
 -- and the second argument is covariant.
