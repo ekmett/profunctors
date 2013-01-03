@@ -1,3 +1,7 @@
+{-# LANGUAGE CPP #-}
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 702
+{-# LANGUAGE Trustworthy #-}
+#endif
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Profunctor
@@ -19,7 +23,7 @@
 module Data.Profunctor
   (
   -- * Profunctors
-    Profunctor(..)
+    Profunctor(dimap,lmap,rmap)
   -- ** Profunctorial Strength
   , Lenticular(..)
   , Prismatic(..)
@@ -33,97 +37,11 @@ import Control.Applicative hiding (WrappedArrow(..))
 import Control.Arrow
 import Control.Category
 import Control.Comonad (Cokleisli(..))
-import Control.Monad (liftM)
 import Data.Tagged
 import Data.Traversable
+import Data.Profunctor.Unsafe
 import Prelude hiding (id,(.),sequence)
-----------------------------------------------------------------------------
--- Profunctors
-----------------------------------------------------------------------------
-
--- | Formally, 'Profunctor' represents a 'profunctor' from @Hask@ -> @Hask@
---
--- Intuitively it is a bifunctor where the first argument is contravariant
--- and the second argument is covariant.
---
--- You can define a profunctor by either defining 'dimap' or by defining both
--- 'lmap' and 'rmap'.
---
--- If you supply 'dimap', you should ensure that:
---
--- @'dimap' 'id' 'id' ≡ 'id'@
---
--- If you supply 'lmap' and 'rmap', ensure:
---
--- @
--- 'lmap' 'id' ≡ 'id'
--- 'rmap' 'id' ≡ 'id'
--- @
---
--- If you supply both, you should also ensure:
---
--- @'dimap' f g ≡ 'lmap' f . 'rmap' g@
---
--- These ensure by parametricity:
---
--- @
--- 'dimap' (f '.' g) (h '.' i) ≡ 'dimap' g h '.' 'dimap' f i
--- 'lmap' (f '.' g) ≡ 'lmap' g '.' 'lmap' f
--- 'rmap' (f '.' g) ≡ 'rmap' f '.' 'rmap' g
--- @
-class Profunctor p where
-  -- | Map over both arguments at the same time.
-  --
-  -- @'dimap' f g ≡ 'lmap' f '.' 'rmap' g@
-  dimap :: (a -> b) -> (c -> d) -> p b c -> p a d
-  dimap f g = lmap f . rmap g
-  {-# INLINE dimap #-}
-
-  -- | Map the first argument contravariantly
-  --
-  -- @'lmap' f ≡ 'dimap' f 'id'@
-  lmap :: (a -> b) -> p b c -> p a c
-  lmap f = dimap f id
-  {-# INLINE lmap #-}
-
-  -- | Map the second argument covariantly
-  --
-  -- @'rmap' ≡ 'dimap' 'id'@
-  rmap :: (b -> c) -> p a b -> p a c
-  rmap = dimap id
-  {-# INLINE rmap #-}
-
-instance Profunctor (->) where
-  dimap ab cd bc = cd . bc . ab
-  {-# INLINE dimap #-}
-  lmap = flip (.)
-  {-# INLINE lmap #-}
-  rmap = (.)
-  {-# INLINE rmap #-}
-
-instance Profunctor Tagged where
-  dimap _ f (Tagged s) = Tagged (f s)
-  {-# INLINE dimap #-}
-  lmap _ = retag
-  {-# INLINE lmap #-}
-  rmap = fmap
-  {-# INLINE rmap #-}
-
-instance Monad m => Profunctor (Kleisli m) where
-  dimap f g (Kleisli h) = Kleisli (liftM g . h . f)
-  {-# INLINE dimap #-}
-  lmap k (Kleisli f) = Kleisli (f . k)
-  {-# INLINE lmap #-}
-  rmap k (Kleisli f) = Kleisli (liftM k . f)
-  {-# INLINE rmap #-}
-
-instance Functor w => Profunctor (Cokleisli w) where
-  dimap f g (Cokleisli h) = Cokleisli (g . h . fmap f)
-  {-# INLINE dimap #-}
-  lmap k (Cokleisli f) = Cokleisli (f . fmap k)
-  {-# INLINE lmap #-}
-  rmap k (Cokleisli f) = Cokleisli (k . f)
-  {-# INLINE rmap #-}
+import Unsafe.Coerce
 
 ------------------------------------------------------------------------------
 -- UpStar
@@ -139,6 +57,7 @@ instance Functor f => Profunctor (UpStar f) where
   {-# INLINE lmap #-}
   rmap k (UpStar f) = UpStar (fmap k . f)
   {-# INLINE rmap #-}
+  -- We cannot safely overload (#.) because we didn't write the 'Functor'.
 
 instance Functor f => Functor (UpStar f a) where
   fmap = rmap
@@ -158,6 +77,9 @@ instance Functor f => Profunctor (DownStar f) where
   {-# INLINE lmap #-}
   rmap k (DownStar f) = DownStar (k . f)
   {-# INLINE rmap #-}
+  (#.) _ = unsafeCoerce
+  {-# INLINE (#.) #-}
+  -- We cannot overload (.#) because we didn't write the 'Functor'.
 
 instance Functor (DownStar f a) where
   fmap k (DownStar f) = DownStar (k . f)
@@ -215,6 +137,7 @@ instance Arrow p => Profunctor (WrappedArrow p) where
   {-# INLINE lmap #-}
   rmap = (^<<)
   {-# INLINE rmap #-}
+  -- We cannot safely overload (#.) or (.#) because we didn't write the 'Arrow'.
 
 ------------------------------------------------------------------------------
 -- Lenticular

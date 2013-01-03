@@ -1,6 +1,6 @@
 name:          profunctors
 category:      Control, Categories
-version:       3.1.1
+version:       3.1.2
 license:       BSD3
 cabal-version: >= 1.6
 license-file:  LICENSE
@@ -31,5 +31,7 @@ library
     tagged        >= 0.4.4 && < 0.5
 
   hs-source-dirs:  src
-  exposed-modules: Data.Profunctor
+  exposed-modules:
+    Data.Profunctor
+    Data.Profunctor.Unsafe
   ghc-options:     -Wall
