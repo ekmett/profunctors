@@ -124,9 +124,9 @@ class Profunctor p where
   -- should match the default definition:
   --
   -- @(#.) ≡ \\f -> \\p -> p \`seq\` 'rmap' f p@
-  (#.) :: (b -> c) -> p a b -> p a c
-  (#.) = \f -> \p -> p `seq` rmap f p
-  {-# INLINE (#.) #-}
+  ( #. ) :: (b -> c) -> p a b -> p a c
+  ( #. ) = \f -> \p -> p `seq` rmap f p
+  {-# INLINE ( #. ) #-}
 
   -- | Strictly map the first argument argument
   -- contravariantly with a function that is assumed
@@ -150,9 +150,9 @@ class Profunctor p where
   -- operationally identity.
   --
   -- @(.#) ≡ \\p -> p \`seq\` \\f -> 'lmap' f p@
-  (.#) :: p b c -> (a -> b) -> p a c
-  (.#) = \p -> p `seq` \f -> lmap f p
-  {-# INLINE (.#) #-}
+  ( .# ) :: p b c -> (a -> b) -> p a c
+  ( .# ) = \p -> p `seq` \f -> lmap f p
+  {-# INLINE ( .# ) #-}
 
 instance Profunctor (->) where
   dimap ab cd bc = cd . bc . ab
@@ -161,10 +161,10 @@ instance Profunctor (->) where
   {-# INLINE lmap #-}
   rmap = (.)
   {-# INLINE rmap #-}
-  (#.) _ = unsafeCoerce
-  {-# INLINE (#.) #-}
-  (.#) pbc _ = unsafeCoerce pbc
-  {-# INLINE (.#) #-}
+  ( #. ) _ = unsafeCoerce
+  {-# INLINE ( #. ) #-}
+  ( .# ) pbc _ = unsafeCoerce pbc
+  {-# INLINE ( .# ) #-}
 
 instance Profunctor Tagged where
   dimap _ f (Tagged s) = Tagged (f s)
@@ -173,10 +173,10 @@ instance Profunctor Tagged where
   {-# INLINE lmap #-}
   rmap = fmap
   {-# INLINE rmap #-}
-  (#.) _ = unsafeCoerce
-  {-# INLINE (#.) #-}
+  ( #. ) _ = unsafeCoerce
+  {-# INLINE ( #. ) #-}
   Tagged s .# _ = Tagged s
-  {-# INLINE (.#) #-}
+  {-# INLINE ( .# ) #-}
 
 instance Monad m => Profunctor (Kleisli m) where
   dimap f g (Kleisli h) = Kleisli (liftM g . h . f)
@@ -186,8 +186,8 @@ instance Monad m => Profunctor (Kleisli m) where
   rmap k (Kleisli f) = Kleisli (liftM k . f)
   {-# INLINE rmap #-}
   -- We cannot safely overload (#.) because we didn't provide the 'Monad'.
-  (.#) pbc _ = unsafeCoerce pbc
-  {-# INLINE (.#) #-}
+  ( .# ) pbc _ = unsafeCoerce pbc
+  {-# INLINE ( .# ) #-}
 
 instance Functor w => Profunctor (Cokleisli w) where
   dimap f g (Cokleisli h) = Cokleisli (g . h . fmap f)
@@ -197,5 +197,5 @@ instance Functor w => Profunctor (Cokleisli w) where
   rmap k (Cokleisli f) = Cokleisli (k . f)
   {-# INLINE rmap #-}
   -- We cannot safely overload (.#) because we didn't provide the 'Functor'.
-  (#.) _ = unsafeCoerce
-  {-# INLINE (.#) #-}
+  ( #. ) _ = unsafeCoerce
+  {-# INLINE ( #. ) #-}

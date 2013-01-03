@@ -57,7 +57,9 @@ instance Functor f => Profunctor (UpStar f) where
   {-# INLINE lmap #-}
   rmap k (UpStar f) = UpStar (fmap k . f)
   {-# INLINE rmap #-}
-  -- We cannot safely overload (#.) because we didn't write the 'Functor'.
+  -- We cannot safely overload ( #. ) because we didn't write the 'Functor'.
+  p .# _ = unsafeCoerce p
+  {-# INLINE ( .# ) #-}
 
 instance Functor f => Functor (UpStar f a) where
   fmap = rmap
@@ -77,9 +79,9 @@ instance Functor f => Profunctor (DownStar f) where
   {-# INLINE lmap #-}
   rmap k (DownStar f) = DownStar (k . f)
   {-# INLINE rmap #-}
-  (#.) _ = unsafeCoerce
-  {-# INLINE (#.) #-}
-  -- We cannot overload (.#) because we didn't write the 'Functor'.
+  ( #. ) _ = unsafeCoerce
+  {-# INLINE ( #. ) #-}
+  -- We cannot overload ( .# ) because we didn't write the 'Functor'.
 
 instance Functor (DownStar f a) where
   fmap k (DownStar f) = DownStar (k . f)
@@ -137,7 +139,7 @@ instance Arrow p => Profunctor (WrappedArrow p) where
   {-# INLINE lmap #-}
   rmap = (^<<)
   {-# INLINE rmap #-}
-  -- We cannot safely overload (#.) or (.#) because we didn't write the 'Arrow'.
+  -- We cannot safely overload ( #. ) or ( .# ) because we didn't write the 'Arrow'.
 
 ------------------------------------------------------------------------------
 -- Lenticular
