@@ -40,6 +40,9 @@ import Data.Tagged
 import Prelude hiding (id,(.),sequence)
 import Unsafe.Coerce
 
+{-# ANN module "Hlint: ignore Redundant lambda" #-}
+{-# ANN module "Hlint: ignore Collapse lambdas" #-}
+
 infixr 9 #.
 infixl 8 .#
 
