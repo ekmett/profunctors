@@ -33,7 +33,7 @@ module Data.Profunctor
   , WrappedArrow(..)
   ) where
 
-import Control.Applicative hiding (WrappedArrow(..))
+import Control.Applicative
 import Control.Arrow
 import Control.Category
 import Control.Comonad (Cokleisli(..))
@@ -90,9 +90,6 @@ instance Functor (DownStar f a) where
 ------------------------------------------------------------------------------
 -- Wrapped Profunctors
 ------------------------------------------------------------------------------
-
--- | Wrap an arrow for use as a 'Profunctor'
-newtype WrappedArrow p a b = WrapArrow { unwrapArrow :: p a b }
 
 instance Category p => Category (WrappedArrow p) where
   WrapArrow f . WrapArrow g = WrapArrow (f . g)
