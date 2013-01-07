@@ -1,3 +1,7 @@
+3.1.3
+-----
+* Removed upper bounds on my own intra-package dependencies
+
 3.1.1
 -----
 * Added Documentation!
