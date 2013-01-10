@@ -47,7 +47,7 @@ import Unsafe.Coerce
 -- UpStar
 ------------------------------------------------------------------------------
 
--- | Lift a 'Functor' into a 'Profunctor' (forwards)
+-- | Lift a 'Functor' into a 'Profunctor' (forwards).
 newtype UpStar f d c = UpStar { runUpStar :: d -> f c }
 
 instance Functor f => Profunctor (UpStar f) where
@@ -69,7 +69,7 @@ instance Functor f => Functor (UpStar f a) where
 -- DownStar
 ------------------------------------------------------------------------------
 
--- | Lift a 'Functor' into a 'Profunctor' (backwards)
+-- | Lift a 'Functor' into a 'Profunctor' (backwards).
 newtype DownStar f d c = DownStar { runDownStar :: f d -> c }
 
 instance Functor f => Profunctor (DownStar f) where
@@ -91,7 +91,7 @@ instance Functor (DownStar f a) where
 -- Wrapped Profunctors
 ------------------------------------------------------------------------------
 
--- | Wrap an arrow for use as a 'Profunctor'
+-- | Wrap an arrow for use as a 'Profunctor'.
 newtype WrappedArrow p a b = WrapArrow { unwrapArrow :: p a b }
 
 instance Category p => Category (WrappedArrow p) where
@@ -173,7 +173,7 @@ instance Arrow p => Lenticular (WrappedArrow p) where
 -- Prismatic
 ------------------------------------------------------------------------------
 
--- | The generalization of 'DownStar' of a \"Costrong\" 'Functor'
+-- | The generalization of 'DownStar' of a \"Costrong\" 'Functor'.
 --
 -- /Note:/ Here we use 'Traversable' as an approximate costrength.
 class Profunctor p => Prismatic p where
@@ -187,12 +187,12 @@ instance Monad m => Prismatic (Kleisli m) where
   prismatic (Kleisli pab) = Kleisli (either return pab)
   {-# INLINE prismatic #-}
 
--- | 'sequence' approximates 'costrength'
+-- | 'sequence' approximates 'costrength'.
 instance Traversable w => Prismatic (Cokleisli w) where
   prismatic (Cokleisli wab) = Cokleisli (either id wab . sequence)
   {-# INLINE prismatic #-}
 
--- | 'sequence' approximates 'costrength'
+-- | 'sequence' approximates 'costrength'.
 instance Traversable w => Prismatic (DownStar w) where
   prismatic (DownStar wab) = DownStar (either id wab . sequence)
   {-# INLINE prismatic #-}
