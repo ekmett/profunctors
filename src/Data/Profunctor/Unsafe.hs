@@ -50,12 +50,13 @@ infixl 8 .#
 -- Profunctors
 ----------------------------------------------------------------------------
 
--- | Formally, the class 'Profunctor' represents a profunctor from @Hask@ -> @Hask@
+-- | Formally, the class 'Profunctor' represents a profunctor
+-- from @Hask@ -> @Hask@.
 --
 -- Intuitively it is a bifunctor where the first argument is contravariant
 -- and the second argument is covariant.
 --
--- You can define a profunctor by either defining 'dimap' or by defining both
+-- You can define a 'Profunctor' by either defining 'dimap' or by defining both
 -- 'lmap' and 'rmap'.
 --
 -- If you supply 'dimap', you should ensure that:
@@ -71,7 +72,7 @@ infixl 8 .#
 --
 -- If you supply both, you should also ensure:
 --
--- @'dimap' f g ≡ 'lmap' f . 'rmap' g@
+-- @'dimap' f g ≡ 'lmap' f '.' 'rmap' g@
 --
 -- These ensure by parametricity:
 --
@@ -88,14 +89,14 @@ class Profunctor p where
   dimap f g = lmap f . rmap g
   {-# INLINE dimap #-}
 
-  -- | Map the first argument contravariantly
+  -- | Map the first argument contravariantly.
   --
   -- @'lmap' f ≡ 'dimap' f 'id'@
   lmap :: (a -> b) -> p b c -> p a c
   lmap f = dimap f id
   {-# INLINE lmap #-}
 
-  -- | Map the second argument covariantly
+  -- | Map the second argument covariantly.
   --
   -- @'rmap' ≡ 'dimap' 'id'@
   rmap :: (b -> c) -> p a b -> p a c
@@ -126,7 +127,7 @@ class Profunctor p where
   -- The semantics of this function with respect to bottoms
   -- should match the default definition:
   --
-  -- @(#.) ≡ \\f -> \\p -> p \`seq\` 'rmap' f p@
+  -- @('Profuctor.Unsafe.#.') ≡ \\f -> \\p -> p \`seq\` 'rmap' f p@
   ( #. ) :: (b -> c) -> p a b -> p a c
   ( #. ) = \f -> \p -> p `seq` rmap f p
   {-# INLINE ( #. ) #-}
@@ -152,7 +153,7 @@ class Profunctor p where
   -- will only call this with a second argument that is
   -- operationally identity.
   --
-  -- @(.#) ≡ \\p -> p \`seq\` \\f -> 'lmap' f p@
+  -- @('.#') ≡ \\p -> p \`seq\` \\f -> 'lmap' f p@
   ( .# ) :: p b c -> (a -> b) -> p a c
   ( .# ) = \p -> p `seq` \f -> lmap f p
   {-# INLINE ( .# ) #-}

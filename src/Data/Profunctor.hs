@@ -48,7 +48,7 @@ import Unsafe.Coerce
 -- UpStar
 ------------------------------------------------------------------------------
 
--- | Lift a 'Functor' into a 'Profunctor' (forwards)
+-- | Lift a 'Functor' into a 'Profunctor' (forwards).
 newtype UpStar f d c = UpStar { runUpStar :: d -> f c }
 
 instance Functor f => Profunctor (UpStar f) where
@@ -70,7 +70,7 @@ instance Functor f => Functor (UpStar f a) where
 -- DownStar
 ------------------------------------------------------------------------------
 
--- | Lift a 'Functor' into a 'Profunctor' (backwards)
+-- | Lift a 'Functor' into a 'Profunctor' (backwards).
 newtype DownStar f d c = DownStar { runDownStar :: f d -> c }
 
 instance Functor f => Profunctor (DownStar f) where
@@ -92,7 +92,7 @@ instance Functor (DownStar f a) where
 -- Wrapped Profunctors
 ------------------------------------------------------------------------------
 
--- | Wrap an arrow for use as a 'Profunctor'
+-- | Wrap an arrow for use as a 'Profunctor'.
 newtype WrappedArrow p a b = WrapArrow { unwrapArrow :: p a b }
 
 instance Category p => Category (WrappedArrow p) where
@@ -188,7 +188,6 @@ instance Arrow p => Strong (WrappedArrow p) where
 ------------------------------------------------------------------------------
 -- Choice
 ------------------------------------------------------------------------------
-
 
 -- | The generalization of 'DownStar' of a \"costrong\" 'Functor'
 --
