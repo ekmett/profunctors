@@ -25,8 +25,8 @@ module Data.Profunctor
   -- * Profunctors
     Profunctor(dimap,lmap,rmap)
   -- ** Profunctorial Strength
-  , Lenticular(..)
-  , Prismatic(..)
+  , Strong(..)
+  , Choice(..)
   -- ** Common Profunctors
   , UpStar(..)
   , DownStar(..)
@@ -36,9 +36,10 @@ module Data.Profunctor
 import Control.Applicative hiding (WrappedArrow(..))
 import Control.Arrow
 import Control.Category
-import Control.Comonad (Cokleisli(..))
+import Control.Comonad
 import Data.Tagged
 import Data.Traversable
+import Data.Tuple
 import Data.Profunctor.Unsafe
 import Prelude hiding (id,(.),sequence)
 import Unsafe.Coerce
@@ -142,65 +143,100 @@ instance Arrow p => Profunctor (WrappedArrow p) where
   -- We cannot safely overload ( #. ) or ( .# ) because we didn't write the 'Arrow'.
 
 ------------------------------------------------------------------------------
--- Lenticular
+-- Strong
 ------------------------------------------------------------------------------
 
 -- | Generalizing upstar of a strong 'Functor'
 --
--- /Note:/ Every 'Functor' in Haskell is strong.
-class Profunctor p => Lenticular p where
-  lenticular :: p a b -> p a (a, b)
-
-instance Lenticular (->) where
-  lenticular f a = (a, f a)
-  {-# INLINE lenticular #-}
-
-instance Monad m => Lenticular (Kleisli m) where
-  lenticular (Kleisli f) = Kleisli $ \ a -> do
-     b <- f a
-     return (a, b)
-  {-# INLINE lenticular #-}
-
-instance Functor m => Lenticular (UpStar m) where
-  lenticular (UpStar f) = UpStar $ \ a -> (,) a <$> f a
-  {-# INLINE lenticular #-}
-
-instance Arrow p => Lenticular (WrappedArrow p) where
-  lenticular (WrapArrow k) = WrapArrow (id &&& k)
-  {-# INLINE lenticular #-}
-
-------------------------------------------------------------------------------
--- Prismatic
-------------------------------------------------------------------------------
-
--- | The generalization of 'DownStar' of a \"Costrong\" 'Functor'
+-- Minimal complete definition: ''first'' or 'second''
 --
--- /Note:/ Here we use 'Traversable' as an approximate costrength.
-class Profunctor p => Prismatic p where
-  prismatic :: p a b -> p (Either b a) b
+-- /Note:/ Every 'Functor' in Haskell is strong.
+class Profunctor p => Strong p where
+  first' :: p a b  -> p (a, c) (b, c)
+  first' = dimap swap swap . second'
 
-instance Prismatic (->) where
-  prismatic = either id
-  {-# INLINE prismatic #-}
+  second' :: p a b -> p (c, a) (c, b)
+  second' = dimap swap swap . first'
 
-instance Monad m => Prismatic (Kleisli m) where
-  prismatic (Kleisli pab) = Kleisli (either return pab)
-  {-# INLINE prismatic #-}
+instance Strong (->) where
+  first' ab ~(a, c) = (ab a, c)
+  {-# INLINE first' #-}
+  second' ab ~(c, a) = (c, ab a)
+
+instance Monad m => Strong (Kleisli m) where
+  first' (Kleisli f) = Kleisli $ \ ~(a, c) -> do
+     b <- f a
+     return (b, c)
+  {-# INLINE first' #-}
+  second' (Kleisli f) = Kleisli $ \ ~(c, a) -> do
+     b <- f a
+     return (c, b)
+  {-# INLINE second' #-}
+
+instance Functor m => Strong (UpStar m) where
+  first' (UpStar f) = UpStar $ \ ~(a, c) -> (\b' -> (b', c)) <$> f a
+  {-# INLINE first' #-}
+  second' (UpStar f) = UpStar $ \ ~(c, a) -> (,) c <$> f a
+  {-# INLINE second' #-}
+
+instance Arrow p => Strong (WrappedArrow p) where
+  first' (WrapArrow k) = WrapArrow (first k)
+  {-# INLINE first' #-}
+  second' (WrapArrow k) = WrapArrow (second k)
+  {-# INLINE second' #-}
+
+------------------------------------------------------------------------------
+-- Choice
+------------------------------------------------------------------------------
+
+
+-- | The generalization of 'DownStar' of a \"costrong\" 'Functor'
+--
+-- Minimal complete definition: 'left'' or 'right''
+--
+-- /Note:/ We use 'traverse' and 'extract' as approximate costrength as needed.
+class Profunctor p => Choice p where
+  left'  :: p a b -> p (Either a c) (Either b c)
+  left' =  dimap (either Right Left) (either Right Left) . right'
+
+  right' :: p a b -> p (Either c a) (Either c b)
+  right' =  dimap (either Right Left) (either Right Left) . left'
+
+instance Choice (->) where
+  left' ab (Left a) = Left (ab a)
+  left' _ (Right c) = Right c
+  {-# INLINE left' #-}
+  right' = fmap
+  {-# INLINE right' #-}
+
+instance Monad m => Choice (Kleisli m) where
+  left' = left
+  {-# INLINE left' #-}
+  right' = right
+  {-# INLINE right' #-}
+
+-- | 'extract' approximates 'costrength'
+instance Comonad w => Choice (Cokleisli w) where
+  left' = left
+  {-# INLINE left' #-}
+  right' = right
+  {-# INLINE right' #-}
 
 -- | 'sequence' approximates 'costrength'
-instance Traversable w => Prismatic (Cokleisli w) where
-  prismatic (Cokleisli wab) = Cokleisli (either id wab . sequence)
-  {-# INLINE prismatic #-}
+instance Traversable w => Choice (DownStar w) where
+  left' (DownStar wab) = DownStar (either Right Left . fmap wab . traverse (either Right Left))
+  {-# INLINE left' #-}
+  right' (DownStar wab) = DownStar (fmap wab . sequence)
+  {-# INLINE right' #-}
 
--- | 'sequence' approximates 'costrength'
-instance Traversable w => Prismatic (DownStar w) where
-  prismatic (DownStar wab) = DownStar (either id wab . sequence)
-  {-# INLINE prismatic #-}
+instance Choice Tagged where
+  left' (Tagged b) = Tagged (Left b)
+  {-# INLINE left' #-}
+  right' (Tagged b) = Tagged (Right b)
+  {-# INLINE right' #-}
 
-instance Prismatic Tagged where
-  prismatic = retag
-  {-# INLINE prismatic #-}
-
-instance ArrowChoice p => Prismatic (WrappedArrow p) where
-  prismatic (WrapArrow k) = WrapArrow (id ||| k)
-  {-# INLINE prismatic #-}
+instance ArrowChoice p => Choice (WrappedArrow p) where
+  left' (WrapArrow k) = WrapArrow (left k)
+  {-# INLINE left' #-}
+  right' (WrapArrow k) = WrapArrow (right k)
+  {-# INLINE right' #-}
