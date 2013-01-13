@@ -148,7 +148,7 @@ instance Arrow p => Profunctor (WrappedArrow p) where
 
 -- | Generalizing upstar of a strong 'Functor'
 --
--- Minimal complete definition: ''first'' or 'second''
+-- Minimal complete definition: 'first'' or 'second''
 --
 -- /Note:/ Every 'Functor' in Haskell is strong.
 class Profunctor p => Strong p where
