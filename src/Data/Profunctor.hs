@@ -214,6 +214,12 @@ instance Monad m => Choice (Kleisli m) where
   right' = right
   {-# INLINE right' #-}
 
+instance Applicative f => Choice (UpStar f) where
+  left' (UpStar f) = UpStar $ either (fmap Left . f) (fmap Right . pure)
+  {-# INLINE left' #-}
+  right' (UpStar f) = UpStar $ either (fmap Left . pure) (fmap Right . f)
+  {-# INLINE right' #-}
+
 -- | 'extract' approximates 'costrength'
 instance Comonad w => Choice (Cokleisli w) where
   left' = left
