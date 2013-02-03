@@ -31,12 +31,15 @@ module Data.Profunctor
   , UpStar(..)
   , DownStar(..)
   , WrappedArrow(..)
+  , Forget(..)
   ) where
 
 import Control.Applicative hiding (WrappedArrow(..))
 import Control.Arrow
 import Control.Category
 import Control.Comonad
+import Data.Foldable
+import Data.Monoid
 import Data.Tagged
 import Data.Traversable
 import Data.Tuple
@@ -143,6 +146,32 @@ instance Arrow p => Profunctor (WrappedArrow p) where
   -- We cannot safely overload ( #. ) or ( .# ) because we didn't write the 'Arrow'.
 
 ------------------------------------------------------------------------------
+-- Forget
+------------------------------------------------------------------------------
+
+newtype Forget r a b = Forget { runForget :: a -> r }
+
+instance Profunctor (Forget r) where
+  dimap f _ (Forget k) = Forget (k . f)
+  {-# INLINE dimap #-}
+  lmap f (Forget k) = Forget (k . f)
+  {-# INLINE lmap #-}
+  rmap _ (Forget k) = Forget k
+  {-# INLINE rmap #-}
+
+instance Functor (Forget r a) where
+  fmap _ (Forget k) = Forget k
+  {-# INLINE fmap #-}
+
+instance Foldable (Forget r a) where
+  foldMap _ _ = mempty
+  {-# INLINE foldMap #-}
+
+instance Traversable (Forget r a) where
+  traverse _ (Forget k) = pure (Forget k)
+  {-# INLINE traverse #-}
+
+------------------------------------------------------------------------------
 -- Strong
 ------------------------------------------------------------------------------
 
@@ -183,6 +212,12 @@ instance Arrow p => Strong (WrappedArrow p) where
   first' (WrapArrow k) = WrapArrow (first k)
   {-# INLINE first' #-}
   second' (WrapArrow k) = WrapArrow (second k)
+  {-# INLINE second' #-}
+
+instance Strong (Forget r) where
+  first' (Forget k) = Forget (k . fst)
+  {-# INLINE first' #-}
+  second' (Forget k) = Forget (k . snd)
   {-# INLINE second' #-}
 
 ------------------------------------------------------------------------------
@@ -244,4 +279,10 @@ instance ArrowChoice p => Choice (WrappedArrow p) where
   left' (WrapArrow k) = WrapArrow (left k)
   {-# INLINE left' #-}
   right' (WrapArrow k) = WrapArrow (right k)
+  {-# INLINE right' #-}
+
+instance Monoid r => Choice (Forget r) where
+  left' (Forget k) = Forget (either k (const mempty))
+  {-# INLINE left' #-}
+  right' (Forget k) = Forget (either (const mempty) k)
   {-# INLINE right' #-}
