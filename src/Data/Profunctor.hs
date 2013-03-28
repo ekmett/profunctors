@@ -4,7 +4,6 @@
 #endif
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Data.Profunctor
 -- Copyright   :  (C) 2011-2012 Edward Kmett,
 -- License     :  BSD-style (see the file LICENSE)
 --
