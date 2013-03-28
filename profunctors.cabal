@@ -1,6 +1,6 @@
 name:          profunctors
 category:      Control, Categories
-version:       3.3
+version:       3.3.0.1
 license:       BSD3
 cabal-version: >= 1.6
 license-file:  LICENSE
@@ -28,8 +28,8 @@ source-repository head
 library
   build-depends:
     base          == 4.*,
-    comonad       >= 3,
-    tagged        >= 0.4.4
+    comonad       >= 3     && < 4,
+    tagged        >= 0.4.4 && < 1,
 
   exposed-modules:
     Data.Profunctor
