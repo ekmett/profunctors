@@ -27,9 +27,9 @@ source-repository head
 
 library
   build-depends:
-    base          == 4.*,
-    comonad       >= 3     && < 4,
-    tagged        >= 0.4.4 && < 1,
+    base    == 4.*,
+    comonad >= 3     && < 4,
+    tagged  >= 0.4.4 && < 1
 
   exposed-modules:
     Data.Profunctor
