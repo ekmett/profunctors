@@ -1,8 +1,8 @@
 name:          profunctors
 category:      Control, Categories
-version:       3.3.0.1
+version:       3.4
 license:       BSD3
-cabal-version: >= 1.6
+cabal-version: >= 1.10
 license-file:  LICENSE
 author:        Edward A. Kmett
 maintainer:    Edward A. Kmett <ekmett@gmail.com>
@@ -10,8 +10,8 @@ stability:     experimental
 homepage:      http://github.com/ekmett/profunctors/
 bug-reports:   http://github.com/ekmett/profunctors/issues
 copyright:     Copyright (C) 2011-2013 Edward A. Kmett
-synopsis:      Haskell 98 Profunctors
-description:   Haskell 98 Profunctors
+synopsis:      Profunctors
+description:   Profunctors
 build-type:    Simple
 extra-source-files:
   .ghci
@@ -27,13 +27,30 @@ source-repository head
 
 library
   build-depends:
-    base    == 4.*,
-    comonad >= 3     && < 4,
-    tagged  >= 0.4.4 && < 1
+    base                >= 4     && < 5,
+    comonad             >= 3     && < 4,
+    tagged              >= 0.4.4 && < 1,
+    semigroupoids       >= 3     && < 4,
+    semigroupoid-extras >= 3     && < 4,
+    tagged              >= 0.4.4 && < 1,
+    transformers        >= 0.2   && < 0.4
 
   exposed-modules:
     Data.Profunctor
+    Data.Profunctor.Composition
+    Data.Profunctor.Collage
+    Data.Profunctor.Rep
+    Data.Profunctor.Rift
+    Data.Profunctor.Trace
     Data.Profunctor.Unsafe
 
-  ghc-options:     -Wall
+  ghc-options:     -Wall -O2
   hs-source-dirs:  src
+
+  other-extensions:
+    CPP
+    GADTs
+    FlexibleContexts
+    FlexibleInstances
+    UndecidableInstances
+    TypeFamilies
