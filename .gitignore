@@ -1,3 +1,14 @@
-_darcs
-dist
+dist/
+.hsenv/
+docs
+wiki
+TAGS
 tags
+wip
+.DS_Store
+.*.swp
+.*.swo
+*.o
+*.hi
+*~
+*#
