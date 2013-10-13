@@ -1,3 +1,4 @@
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FlexibleContexts #-}
@@ -62,14 +63,14 @@ instance Functor f => Representable (UpStar f) where
   rep = runUpStar
   {-# INLINE rep #-}
 
+type Iso s t a b = forall p f. (Profunctor p, Functor f) => p a (f b) -> p s (f t)
+
 -- | 'tabulate' and 'rep' form two halves of an isomorphism.
 --
 -- This can be used with the combinators from the @lens@ package.
 --
 -- @'tabulated' :: 'Representable' p => 'Iso'' (d -> 'Rep' p c) (p d c)@
-tabulated :: (Profunctor r, Functor f, Representable p, Representable q)
-          => r (p d c) (f (q d' c'))
-          -> r (d -> Rep p c) (f (d' -> Rep q c'))
+tabulated :: (Representable p, Representable q) => Iso (d -> Rep p c) (d' -> Rep q c') (p d c) (q d' c')
 tabulated = dimap tabulate (fmap rep)
 {-# INLINE tabulated #-}
 
@@ -115,8 +116,6 @@ instance Functor f => Corepresentable (DownStar f) where
 -- This can be used with the combinators from the @lens@ package.
 --
 -- @'tabulated' :: 'Corep' f p => 'Iso'' (f d -> c) (p d c)@
-cotabulated :: (Profunctor r, Functor h, Corepresentable p, Corepresentable q)
-          => r (p d c) (h (q d' c'))
-          -> r (Corep p d -> c) (h (Corep q d' -> c'))
+cotabulated :: (Corepresentable p, Corepresentable q) => Iso (Corep p d -> c) (Corep q d' -> c') (p d c) (q d' c')
 cotabulated = dimap cotabulate (fmap corep)
 {-# INLINE cotabulated #-}
