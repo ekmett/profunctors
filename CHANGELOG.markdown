@@ -1,3 +1,7 @@
+4.0
+---
+* Merged the contents of `profunctor-extras` into `profunctors`.
+
 3.3
 ---
 * Added `instance Choice (Upstar f)` and introduced `Forget`.
