@@ -62,6 +62,13 @@ instance Functor f => Representable (UpStar f) where
   {-# INLINE tabulate #-}
   rep = runUpStar
   {-# INLINE rep #-}
+  
+instance Representable (Forget r) where
+  type Rep (Forget r) = Const r
+  tabulate = Forget . (getConst .)
+  {-# INLINE tabulate #-}
+  rep = (Const .) . runForget
+  {-# INLINE rep #-}
 
 type Iso s t a b = forall p f. (Profunctor p, Functor f) => p a (f b) -> p s (f t)
 
