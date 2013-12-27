@@ -179,6 +179,8 @@ instance Traversable (Forget r a) where
 -- Minimal complete definition: 'first'' or 'second''
 --
 -- /Note:/ Every 'Functor' in Haskell is strong.
+--
+-- <http://takeichi.ipl-lab.org/~asada/papers/arrStrMnd.pdf>
 class Profunctor p => Strong p where
   first' :: p a b  -> p (a, c) (b, c)
   first' = dimap swap swap . second'
@@ -207,6 +209,7 @@ instance Functor m => Strong (UpStar m) where
   second' (UpStar f) = UpStar $ \ ~(c, a) -> (,) c <$> f a
   {-# INLINE second' #-}
 
+-- | Every Arrow is a Strong Monad in Prof
 instance Arrow p => Strong (WrappedArrow p) where
   first' (WrapArrow k) = WrapArrow (first k)
   {-# INLINE first' #-}
