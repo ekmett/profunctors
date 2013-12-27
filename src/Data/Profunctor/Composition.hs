@@ -21,9 +21,10 @@ module Data.Profunctor.Composition
   -- * Profunctor Composition
     Procompose(..)
   , procomposed
-  -- * Lax identity
+  -- * Bicategorical Associators
   , idl
   , idr
+  , assoc
   -- * Generalized Composition
   , upstars, kleislis
   , downstars, cokleislis
@@ -128,6 +129,18 @@ idl = dimap (\(Procompose f g) -> lmap f g) (fmap (Procompose id))
 -- @
 idr :: Profunctor q => Iso (Procompose q (->) d c) (Procompose r (->) d' c') (q d c) (r d' c')
 idr = dimap (\(Procompose f g) -> rmap g f) (fmap (`Procompose` id))
+
+
+-- | The associator for 'Profunctor' composition.
+--
+-- This provides an 'Iso' for the @lens@ package that witnesses the
+-- isomorphism between @'Procompose' p ('Procompose' q r) a b@ and
+-- @'Procompose' ('Procompose' p q) r a b@, which arises because
+-- @Prof@ is only a bicategory, rather than a strict 2-category.
+assoc :: Iso (Procompose p (Procompose q r) a b) (Procompose x (Procompose y z) a b)
+             (Procompose (Procompose p q) r a b) (Procompose (Procompose x y) z a b)
+assoc = dimap (\(Procompose f (Procompose g h)) -> Procompose (Procompose f g) h)
+              (fmap (\(Procompose (Procompose f g) h) -> Procompose f (Procompose g h)))
 
 -- | 'Profunctor' composition generalizes 'Functor' composition in two ways.
 --
