@@ -1,3 +1,7 @@
+4.0.2
+-----
+* Added `assoc` to `Data.Profunctor.Composition` so that we have all 3 associators.
+
 4.0
 ---
 * Merged the contents of `profunctor-extras` into `profunctors`.
