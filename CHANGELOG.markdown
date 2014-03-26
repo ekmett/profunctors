@@ -1,3 +1,7 @@
+4.0.3
+-----
+* Added `Data.Profunctor.Lift` containing the left Kan lift of a profunctor.
+
 4.0.2
 -----
 * Added `assoc` to `Data.Profunctor.Composition` so that we have all 3 associators.
