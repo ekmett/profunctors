@@ -16,13 +16,13 @@
 ----------------------------------------------------------------------------
 module Data.Profunctor.Lift
   ( Lift(..)
---  , decomposeLift
+  , decomposeLift
 --  , precomposeLift
   ) where
 
 import Control.Category
 import Data.Profunctor.Unsafe
--- import Data.Profunctor.Composition
+import Data.Profunctor.Composition
 import Prelude hiding (id,(.))
 
 -- | This represents the left Kan lift of a 'Profunctor' @q@ along a 'Profunctor' @p@ in a limited version of the 2-category of Profunctors where the only object is the category Hask, 1-morphisms are profunctors composed and compose with Profunctor composition, and 2-morphisms are just natural transformations.
@@ -52,14 +52,14 @@ instance p ~ q => Category (Lift p q) where
   Lift f . Lift g = Lift (g . f)
   {-# INLINE (.) #-}
 
-{-
 -- | The 2-morphism that defines a left Kan lift.
 --
--- Note: When @f@ is left adjoint to @'Lift' f (->)@ then 'decomposeLift' is the 'counit' of the adjunction.
-decomposeLift :: Procompose q (Lift q p) a b -> p a b
-decomposeLift (Procompose q (Lift qp)) = qp q
+-- Note: When @p@ is left adjoint to @'Lift' p (->)@ then 'decomposeLift' is the 'counit' of the adjunction.
+decomposeLift :: Procompose (Lift p q) p a b -> q a b
+decomposeLift (Procompose (Lift pq) p) = pq p
 {-# INLINE decomposeLift #-}
 
+{-
 precomposeLift :: Profunctor q => Procompose (Lift p (->)) q a b -> Lift p q a b
 precomposeLift (Procompose pf p) = Lift (\pxa -> runLift pf pxa `lmap` p)
 {-# INLINE precomposeLift #-}
