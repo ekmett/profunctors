@@ -17,7 +17,6 @@
 module Data.Profunctor.Lift
   ( Lift(..)
   , decomposeLift
---  , precomposeLift
   ) where
 
 import Control.Category
@@ -54,13 +53,7 @@ instance p ~ q => Category (Lift p q) where
 
 -- | The 2-morphism that defines a left Kan lift.
 --
--- Note: When @p@ is left adjoint to @'Lift' p (->)@ then 'decomposeLift' is the 'counit' of the adjunction.
+-- Note: When @p@ is right adjoint to @'Lift' p (->)@ then 'decomposeLift' is the 'counit' of the adjunction.
 decomposeLift :: Procompose (Lift p q) p a b -> q a b
 decomposeLift (Procompose (Lift pq) p) = pq p
 {-# INLINE decomposeLift #-}
-
-{-
-precomposeLift :: Profunctor q => Procompose (Lift p (->)) q a b -> Lift p q a b
-precomposeLift (Procompose pf p) = Lift (\pxa -> runLift pf pxa `lmap` p)
-{-# INLINE precomposeLift #-}
--}
