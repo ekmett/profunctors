@@ -11,7 +11,7 @@
 --
 -- Maintainer  :  Edward Kmett <ekmett@gmail.com>
 -- Stability   :  provisional
--- Portability :  Rank2Types
+-- Portability :  Rank2Types, TFs
 --
 ----------------------------------------------------------------------------
 module Data.Profunctor.Rift
