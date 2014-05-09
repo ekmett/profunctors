@@ -174,7 +174,7 @@ instance Traversable (Forget r a) where
 -- Strong
 ------------------------------------------------------------------------------
 
--- | Generalizing upstar of a strong 'Functor'
+-- | Generalizing 'UpStar' of a strong 'Functor'
 --
 -- Minimal complete definition: 'first'' or 'second''
 --
