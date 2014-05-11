@@ -31,7 +31,7 @@ library
     comonad             >= 4     && < 5,
     semigroupoids       >= 4     && < 5,
     tagged              >= 0.4.4 && < 1,
-    transformers        >= 0.2   && < 0.4
+    transformers        >= 0.2   && < 0.5
 
   exposed-modules:
     Data.Profunctor
