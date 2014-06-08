@@ -115,7 +115,7 @@ instance Functor f => Corepresentable (DownStar f) where
 --
 -- This can be used with the combinators from the @lens@ package.
 --
--- @'tabulated' :: 'Corep' f p => 'Iso'' (f d -> c) (p d c)@
+-- @'cotabulated' :: 'Corep' f p => 'Iso'' (f d -> c) (p d c)@
 cotabulated :: (Corepresentable p, Corepresentable q) => Iso (Corep p d -> c) (Corep q d' -> c') (p d c) (q d' c')
 cotabulated = dimap cotabulate (fmap corep)
 {-# INLINE cotabulated #-}
