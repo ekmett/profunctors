@@ -12,6 +12,7 @@
 ----------------------------------------------------------------------------
 module Data.Profunctor.Tambara
   ( Tambara(..)
+  , Cotambara(..)
   ) where
 
 import Control.Arrow
@@ -36,3 +37,21 @@ instance Category p => Category (Tambara p) where
   Tambara p . Tambara q = Tambara (p . q)
 
 -- TODO: (Strong p, Profunctor q) => Iso' (p ~> q) (p ~> Tambara q)
+
+newtype Cotambara p a b = Cotambara { runCotambara :: forall c. p (Either a c) (Either b c) }
+
+instance Profunctor p => Profunctor (Cotambara p) where
+  dimap f g (Cotambara p) = Cotambara $ dimap (left f) (left g) p
+  {-# INLINE dimap #-}
+
+instance Profunctor p => Choice (Cotambara p) where
+  left' (Cotambara p) = Cotambara (dimap hither yon p) where
+    hither (Left (Left x))   = Left x
+    hither (Left (Right y))  = Right (Left y)
+    hither (Right z)         = Right (Right z)
+    yon    (Left x)          = Left (Left x)
+    yon    (Right (Left y))  = Left (Right y)
+    yon    (Right (Right z)) = Right z
+  {-# INLINE left' #-}
+
+-- TODO: (Profunctor p, Choice q) => Iso' (p ~> q) (Cotambara p ~> q)
