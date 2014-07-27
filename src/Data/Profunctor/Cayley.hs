@@ -1,3 +1,13 @@
+-----------------------------------------------------------------------------
+-- |
+-- Copyright   :  (C) 2014 Edward Kmett
+-- License     :  BSD-style (see the file LICENSE)
+--
+-- Maintainer  :  Edward Kmett <ekmett@gmail.com>
+-- Stability   :  experimental
+-- Portability :  portable
+--
+----------------------------------------------------------------------------
 module Data.Profunctor.Cayley where
 
 import Control.Applicative
