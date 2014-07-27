@@ -20,7 +20,7 @@
 <a name="line-11"></a><span class='hs-comment'>--</span>
 <a name="line-12"></a><span class='hs-comment'>-- Maintainer  :  Edward Kmett &lt;ekmett@gmail.com&gt;</span>
 <a name="line-13"></a><span class='hs-comment'>-- Stability   :  provisional</span>
-<a name="line-14"></a><span class='hs-comment'>-- Portability :  Rank2Types</span>
+<a name="line-14"></a><span class='hs-comment'>-- Portability :  Rank2Types, TFs</span>
 <a name="line-15"></a><span class='hs-comment'>--</span>
 <a name="line-16"></a><span class='hs-comment'>----------------------------------------------------------------------------</span>
 <a name="line-17"></a><span class='hs-keyword'>module</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Profunctor</span><span class='hs-varop'>.</span><span class='hs-conid'>Rift</span>
@@ -64,7 +64,7 @@
 <a name="line-55"></a>
 <a name="line-56"></a><a name="decomposeRift"></a><span class='hs-comment'>-- | The 2-morphism that defines a right Kan lift.</span>
 <a name="line-57"></a><span class='hs-comment'>--</span>
-<a name="line-58"></a><span class='hs-comment'>-- Note: When @f@ is left adjoint to @'Rift' f (-&gt;)@ then 'decomposeRift' is the 'counit' of the adjunction.</span>
+<a name="line-58"></a><span class='hs-comment'>-- Note: When @q@ is left adjoint to @'Rift' q (-&gt;)@ then 'decomposeRift' is the 'counit' of the adjunction.</span>
 <a name="line-59"></a><span class='hs-definition'>decomposeRift</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Procompose</span> <span class='hs-varid'>q</span> <span class='hs-layout'>(</span><span class='hs-conid'>Rift</span> <span class='hs-varid'>q</span> <span class='hs-varid'>p</span><span class='hs-layout'>)</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span>
 <a name="line-60"></a><span class='hs-definition'>decomposeRift</span> <span class='hs-layout'>(</span><span class='hs-conid'>Procompose</span> <span class='hs-varid'>q</span> <span class='hs-layout'>(</span><span class='hs-conid'>Rift</span> <span class='hs-varid'>qp</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>qp</span> <span class='hs-varid'>q</span>
 <a name="line-61"></a><span class='hs-comment'>{-# INLINE decomposeRift #-}</span>
