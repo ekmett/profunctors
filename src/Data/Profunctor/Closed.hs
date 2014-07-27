@@ -58,6 +58,9 @@ instance Profunctor p => Profunctor (Closure p) where
 instance Profunctor p => Closed (Closure p) where
   closed (Closure p) = Closure $ dimap uncurry curry p
 
+instance Strong p => Strong (Closure p) where
+  first' (Closure f) = Closure $ dimap hither yon $ first' f
+
 instance Category p => Category (Closure p) where
   id = Closure id
   Closure p . Closure q = Closure (p . q)
