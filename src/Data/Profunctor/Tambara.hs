@@ -101,6 +101,8 @@ instance Profunctor p => Profunctor (Cotambara p) where
   dimap f g (Cotambara p) = Cotambara $ dimap (left f) (left g) p
   {-# INLINE dimap #-}
 
+-- instance Strong p => Strong (Cotambara p)  -- ?
+
 instance Profunctor p => Choice (Cotambara p) where
   left' (Cotambara p) = Cotambara (dimap hither yon p) where
     hither (Left (Left x))   = Left x
@@ -110,5 +112,12 @@ instance Profunctor p => Choice (Cotambara p) where
     yon    (Right (Left y))  = Left (Right y)
     yon    (Right (Right z)) = Right z
   {-# INLINE left' #-}
+
+instance Category p => Category (Cotambara p) where
+  id = Cotambara id
+  Cotambara p . Cotambara q = Cotambara (p . q)
+
+instance Profunctor p => Functor (Cotambara p a) where
+  fmap = rmap
 
 -- TODO: (Profunctor p, Choice q) => Iso' (p ~> q) (Cotambara p ~> q)
