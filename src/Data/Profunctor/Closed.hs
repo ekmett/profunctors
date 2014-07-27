@@ -55,6 +55,9 @@ instance Profunctor p => Profunctor (Closure p) where
   witness #. Closure p = Closure $ fmap witness #. p
   Closure p .# witness = Closure $ p .# fmap witness
 
+instance Profunctor p => Closed (Closure p) where
+  closed (Closure p) = Closure $ dimap uncurry curry p
+
 instance Category p => Category (Closure p) where
   id = Closure id
   Closure p . Closure q = Closure (p . q)
