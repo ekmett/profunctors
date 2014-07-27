@@ -41,6 +41,7 @@ library
     Data.Profunctor.Composition
     Data.Profunctor.Collage
     Data.Profunctor.Lift
+    Data.Profunctor.Monad
     Data.Profunctor.Rep
     Data.Profunctor.Rift
     Data.Profunctor.Tambara

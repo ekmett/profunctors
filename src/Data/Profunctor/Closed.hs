@@ -52,8 +52,8 @@ instance Profunctor p => Profunctor (Closure p) where
   dimap f g (Closure p) = Closure $ dimap (fmap f) (fmap g) p
   lmap f (Closure p) = Closure $ lmap (fmap f) p
   rmap f (Closure p) = Closure $ rmap (fmap f) p
-  witness #. Closure p = Closure $ fmap witness #. p
-  Closure p .# witness = Closure $ p .# fmap witness
+  w #. Closure p = Closure $ fmap w #. p
+  Closure p .# w = Closure $ p .# fmap w
 
 instance Profunctor p => Closed (Closure p) where
   closed (Closure p) = Closure $ dimap uncurry curry p

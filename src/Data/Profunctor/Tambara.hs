@@ -12,11 +12,7 @@
 ----------------------------------------------------------------------------
 module Data.Profunctor.Tambara
   ( Tambara(..)
-  , extractTambara
-  , duplicateTambara
   , Cotambara(..)
-  , extractCotambara
-  , duplicateCotambara
   ) where
 
 import Control.Applicative
@@ -24,6 +20,7 @@ import Control.Arrow
 import Control.Category
 import Data.Monoid
 import Data.Profunctor
+import Data.Profunctor.Monad
 import Prelude hiding (id,(.))
 
 ----------------------------------------------------------------------------
@@ -32,21 +29,18 @@ import Prelude hiding (id,(.))
 
 newtype Tambara p a b = Tambara { runTambara :: forall c. p (a, c) (b, c) }
 
--- @Tambara@ is a monoidal comonad in @Prof@
-extractTambara :: Profunctor p => Tambara p a b -> p a b
-extractTambara (Tambara p) = dimap (\a -> (a,())) fst p
-
-duplicateTambara :: Profunctor p => Tambara p a b -> Tambara (Tambara p) a b
-duplicateTambara (Tambara p) = Tambara (Tambara $ dimap hither yon p) where
-  hither ~(~(x,y),z) = (x,(y,z))
-  yon    ~(x,~(y,z)) = ((x,y),z)
-
 instance Profunctor p => Profunctor (Tambara p) where
   dimap f g (Tambara p) = Tambara $ dimap (first f) (first g) p
   {-# INLINE dimap #-}
 
+instance ProfunctorComonad Tambara where
+  proextract (Tambara p) = dimap (\a -> (a,())) fst p
+  produplicate (Tambara p) = Tambara (Tambara $ dimap hither yon p) where
+    hither ~(~(x,y),z) = (x,(y,z))
+    yon    ~(x,~(y,z)) = ((x,y),z)
+
 instance Profunctor p => Strong (Tambara p) where
-  first' = runTambara . duplicateTambara
+  first' = runTambara . produplicate
   {-# INLINE first' #-}
 
 instance Choice p => Choice (Tambara p) where
@@ -108,25 +102,22 @@ instance (Profunctor p, ArrowPlus p) => Monoid (Tambara p a b) where
 
 newtype Cotambara p a b = Cotambara { runCotambara :: forall c. p (Either a c) (Either b c) }
 
--- @Cotambara@ is a monoidal comonad in @Prof@
-extractCotambara :: Profunctor p => Cotambara p a b -> p a b
-extractCotambara (Cotambara p) = dimap Left (\(Left a) -> a) p
-
-duplicateCotambara :: Profunctor p => Cotambara p a b -> Cotambara (Cotambara p) a b
-duplicateCotambara (Cotambara p) = Cotambara (Cotambara $ dimap hither yon p) where
-  hither (Left (Left x))   = Left x
-  hither (Left (Right y))  = Right (Left y)
-  hither (Right z)         = Right (Right z)
-  yon    (Left x)          = Left (Left x)
-  yon    (Right (Left y))  = Left (Right y)
-  yon    (Right (Right z)) = Right z
+instance ProfunctorComonad Cotambara where
+  proextract (Cotambara p)   = dimap Left (\(Left a) -> a) p
+  produplicate (Cotambara p) = Cotambara (Cotambara $ dimap hither yon p) where
+    hither (Left (Left x))   = Left x
+    hither (Left (Right y))  = Right (Left y)
+    hither (Right z)         = Right (Right z)
+    yon    (Left x)          = Left (Left x)
+    yon    (Right (Left y))  = Left (Right y)
+    yon    (Right (Right z)) = Right z
 
 instance Profunctor p => Profunctor (Cotambara p) where
   dimap f g (Cotambara p) = Cotambara $ dimap (left f) (left g) p
   {-# INLINE dimap #-}
 
 instance Profunctor p => Choice (Cotambara p) where
-  left' = runCotambara . duplicateCotambara 
+  left' = runCotambara . produplicate
   {-# INLINE left' #-}
 
 instance Category p => Category (Cotambara p) where
