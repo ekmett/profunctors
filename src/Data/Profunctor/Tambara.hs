@@ -15,10 +15,16 @@ module Data.Profunctor.Tambara
   , Cotambara(..)
   ) where
 
+import Control.Applicative
 import Control.Arrow
 import Control.Category
+import Data.Monoid
 import Data.Profunctor
 import Prelude hiding (id,(.))
+
+----------------------------------------------------------------------------
+-- * Tambara
+----------------------------------------------------------------------------
 
 newtype Tambara p a b = Tambara { runTambara :: forall c. p (a, c) (b, c) }
 
@@ -38,7 +44,7 @@ instance Choice p => Choice (Tambara p) where
     hither (Right z, s) = Right (z, s)
     yon (Left (y, s)) = (Left y, s)
     yon (Right (z, s)) = (Right z, s)
-  
+
 instance Category p => Category (Tambara p) where
   id = Tambara id
   Tambara p . Tambara q = Tambara (p . q)
@@ -68,7 +74,26 @@ instance ArrowZero p => ArrowZero (Tambara p) where
 instance ArrowPlus p => ArrowPlus (Tambara p) where
   Tambara f <+> Tambara g = Tambara (f <+> g)
 
+instance Profunctor p => Functor (Tambara p a) where
+  fmap = rmap
+
+instance (Profunctor p, Arrow p) => Applicative (Tambara p a) where
+  pure x = arr (const x)
+  f <*> g = arr (uncurry id) . (f &&& g)
+
+instance (Profunctor p, ArrowPlus p) => Alternative (Tambara p a) where
+  empty = zeroArrow
+  f <|> g = f <+> g
+
+instance (Profunctor p, ArrowPlus p) => Monoid (Tambara p a b) where
+  mempty = zeroArrow
+  mappend f g = f <+> g
+
 -- TODO: (Strong p, Profunctor q) => Iso' (p ~> q) (p ~> Tambara q)
+
+----------------------------------------------------------------------------
+-- * Cotambara
+----------------------------------------------------------------------------
 
 newtype Cotambara p a b = Cotambara { runCotambara :: forall c. p (Either a c) (Either b c) }
 
