@@ -55,6 +55,19 @@ instance ArrowChoice p => ArrowChoice (Tambara p) where
     yon (Left (y, s)) = (Left y, s)
     yon (Right (z, s)) = (Right z, s)
 
+instance ArrowApply p => ArrowApply (Tambara p) where
+  app = Tambara $ app . arr (\((Tambara f, x), s) -> (f, (x, s)))
+
+instance ArrowLoop p => ArrowLoop (Tambara p) where
+  loop (Tambara f) = Tambara (loop (arr go . f . arr go)) where
+    go ~(~(x,y),z) = ((x,z),y)
+
+instance ArrowZero p => ArrowZero (Tambara p) where
+  zeroArrow = Tambara zeroArrow
+
+instance ArrowPlus p => ArrowPlus (Tambara p) where
+  Tambara f <+> Tambara g = Tambara (f <+> g)
+
 -- TODO: (Strong p, Profunctor q) => Iso' (p ~> q) (p ~> Tambara q)
 
 newtype Cotambara p a b = Cotambara { runCotambara :: forall c. p (Either a c) (Either b c) }
