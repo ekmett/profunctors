@@ -27,14 +27,33 @@ instance Profunctor p => Profunctor (Tambara p) where
   {-# INLINE dimap #-}
 
 instance Profunctor p => Strong (Tambara p) where
-  first' (Tambara p) = Tambara (dimap hither yon p) where
-    hither ((x,y),z) = (x,(y,z))
-    yon    (x,(y,z)) = ((x,y),z)
+  first' (Tambara p) = Tambara $ dimap hither yon p where
+    hither ~(~(x,y),z) = (x,(y,z))
+    yon    ~(x,~(y,z)) = ((x,y),z)
   {-# INLINE first' #-}
 
+instance Choice p => Choice (Tambara p) where
+  left' (Tambara f) = Tambara $ dimap hither yon $ left' f where
+    hither (Left y, s) = Left (y, s)
+    hither (Right z, s) = Right (z, s)
+    yon (Left (y, s)) = (Left y, s)
+    yon (Right (z, s)) = (Right z, s)
+  
 instance Category p => Category (Tambara p) where
   id = Tambara id
   Tambara p . Tambara q = Tambara (p . q)
+
+instance Arrow p => Arrow (Tambara p) where
+  arr f = Tambara (arr (\(x, s) -> (f x, s)))
+  first (Tambara f) = Tambara (arr go . first f . arr go) where
+    go ~(~(x,y),z) = ((x,z),y)
+
+instance ArrowChoice p => ArrowChoice (Tambara p) where
+  left (Tambara f) = Tambara (arr yon . left f . arr hither) where
+    hither (Left y, s) = Left (y, s)
+    hither (Right z, s) = Right (z, s)
+    yon (Left (y, s)) = (Left y, s)
+    yon (Right (z, s)) = (Right z, s)
 
 -- TODO: (Strong p, Profunctor q) => Iso' (p ~> q) (p ~> Tambara q)
 
