@@ -26,7 +26,7 @@ import Data.Profunctor.Monad
 import Data.Profunctor.Composition
 import Prelude hiding (id,(.))
 
--- | This represents the right Kan lift of a 'Profunctor' @q@ along a 'Profunctor' @p@ in a limited version of the 2-category of Profunctors where the only object is the category Hask, 1-morphisms are profunctors composed and compose with Profunctor composition, and 2-morphisms are just natural transformations.
+-- | This represents the right Kan extension of a 'Profunctor' @q@ along a 'Profunctor' @p@ in a limited version of the 2-category of Profunctors where the only object is the category Hask, 1-morphisms are profunctors composed and compose with Profunctor composition, and 2-morphisms are just natural transformations.
 newtype Ran p q a b = Ran { runRan :: forall x. p x a -> q x b }
 
 instance Category p => ProfunctorComonad (Ran p) where
@@ -56,7 +56,7 @@ instance p ~ q => Category (Ran p q) where
   Ran f . Ran g = Ran (f . g)
   {-# INLINE (.) #-}
 
--- | The 2-morphism that defines a right Kan lift.
+-- | The 2-morphism that defines a right Kan extension.
 --
 -- Note: When @q@ is left adjoint to @'Ran' q (->)@ then 'decomposeRan' is the 'counit' of the adjunction.
 decomposeRan :: Procompose (Ran q p) q a b -> p a b
