@@ -34,6 +34,10 @@ instance Comonad f => ProfunctorComonad (Cayley f) where
 
 instance (Functor f, Profunctor p) => Profunctor (Cayley f p) where
   dimap f g = Cayley . fmap (dimap f g) . runCayley
+  lmap f = Cayley . fmap (lmap f) . runCayley
+  rmap g = Cayley . fmap (rmap g) . runCayley
+  w #. Cayley fp = Cayley $ fmap (w #.) fp
+  Cayley fp .# w = Cayley $ fmap (.# w) fp
 
 instance (Functor f, Strong p) => Strong (Cayley f p) where
   first'  = Cayley . fmap first' . runCayley
