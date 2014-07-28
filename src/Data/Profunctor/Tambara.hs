@@ -19,6 +19,7 @@ module Data.Profunctor.Tambara
   , Pastro(..)
   , Cotambara(..)
   , cotambara, uncotambara
+  , Copastro(..)
   ) where
 
 import Control.Applicative
