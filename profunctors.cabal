@@ -36,6 +36,7 @@ library
 
   exposed-modules:
     Data.Profunctor
+    Data.Profunctor.Adjunction
     Data.Profunctor.Cayley
     Data.Profunctor.Closed
     Data.Profunctor.Codensity

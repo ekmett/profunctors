@@ -1,5 +1,8 @@
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE Rank2Types #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 -----------------------------------------------------------------------------
 -- |
 -- Copyright   :  (C) 2014 Edward Kmett
@@ -13,6 +16,7 @@
 module Data.Profunctor.Tambara
   ( Tambara(..)
   , tambara, untambara
+  , Pastro(..)
   , Cotambara(..)
   , cotambara, uncotambara
   ) where
@@ -22,6 +26,7 @@ import Control.Arrow
 import Control.Category
 import Data.Monoid
 import Data.Profunctor
+import Data.Profunctor.Adjunction
 import Data.Profunctor.Monad
 import Prelude hiding (id,(.))
 
@@ -111,6 +116,25 @@ tambara f p = Tambara $ f $ first' p
 -- @
 untambara :: Profunctor q => (forall x y. p x y -> Tambara q x y) -> p a b -> q a b
 untambara f p = dimap (\a -> (a,())) fst $ runTambara $ f p
+
+----------------------------------------------------------------------------
+-- * Pastro
+----------------------------------------------------------------------------
+
+-- | Pastro -| Tambara
+data Pastro p a b where
+  Pastro :: (a -> (x, z)) -> p x (z -> b) -> Pastro p a b
+
+instance Profunctor p => Profunctor (Pastro p) where
+  dimap f g (Pastro axz p) = Pastro (axz . f) (rmap (fmap g) p)
+
+instance ProfunctorMonad Pastro where
+  proreturn p = Pastro (\a -> (a,())) $ rmap const p
+  projoin (Pastro f (Pastro g h)) = Pastro (\a -> case f a of (x, z) -> case g x of (y, w) -> (y, (w, z))) (rmap uncurry h)
+
+instance Pastro -| Tambara where
+  counit (Pastro f (Tambara p)) = dimap f (uncurry id) p
+  unit p = Tambara (Pastro id (rmap (,) p))
 
 ----------------------------------------------------------------------------
 -- * Cotambara
