@@ -6,6 +6,7 @@ import Control.Category
 import Control.Comonad
 import Control.Arrow
 import Data.Profunctor
+import Data.Profunctor.Closed
 import Data.Profunctor.Composition
 import Prelude hiding ((.),id)
 
@@ -26,3 +27,7 @@ instance Monad m => ProfunctorMonoid (Kleisli m) where
 instance Comonad w => ProfunctorMonoid (Cokleisli w) where
   eta = arr
   mu (Procompose f g) = f . g
+
+instance (Closed p, ProfunctorMonoid p) => ProfunctorMonoid (Closure p) where
+  eta p = Closure $ eta (closed p)
+  mu (Procompose (Closure f) (Closure g)) = Closure $ mu (Procompose f g)
