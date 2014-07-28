@@ -45,13 +45,9 @@ library
     Data.Profunctor.Monad
     Data.Profunctor.Ran
     Data.Profunctor.Rep
-    Data.Profunctor.Rift
     Data.Profunctor.Tambara
     Data.Profunctor.Trace
     Data.Profunctor.Unsafe
-
-
---    Data.Profunctor.Lift
 
   ghc-options:     -Wall -O2
   hs-source-dirs:  src
