@@ -21,12 +21,16 @@ module Data.Profunctor.Lift
 
 import Control.Category
 import Data.Profunctor.Unsafe
+import Data.Profunctor.Monad
 import Data.Profunctor.Composition
 import Prelude hiding (id,(.))
 
 -- | This represents the left Kan lift of a 'Profunctor' @q@ along a 'Profunctor' @p@ in a limited version of the 2-category of Profunctors where the only object is the category Hask, 1-morphisms are profunctors composed and compose with Profunctor composition, and 2-morphisms are just natural transformations.
 newtype Lift p q a b = Lift { runLift :: forall x. p b x -> q a x }
 
+instance Category p => ProfunctorComonad (Lift p) where
+  proextract (Lift f) = f id
+  produplicate (Lift f) = Lift $ \p -> Lift $ \q -> f (q . p)
 
 instance (Profunctor p, Profunctor q) => Profunctor (Lift p q) where
   dimap ca bd f = Lift (lmap ca . runLift f . lmap bd)
