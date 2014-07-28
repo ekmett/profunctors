@@ -132,7 +132,7 @@ instance Profunctor p => Profunctor (Environment p) where
   Environment l m r .# w = Environment l m (r .# w)
 
 instance ProfunctorMonad Environment where
-  proreturn p = Environment ($ ()) p $ const
+  proreturn p = Environment ($ ()) p const
   projoin (Environment l (Environment m n o) p) = Environment (lm . curry) n op where
     op a (b, c) = o (p a b) c
     lm zr = l (m.zr)
