@@ -19,10 +19,13 @@ module Data.Profunctor.Ran
   ( Ran(..)
   , decomposeRan
   , precomposeRan
+  , curryRan
+  , uncurryRan
   ) where
 
 import Control.Category
 import Data.Profunctor
+import Data.Profunctor.Adjunction
 import Data.Profunctor.Composition
 import Data.Profunctor.Monad
 import Data.Profunctor.Unsafe
@@ -68,3 +71,11 @@ decomposeRan (Procompose (Ran qp) q) = qp q
 precomposeRan :: Profunctor q => Procompose q (Ran p (->)) -/-> Ran p q
 precomposeRan (Procompose p pf) = Ran (\pxa -> runRan pf pxa `lmap` p)
 {-# INLINE precomposeRan #-}
+
+curryRan :: (Procompose p q -/-> r) -> p -/-> Ran q r
+curryRan f p = Ran $ \q -> f (Procompose p q)
+{-# INLINE curryRan #-}
+
+uncurryRan :: (p -/-> Ran q r) -> Procompose p q -/-> r
+uncurryRan f (Procompose p q) = runRan (f p) q
+{-# INLINE uncurryRan #-}
