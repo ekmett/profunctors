@@ -28,6 +28,7 @@ import Data.Monoid
 import Data.Profunctor
 import Data.Profunctor.Adjunction
 import Data.Profunctor.Monad
+import Data.Profunctor.Unsafe
 import Prelude hiding (id,(.))
 
 ----------------------------------------------------------------------------
@@ -140,6 +141,7 @@ instance Pastro -| Tambara where
 -- * Cotambara
 ----------------------------------------------------------------------------
 
+-- | Cotambara is freely adjoins respect for cocartesian structure to a profunctor
 newtype Cotambara p a b = Cotambara { runCotambara :: forall c. p (Either a c) (Either b c) }
 
 instance ProfunctorComonad Cotambara where
@@ -182,3 +184,34 @@ cotambara f p = Cotambara $ f $ left' p
 -- @
 uncotambara :: Profunctor q => (forall x y. p x y -> Cotambara q x y) -> p a b -> q a b
 uncotambara f p = dimap Left (\(Left a) -> a) $ runCotambara $ f p
+
+----------------------------------------------------------------------------
+-- * Copastro
+----------------------------------------------------------------------------
+
+-- | Copastro -| Cotambara
+data Copastro p a b where
+  Copastro :: (Either y z -> b) -> p x y -> (a -> Either x z) -> Copastro p a b
+
+instance Profunctor p => Profunctor (Copastro p) where
+  dimap f g (Copastro l m r) = Copastro (g . l) m (r . f)
+  lmap f (Copastro l m r) = Copastro l m (r . f)
+  rmap g (Copastro l m r) = Copastro (g . l) m r
+  w #. Copastro l m r = Copastro (w #. l) m r
+  Copastro l m r .# w = Copastro l m (r .# w)
+
+instance Copastro -| Cotambara where
+  counit (Copastro f (Cotambara g) h) = dimap h f g
+  unit p = Cotambara $ Copastro id p id
+
+instance ProfunctorMonad Copastro where
+  proreturn p = Copastro (\(Left a)-> a) p Left
+  projoin (Copastro l (Copastro m n o) q) = Copastro lm n oq where
+    oq a = case q a of
+      Left b -> case o b of
+        Left c -> Left c
+        Right z -> Right (Left z)
+      Right z -> Right (Right z)
+    lm (Left x) = l $ Left $ m $ Left x
+    lm (Right (Left y)) = l $ Left $ m $ Right y
+    lm (Right (Right z)) = l $ Right z
