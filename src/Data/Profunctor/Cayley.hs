@@ -13,12 +13,24 @@ module Data.Profunctor.Cayley where
 import Control.Applicative
 import Control.Arrow
 import Control.Category
-import Data.Profunctor.Unsafe
+import Control.Comonad
 import Data.Profunctor
+import Data.Profunctor.Monad
+import Data.Profunctor.Unsafe
 import Prelude hiding ((.), id)
 
 -- static arrows
 newtype Cayley f p a b = Cayley { runCayley :: f (p a b) }
+
+-- | Cayley transforms Monads in @Hask@ into monads on @Prof@
+instance Monad f => ProfunctorMonad (Cayley f) where
+  proreturn = Cayley . return
+  projoin (Cayley m) = Cayley $ m >>= runCayley
+
+-- | Cayley transforms Comonads in @Hask@ into comonads on @Prof@
+instance Comonad f => ProfunctorComonad (Cayley f) where
+  proextract = extract . runCayley
+  produplicate (Cayley w) = Cayley $ extend Cayley w
 
 instance (Functor f, Profunctor p) => Profunctor (Cayley f p) where
   dimap f g = Cayley . fmap (dimap f g) . runCayley
