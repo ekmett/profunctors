@@ -33,7 +33,9 @@ module Data.Profunctor
   , DownStar(..)
   , WrappedArrow(..)
   , Forget(..)
+#ifndef HLINT
   , type (-/->)
+#endif
   ) where
 
 import Control.Applicative hiding (WrappedArrow(..))
