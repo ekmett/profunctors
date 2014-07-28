@@ -12,7 +12,9 @@
 ----------------------------------------------------------------------------
 module Data.Profunctor.Tambara
   ( Tambara(..)
+  , tambara, untambara
   , Cotambara(..)
+  , cotambara, uncotambara
   ) where
 
 import Control.Applicative
@@ -94,7 +96,21 @@ instance (Profunctor p, ArrowPlus p) => Monoid (Tambara p a b) where
   mempty = zeroArrow
   mappend f g = f <+> g
 
--- TODO: (Strong p, Profunctor q) => Iso' (p ~> q) (p ~> Tambara q)
+-- |
+-- @
+-- 'tambara' '.' 'untambara' ≡ 'id'
+-- 'untambara' '.' 'tambara' ≡ 'id'
+-- @
+tambara :: Strong p => (forall x y. p x y -> q x y) -> p a b -> Tambara q a b
+tambara f p = Tambara $ f $ first' p
+
+-- |
+-- @
+-- 'tambara' '.' 'untambara' ≡ 'id'
+-- 'untambara' '.' 'tambara' ≡ 'id'
+-- @
+untambara :: Profunctor q => (forall x y. p x y -> Tambara q x y) -> p a b -> q a b
+untambara f p = dimap (\a -> (a,())) fst $ runTambara $ f p
 
 ----------------------------------------------------------------------------
 -- * Cotambara
@@ -127,4 +143,18 @@ instance Category p => Category (Cotambara p) where
 instance Profunctor p => Functor (Cotambara p a) where
   fmap = rmap
 
--- TODO: (Profunctor p, Choice q) => Iso' (p ~> q) (Cotambara p ~> q)
+-- |
+-- @
+-- 'cotambara' '.' 'uncotambara' ≡ 'id'
+-- 'uncotambara' '.' 'cotambara' ≡ 'id'
+-- @
+cotambara :: Choice p => (forall x y. p x y -> q x y) -> p a b -> Cotambara q a b
+cotambara f p = Cotambara $ f $ left' p
+
+-- |
+-- @
+-- 'cotambara' '.' 'uncotambara' ≡ 'id'
+-- 'uncotambara' '.' 'cotambara' ≡ 'id'
+-- @
+uncotambara :: Profunctor q => (forall x y. p x y -> Cotambara q x y) -> p a b -> q a b
+uncotambara f p = dimap Left (\(Left a) -> a) $ runCotambara $ f p
