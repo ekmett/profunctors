@@ -57,7 +57,7 @@ instance Profunctor p => Profunctor (Closure p) where
   Closure p .# w = Closure $ p .# fmap w
 
 instance ProfunctorComonad Closure where
-  proextract = dimap const ($()) . runClosure
+  proextract = dimap const ($ ()) . runClosure
   produplicate (Closure p) = Closure $ Closure $ dimap uncurry curry p
 
 instance Profunctor p => Closed (Closure p) where

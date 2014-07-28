@@ -63,7 +63,7 @@ instance Category p => Category (Tambara p) where
   Tambara p . Tambara q = Tambara (p . q)
 
 instance Arrow p => Arrow (Tambara p) where
-  arr f = Tambara (arr (\(x, s) -> (f x, s)))
+  arr f = Tambara $ arr $ first f
   first (Tambara f) = Tambara (arr go . first f . arr go) where
     go ~(~(x,y),z) = ((x,z),y)
 
