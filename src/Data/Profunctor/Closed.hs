@@ -76,6 +76,9 @@ instance Profunctor p => Profunctor (Closure p) where
   w #. Closure p = Closure $ fmap w #. p
   Closure p .# w = Closure $ p .# fmap w
 
+instance ProfunctorFunctor Closure where
+  promap f (Closure p) = Closure (f p)
+
 instance ProfunctorComonad Closure where
   proextract = dimap const ($ ()) . runClosure
   produplicate (Closure p) = Closure $ Closure $ dimap uncurry curry p
@@ -153,6 +156,9 @@ instance Profunctor p => Profunctor (Environment p) where
   rmap g (Environment l m r) = Environment (g . l) m r
   w #. Environment l m r = Environment (w #. l) m r
   Environment l m r .# w = Environment l m (r .# w)
+
+instance ProfunctorFunctor Environment where
+  promap f (Environment l m r) = Environment l (f m) r
 
 instance ProfunctorMonad Environment where
   proreturn p = Environment ($ ()) p const

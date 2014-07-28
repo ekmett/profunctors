@@ -45,6 +45,9 @@ instance Profunctor p => Profunctor (Tambara p) where
   dimap f g (Tambara p) = Tambara $ dimap (first f) (first g) p
   {-# INLINE dimap #-}
 
+instance ProfunctorFunctor Tambara where
+  promap f (Tambara p) = Tambara (f p)
+
 instance ProfunctorComonad Tambara where
   proextract (Tambara p) = dimap (\a -> (a,())) fst p
   produplicate (Tambara p) = Tambara (Tambara $ dimap hither yon p) where
@@ -137,6 +140,9 @@ instance Profunctor p => Profunctor (Pastro p) where
   w #. Pastro l m r = Pastro (w #. l) m r
   Pastro l m r .# w = Pastro l m (r .# w)
 
+instance ProfunctorFunctor Pastro where
+  promap f (Pastro l m r) = Pastro l (f m) r
+
 instance ProfunctorMonad Pastro where
   proreturn p = Pastro fst p $ \a -> (a,())
   projoin (Pastro l (Pastro m n o) p) = Pastro lm n op where
@@ -155,6 +161,9 @@ instance ProfunctorAdjunction Pastro Tambara where
 
 -- | Cotambara is freely adjoins respect for cocartesian structure to a profunctor
 newtype Cotambara p a b = Cotambara { runCotambara :: forall c. p (Either a c) (Either b c) }
+
+instance ProfunctorFunctor Cotambara where
+  promap f (Cotambara p) = Cotambara (f p)
 
 instance ProfunctorComonad Cotambara where
   proextract (Cotambara p)   = dimap Left (\(Left a) -> a) p
@@ -215,6 +224,9 @@ instance Profunctor p => Profunctor (Copastro p) where
 instance ProfunctorAdjunction Copastro Cotambara where
   counit (Copastro f (Cotambara g) h) = dimap h f g
   unit p = Cotambara $ Copastro id p id
+
+instance ProfunctorFunctor Copastro where
+  promap f (Copastro l m r) = Copastro l (f m) r
 
 instance ProfunctorMonad Copastro where
   proreturn p = Copastro (\(Left a)-> a) p Left

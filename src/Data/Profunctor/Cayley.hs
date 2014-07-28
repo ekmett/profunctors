@@ -20,17 +20,18 @@ import Control.Arrow
 import Control.Category
 import Control.Comonad
 import Data.Profunctor
-import Data.Profunctor.Composition
 import Data.Profunctor.Monad
-import Data.Profunctor.Monoid
 import Data.Profunctor.Unsafe
 import Prelude hiding ((.), id)
 
 -- static arrows
 newtype Cayley f p a b = Cayley { runCayley :: f (p a b) }
 
+instance Functor f => ProfunctorFunctor (Cayley f) where
+  promap f (Cayley p) = Cayley (fmap f p)
+
 -- | Cayley transforms Monads in @Hask@ into monads on @Prof@
-instance Monad f => ProfunctorMonad (Cayley f) where
+instance (Functor f, Monad f) => ProfunctorMonad (Cayley f) where
   proreturn = Cayley . return
   projoin (Cayley m) = Cayley $ m >>= runCayley
 

@@ -33,6 +33,9 @@ import Prelude hiding (id,(.))
 -- | This represents the right Kan extension of a 'Profunctor' @q@ along a 'Profunctor' @p@ in a limited version of the 2-category of Profunctors where the only object is the category Hask, 1-morphisms are profunctors composed and compose with Profunctor composition, and 2-morphisms are just natural transformations.
 newtype Ran p q a b = Ran { runRan :: forall x. p x a -> q x b }
 
+instance ProfunctorFunctor (Ran p) where
+  promap f (Ran g) = Ran (f . g)
+
 instance Category p => ProfunctorComonad (Ran p) where
   proextract (Ran f) = f id
   produplicate (Ran f) = Ran $ \ p -> Ran $ \q -> f (p . q)
