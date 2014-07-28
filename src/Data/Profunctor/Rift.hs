@@ -1,6 +1,7 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 702
 {-# LANGUAGE Trustworthy #-}
 #endif
@@ -20,9 +21,10 @@ module Data.Profunctor.Rift
   ) where
 
 import Control.Category
-import Data.Profunctor.Unsafe
-import Data.Profunctor.Monad
+import Data.Profunctor
 import Data.Profunctor.Composition
+import Data.Profunctor.Monad
+import Data.Profunctor.Unsafe
 import Prelude hiding (id,(.))
 
 -- | This represents the right Kan lift of a 'Profunctor' @q@ along a 'Profunctor' @p@ in a limited version of the 2-category of Profunctors where the only object is the category Hask, 1-morphisms are profunctors composed and compose with Profunctor composition, and 2-morphisms are just natural transformations.
@@ -58,6 +60,6 @@ instance p ~ q => Category (Rift p q) where
 -- | The 2-morphism that defines a left Kan lift.
 --
 -- Note: When @p@ is right adjoint to @'Rift' p (->)@ then 'decomposeRift' is the 'counit' of the adjunction.
-decomposeRift :: Procompose p (Rift p q) a b -> q a b
+decomposeRift :: Procompose p (Rift p q) -/-> q
 decomposeRift (Procompose p (Rift pq)) = pq p
 {-# INLINE decomposeRift #-}

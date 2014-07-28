@@ -1,6 +1,7 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 702
 {-# LANGUAGE Trustworthy #-}
 #endif
@@ -21,9 +22,10 @@ module Data.Profunctor.Ran
   ) where
 
 import Control.Category
-import Data.Profunctor.Unsafe
-import Data.Profunctor.Monad
+import Data.Profunctor
 import Data.Profunctor.Composition
+import Data.Profunctor.Monad
+import Data.Profunctor.Unsafe
 import Prelude hiding (id,(.))
 
 -- | This represents the right Kan extension of a 'Profunctor' @q@ along a 'Profunctor' @p@ in a limited version of the 2-category of Profunctors where the only object is the category Hask, 1-morphisms are profunctors composed and compose with Profunctor composition, and 2-morphisms are just natural transformations.
@@ -59,10 +61,10 @@ instance p ~ q => Category (Ran p q) where
 -- | The 2-morphism that defines a right Kan extension.
 --
 -- Note: When @q@ is left adjoint to @'Ran' q (->)@ then 'decomposeRan' is the 'counit' of the adjunction.
-decomposeRan :: Procompose (Ran q p) q a b -> p a b
+decomposeRan :: Procompose (Ran q p) q -/-> p
 decomposeRan (Procompose (Ran qp) q) = qp q
 {-# INLINE decomposeRan #-}
 
-precomposeRan :: Profunctor q => Procompose q (Ran p (->)) a b -> Ran p q a b
+precomposeRan :: Profunctor q => Procompose q (Ran p (->)) -/-> Ran p q
 precomposeRan (Procompose p pf) = Ran (\pxa -> runRan pf pxa `lmap` p)
 {-# INLINE precomposeRan #-}

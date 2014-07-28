@@ -124,7 +124,7 @@ instance (Profunctor p, Arrow p, Monoid b) => Monoid (Closure p a b) where
 -- 'close' '.' 'unclose' ≡ 'id'
 -- 'unclose' '.' 'close' ≡ 'id'
 -- @
-close :: Closed p => (forall x y. p x y -> q x y) -> p a b -> Closure q a b
+close :: Closed p => (p -/-> q) -> p -/-> Closure q
 close f p = Closure $ f $ closed p
 
 -- |
@@ -132,7 +132,7 @@ close f p = Closure $ f $ closed p
 -- 'close' '.' 'unclose' ≡ 'id'
 -- 'unclose' '.' 'close' ≡ 'id'
 -- @
-unclose :: Profunctor q => (forall x y. p x y -> Closure q x y) -> p a b -> q a b
+unclose :: Profunctor q => (p -/-> Closure q) -> p -/-> q
 unclose f p = dimap const ($ ()) $ runClosure $ f p
 
 --------------------------------------------------------------------------------

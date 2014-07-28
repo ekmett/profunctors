@@ -108,7 +108,7 @@ instance (Profunctor p, ArrowPlus p) => Monoid (Tambara p a b) where
 -- 'tambara' '.' 'untambara' ≡ 'id'
 -- 'untambara' '.' 'tambara' ≡ 'id'
 -- @
-tambara :: Strong p => (forall x y. p x y -> q x y) -> p a b -> Tambara q a b
+tambara :: Strong p => (p -/-> q) -> p -/-> Tambara q
 tambara f p = Tambara $ f $ first' p
 
 -- |
@@ -116,7 +116,7 @@ tambara f p = Tambara $ f $ first' p
 -- 'tambara' '.' 'untambara' ≡ 'id'
 -- 'untambara' '.' 'tambara' ≡ 'id'
 -- @
-untambara :: Profunctor q => (forall x y. p x y -> Tambara q x y) -> p a b -> q a b
+untambara :: Profunctor q => (p -/-> Tambara q) -> p -/-> q
 untambara f p = dimap (\a -> (a,())) fst $ runTambara $ f p
 
 ----------------------------------------------------------------------------
@@ -183,7 +183,7 @@ instance Profunctor p => Functor (Cotambara p a) where
 -- 'cotambara' '.' 'uncotambara' ≡ 'id'
 -- 'uncotambara' '.' 'cotambara' ≡ 'id'
 -- @
-cotambara :: Choice p => (forall x y. p x y -> q x y) -> p a b -> Cotambara q a b
+cotambara :: Choice p => (p -/-> q) -> p -/-> Cotambara q
 cotambara f p = Cotambara $ f $ left' p
 
 -- |
@@ -191,7 +191,7 @@ cotambara f p = Cotambara $ f $ left' p
 -- 'cotambara' '.' 'uncotambara' ≡ 'id'
 -- 'uncotambara' '.' 'cotambara' ≡ 'id'
 -- @
-uncotambara :: Profunctor q => (forall x y. p x y -> Cotambara q x y) -> p a b -> q a b
+uncotambara :: Profunctor q => (p -/-> Cotambara q) -> p -/-> q
 uncotambara f p = dimap Left (\(Left a) -> a) $ runCotambara $ f p
 
 ----------------------------------------------------------------------------

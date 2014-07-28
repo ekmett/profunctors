@@ -1,4 +1,6 @@
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE RankNTypes #-}
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 702
 {-# LANGUAGE Trustworthy #-}
 #endif
@@ -31,6 +33,7 @@ module Data.Profunctor
   , DownStar(..)
   , WrappedArrow(..)
   , Forget(..)
+  , type (-/->)
   ) where
 
 import Control.Applicative hiding (WrappedArrow(..))
@@ -45,6 +48,8 @@ import Data.Tuple
 import Data.Profunctor.Unsafe
 import Prelude hiding (id,(.),sequence)
 import Unsafe.Coerce
+
+type p -/-> q = forall a b. p a b -> q a b
 
 ------------------------------------------------------------------------------
 -- UpStar
