@@ -36,6 +36,7 @@ import Control.Comonad
 import Control.Monad (liftM)
 import Data.Functor.Compose
 import Data.Profunctor
+import Data.Profunctor.Monad
 import Data.Profunctor.Rep
 import Data.Profunctor.Unsafe
 import Prelude hiding ((.),id)
@@ -54,10 +55,13 @@ type Iso s t a b = forall p f. (Profunctor p, Functor f) => p a (f b) -> p s (f 
 data Procompose p q d c where
   Procompose :: p d a -> q a c -> Procompose p q d c
 
+instance Category p => ProfunctorMonad (Procompose p) where
+  proreturn = Procompose id
+  projoin (Procompose p (Procompose q r)) = Procompose (q . p) r
+
 procomposed :: Category p => Procompose p p a b -> p a b
 procomposed (Procompose pda pac) = pac . pda
 {-# INLINE procomposed #-}
-
 
 instance (Profunctor p, Profunctor q) => Profunctor (Procompose p q) where
   dimap l r (Procompose f g) = Procompose (lmap l f) (rmap r g)
