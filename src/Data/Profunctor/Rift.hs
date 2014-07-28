@@ -2,6 +2,7 @@
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 702
 {-# LANGUAGE Trustworthy #-}
 #endif
@@ -22,6 +23,7 @@ module Data.Profunctor.Rift
 
 import Control.Category
 import Data.Profunctor
+import Data.Profunctor.Adjunction
 import Data.Profunctor.Composition
 import Data.Profunctor.Monad
 import Data.Profunctor.Unsafe
@@ -63,3 +65,7 @@ instance p ~ q => Category (Rift p q) where
 decomposeRift :: Procompose p (Rift p q) -/-> q
 decomposeRift (Procompose p (Rift pq)) = pq p
 {-# INLINE decomposeRift #-}
+
+instance Procompose p -| Rift p where
+  counit (Procompose p (Rift pq)) = pq p
+  unit q = Rift $ \p -> Procompose p q
