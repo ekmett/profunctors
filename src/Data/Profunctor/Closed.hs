@@ -2,10 +2,10 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-
 module Data.Profunctor.Closed
   ( Closed(..)
   , Closure(..)
+  , Environment(..)
   ) where
 
 import Control.Applicative
@@ -20,6 +20,10 @@ import Data.Profunctor.Monad
 import Data.Profunctor.Unsafe
 import Data.Tagged
 import Prelude hiding ((.),id)
+
+--------------------------------------------------------------------------------
+-- * Closed
+--------------------------------------------------------------------------------
 
 -- | A strong profunctor allows the monoidal structure to pass through.
 --
@@ -47,6 +51,10 @@ instance (Distributive f, Monad f) => Closed (Kleisli f) where
 
 instance Monoid r => Closed (Forget r) where
   closed _ = Forget $ \_ -> mempty
+
+--------------------------------------------------------------------------------
+-- * Closure
+--------------------------------------------------------------------------------
 
 -- | 'Closure' adjoins a 'Closed' structure to any 'Profunctor'.
 --
@@ -108,6 +116,10 @@ instance (Profunctor p, ArrowPlus p) => Alternative (Closure p a) where
 instance (Profunctor p, Arrow p, Monoid b) => Monoid (Closure p a b) where
   mempty = pure mempty
   mappend = liftA2 mappend
+
+--------------------------------------------------------------------------------
+-- * Environment
+--------------------------------------------------------------------------------
 
 data Environment p a b where
   Environment :: ((z -> y) -> b) -> p x y -> (a -> z -> x) -> Environment p a b
