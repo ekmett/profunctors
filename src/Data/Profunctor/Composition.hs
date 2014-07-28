@@ -8,7 +8,7 @@
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Profunctor.Composition
--- Copyright   :  (C) 2011-2012 Edward Kmett
+-- Copyright   :  (C) 2011-2014 Edward Kmett
 -- License     :  BSD-style (see the file LICENSE)
 --
 -- Maintainer  :  Edward Kmett <ekmett@gmail.com>
@@ -36,6 +36,7 @@ import Control.Comonad
 import Control.Monad (liftM)
 import Data.Functor.Compose
 import Data.Profunctor
+import Data.Profunctor.Closed
 import Data.Profunctor.Monad
 import Data.Profunctor.Rep
 import Data.Profunctor.Unsafe
@@ -53,46 +54,46 @@ type Iso s t a b = forall p f. (Profunctor p, Functor f) => p a (f b) -> p s (f 
 --
 -- <http://blog.sigfpe.com/2011/07/profunctors-in-haskell.html>
 data Procompose p q d c where
-  Procompose :: p d a -> q a c -> Procompose p q d c
+  Procompose :: p x c -> q d x -> Procompose p q d c
 
 instance Category p => ProfunctorMonad (Procompose p) where
   proreturn = Procompose id
-  projoin (Procompose p (Procompose q r)) = Procompose (q . p) r
+  projoin (Procompose p (Procompose q r)) = Procompose (p . q) r
 
 procomposed :: Category p => Procompose p p a b -> p a b
-procomposed (Procompose pda pac) = pac . pda
+procomposed (Procompose pxc pdx) = pxc . pdx
 {-# INLINE procomposed #-}
 
 instance (Profunctor p, Profunctor q) => Profunctor (Procompose p q) where
-  dimap l r (Procompose f g) = Procompose (lmap l f) (rmap r g)
+  dimap l r (Procompose f g) = Procompose (rmap r f) (lmap l g)
   {-# INLINE dimap #-}
-  lmap k (Procompose f g) = Procompose (lmap k f) g
+  lmap k (Procompose f g) = Procompose f (lmap k g)
   {-# INLINE rmap #-}
-  rmap k (Procompose f g) = Procompose f (rmap k g)
+  rmap k (Procompose f g) = Procompose (rmap k f) g
   {-# INLINE lmap #-}
-  k #. Procompose f g     = Procompose f (k #. g)
+  k #. Procompose f g     = Procompose (k #. f) g
   {-# INLINE ( #. ) #-}
-  Procompose f g .# k     = Procompose (f .# k) g
+  Procompose f g .# k     = Procompose f (g .# k)
   {-# INLINE ( .# ) #-}
 
-instance Profunctor q => Functor (Procompose p q a) where
-  fmap k (Procompose f g) = Procompose f (rmap k g)
+instance Profunctor p => Functor (Procompose p q a) where
+  fmap k (Procompose f g) = Procompose (rmap k f) g
   {-# INLINE fmap #-}
 
 -- | The composition of two 'Representable' 'Profunctor's is 'Representable' by
 -- the composition of their representations.
 instance (Representable p, Representable q) => Representable (Procompose p q) where
-  type Rep (Procompose p q) = Compose (Rep p) (Rep q)
-  tabulate f = Procompose (tabulate (getCompose . f)) (tabulate id)
+  type Rep (Procompose p q) = Compose (Rep q) (Rep p)
+  tabulate f = Procompose (tabulate id) (tabulate (getCompose . f))
   {-# INLINE tabulate #-}
-  rep (Procompose f g) d = Compose $ rep g <$> rep f d
+  rep (Procompose g f) d = Compose $ rep g <$> rep f d
   {-# INLINE rep #-}
 
 instance (Corepresentable p, Corepresentable q) => Corepresentable (Procompose p q) where
-  type Corep (Procompose p q) = Compose (Corep q) (Corep p)
-  cotabulate f = Procompose (cotabulate id) (cotabulate (f . Compose))
+  type Corep (Procompose p q) = Compose (Corep p) (Corep q)
+  cotabulate f = Procompose (cotabulate (f . Compose)) (cotabulate id)
   {-# INLINE cotabulate #-}
-  corep (Procompose f g) (Compose d) = corep g $ corep f <$> d
+  corep (Procompose g f) (Compose d) = corep g $ corep f <$> d
   {-# INLINE corep #-}
 
 instance (Strong p, Strong q) => Strong (Procompose p q) where
@@ -107,6 +108,9 @@ instance (Choice p, Choice q) => Choice (Procompose p q) where
   right' (Procompose x y) = Procompose (right' x) (right' y)
   {-# INLINE right' #-}
 
+instance (Closed p, Closed q) => Closed (Procompose p q) where
+  closed (Procompose x y) = Procompose (closed x) (closed y)
+  {-# INLINE closed #-}
 
 -- * Lax identity
 
@@ -120,7 +124,7 @@ instance (Choice p, Choice q) => Choice (Procompose p q) where
 -- 'idl' :: 'Profunctor' q => Iso' ('Procompose' (->) q d c) (q d c)
 -- @
 idl :: Profunctor q => Iso (Procompose (->) q d c) (Procompose (->) r d' c') (q d c) (r d' c')
-idl = dimap (\(Procompose f g) -> lmap f g) (fmap (Procompose id))
+idl = dimap (\(Procompose g f) -> rmap g f) (fmap (Procompose id))
 
 -- | @(->)@ functions as a lax identity for 'Profunctor' composition.
 --
@@ -132,7 +136,7 @@ idl = dimap (\(Procompose f g) -> lmap f g) (fmap (Procompose id))
 -- 'idr' :: 'Profunctor' q => Iso' ('Procompose' q (->) d c) (q d c)
 -- @
 idr :: Profunctor q => Iso (Procompose q (->) d c) (Procompose r (->) d' c') (q d c) (r d' c')
-idr = dimap (\(Procompose f g) -> rmap g f) (fmap (`Procompose` id))
+idr = dimap (\(Procompose g f) -> lmap f g) (fmap (`Procompose` id))
 
 
 -- | The associator for 'Profunctor' composition.
@@ -152,14 +156,14 @@ assoc = dimap (\(Procompose f (Procompose g h)) -> Procompose (Procompose f g) h
 -- isomorphic to @a -> f (g c)@.
 --
 -- @'upstars' :: 'Functor' f => Iso' ('Procompose' ('UpStar' f) ('UpStar' g) d c) ('UpStar' ('Compose' f g) d c)@
-upstars :: Functor f
+upstars :: Functor g
         => Iso (Procompose (UpStar f ) (UpStar g ) d  c )
                (Procompose (UpStar f') (UpStar g') d' c')
-               (UpStar (Compose f  g ) d  c )
-               (UpStar (Compose f' g') d' c')
+               (UpStar (Compose g  f ) d  c )
+               (UpStar (Compose g' f') d' c')
 upstars = dimap hither (fmap yon) where
-  hither (Procompose (UpStar dfx) (UpStar xgc)) = UpStar (Compose . fmap xgc . dfx)
-  yon (UpStar dfgc) = Procompose (UpStar (getCompose . dfgc)) (UpStar id)
+  hither (Procompose (UpStar xgc) (UpStar dfx)) = UpStar (Compose . fmap xgc . dfx)
+  yon (UpStar dfgc) = Procompose (UpStar id) (UpStar (getCompose . dfgc))
 
 -- | 'Profunctor' composition generalizes 'Functor' composition in two ways.
 --
@@ -167,36 +171,36 @@ upstars = dimap hither (fmap yon) where
 -- isomorphic to @g (f a) -> c@.
 --
 -- @'downstars' :: 'Functor' f => Iso' ('Procompose' ('DownStar' f) ('DownStar' g) d c) ('DownStar' ('Compose' g f) d c)@
-downstars :: Functor g
+downstars :: Functor f
           => Iso (Procompose (DownStar f ) (DownStar g ) d  c )
                  (Procompose (DownStar f') (DownStar g') d' c')
-                 (DownStar (Compose g  f ) d  c )
-                 (DownStar (Compose g' f') d' c')
+                 (DownStar (Compose f  g ) d  c )
+                 (DownStar (Compose f' g') d' c')
 downstars = dimap hither (fmap yon) where
-  hither (Procompose (DownStar fdx) (DownStar gxc)) = DownStar (gxc . fmap fdx . getCompose)
-  yon (DownStar dgfc) = Procompose (DownStar id) (DownStar (dgfc . Compose))
+  hither (Procompose (DownStar gxc) (DownStar fdx)) = DownStar (gxc . fmap fdx . getCompose)
+  yon (DownStar dgfc) = Procompose (DownStar (dgfc . Compose)) (DownStar id)
 
 -- | This is a variant on 'upstars' that uses 'Kleisli' instead of 'UpStar'.
 --
 -- @'kleislis' :: 'Monad' f => Iso' ('Procompose' ('Kleisli' f) ('Kleisli' g) d c) ('Kleisli' ('Compose' f g) d c)@
-kleislis :: Monad f
+kleislis :: Monad g
         => Iso (Procompose (Kleisli f ) (Kleisli g ) d  c )
                (Procompose (Kleisli f') (Kleisli g') d' c')
-               (Kleisli (Compose f  g ) d  c )
-               (Kleisli (Compose f' g') d' c')
+               (Kleisli (Compose g  f ) d  c )
+               (Kleisli (Compose g' f') d' c')
 kleislis = dimap hither (fmap yon) where
-  hither (Procompose (Kleisli dfx) (Kleisli xgc)) = Kleisli (Compose . liftM xgc . dfx)
-  yon (Kleisli dfgc) = Procompose (Kleisli (getCompose . dfgc)) (Kleisli id)
+  hither (Procompose (Kleisli xgc) (Kleisli dfx)) = Kleisli (Compose . liftM xgc . dfx)
+  yon (Kleisli dfgc) = Procompose (Kleisli id) (Kleisli (getCompose . dfgc))
 
 -- | This is a variant on 'downstars' that uses 'Cokleisli' instead
 -- of 'DownStar'.
 --
 -- @'cokleislis' :: 'Functor' f => Iso' ('Procompose' ('Cokleisli' f) ('Cokleisli' g) d c) ('Cokleisli' ('Compose' g f) d c)@
-cokleislis :: Functor g
+cokleislis :: Functor f
           => Iso (Procompose (Cokleisli f ) (Cokleisli g ) d  c )
                  (Procompose (Cokleisli f') (Cokleisli g') d' c')
-                 (Cokleisli (Compose g  f ) d  c )
-                 (Cokleisli (Compose g' f') d' c')
+                 (Cokleisli (Compose f  g ) d  c )
+                 (Cokleisli (Compose f' g') d' c')
 cokleislis = dimap hither (fmap yon) where
-  hither (Procompose (Cokleisli fdx) (Cokleisli gxc)) = Cokleisli (gxc . fmap fdx . getCompose)
-  yon (Cokleisli dgfc) = Procompose (Cokleisli id) (Cokleisli (dgfc . Compose))
+  hither (Procompose (Cokleisli gxc) (Cokleisli fdx)) = Cokleisli (gxc . fmap fdx . getCompose)
+  yon (Cokleisli dgfc) = Procompose (Cokleisli (dgfc . Compose)) (Cokleisli id)

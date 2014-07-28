@@ -59,5 +59,5 @@ instance p ~ q => Category (Lift p q) where
 --
 -- Note: When @p@ is right adjoint to @'Lift' p (->)@ then 'decomposeLift' is the 'counit' of the adjunction.
 decomposeLift :: Procompose (Lift p q) p a b -> q a b
-decomposeLift (Procompose (Lift pq) p) = pq p
+decomposeLift (Procompose p (Lift pq) p) = pq p
 {-# INLINE decomposeLift #-}
