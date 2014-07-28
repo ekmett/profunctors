@@ -1,4 +1,8 @@
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+
 module Data.Profunctor.Closed
   ( Closed(..)
   , Closure(..)
@@ -11,6 +15,7 @@ import Control.Comonad
 import Data.Distributive
 import Data.Monoid
 import Data.Profunctor
+import Data.Profunctor.Adjunction
 import Data.Profunctor.Monad
 import Data.Profunctor.Unsafe
 import Data.Tagged
@@ -103,3 +108,23 @@ instance (Profunctor p, ArrowPlus p) => Alternative (Closure p a) where
 instance (Profunctor p, Arrow p, Monoid b) => Monoid (Closure p a b) where
   mempty = pure mempty
   mappend = liftA2 mappend
+
+data Environment p a b where
+  Environment :: ((z -> y) -> b) -> p x y -> (a -> z -> x) -> Environment p a b
+
+instance Profunctor p => Profunctor (Environment p) where
+  dimap f g (Environment l m r) = Environment (g . l) m (r . f)
+  lmap f (Environment l m r) = Environment l m (r . f)
+  rmap g (Environment l m r) = Environment (g . l) m r
+  w #. Environment l m r = Environment (w #. l) m r
+  Environment l m r .# w = Environment l m (r .# w)
+
+instance ProfunctorMonad Environment where
+  proreturn p = Environment ($ ()) p $ const
+  projoin (Environment l (Environment m n o) p) = Environment (lm . curry) n op where
+    op a (b, c) = o (p a b) c
+    lm zr = l (m.zr)
+
+instance Environment -| Closure where
+  counit (Environment g (Closure p) f) = dimap f g p
+  unit p = Closure (Environment id p id)
