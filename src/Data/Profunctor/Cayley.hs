@@ -1,3 +1,7 @@
+{-# LANGUAGE CPP #-}
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 702
+{-# LANGUAGE Trustworthy #-}
+#endif
 -----------------------------------------------------------------------------
 -- |
 -- Copyright   :  (C) 2014 Edward Kmett
@@ -8,6 +12,7 @@
 -- Portability :  portable
 --
 ----------------------------------------------------------------------------
+
 module Data.Profunctor.Cayley where
 
 import Control.Applicative
