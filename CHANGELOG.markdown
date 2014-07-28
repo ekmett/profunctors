@@ -1,3 +1,14 @@
+4.1
+---
+* Flipped the order of 'Procompose'
+* Added the notion of Monads and Comonads on the category of profunctors.
+* Added 'Cayley' which takes normal Haskell Monads and Comonads to a 'ProfunctorMonad' and 'ProfunctorComonad' respectively. Cayley is also known as the 'static arrow' construction
+* Added 'Closed' which is adjoint to 'Strong'.
+* Added 'Closure' which freely adjoins 'Closed' to any 'Profunctor'.
+* Added 'Tambara' which freely adjoins 'Strong' to any 'Profunctor'.
+* Added 'Cotambara' which freely adjoins 'Choice' to any 'Profunctor'.
+* Under the new 'Procompose' the old 'Rift' is now 'Ran', and the old 'Lift' was misnamed. It is now 'Rift'
+
 4.0.3
 -----
 * Added `Data.Profunctor.Lift` containing the left Kan lift of a profunctor.
