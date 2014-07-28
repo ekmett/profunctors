@@ -41,6 +41,7 @@ library
     Data.Profunctor.Composition
     Data.Profunctor.Collage
     Data.Profunctor.Monad
+    Data.Profunctor.Ran
     Data.Profunctor.Rep
     Data.Profunctor.Tambara
     Data.Profunctor.Trace
@@ -48,7 +49,6 @@ library
 
 
 --    Data.Profunctor.Lift
---    Data.Profunctor.Rift
 
   ghc-options:     -Wall -O2
   hs-source-dirs:  src
