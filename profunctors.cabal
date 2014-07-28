@@ -38,6 +38,7 @@ library
     Data.Profunctor
     Data.Profunctor.Cayley
     Data.Profunctor.Closed
+    Data.Profunctor.Codensity
     Data.Profunctor.Composition
     Data.Profunctor.Collage
     Data.Profunctor.Monad
