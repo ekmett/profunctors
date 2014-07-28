@@ -11,6 +11,7 @@ import Control.Comonad
 import Data.Distributive
 import Data.Monoid
 import Data.Profunctor
+import Data.Profunctor.Monad
 import Data.Profunctor.Unsafe
 import Data.Tagged
 import Prelude hiding ((.),id)
@@ -55,8 +56,12 @@ instance Profunctor p => Profunctor (Closure p) where
   w #. Closure p = Closure $ fmap w #. p
   Closure p .# w = Closure $ p .# fmap w
 
+instance ProfunctorComonad Closure where
+  proextract = dimap const ($()) . runClosure
+  produplicate (Closure p) = Closure $ Closure $ dimap uncurry curry p
+
 instance Profunctor p => Closed (Closure p) where
-  closed (Closure p) = Closure $ dimap uncurry curry p
+  closed = runClosure . produplicate
 
 instance Strong p => Strong (Closure p) where
   first' (Closure p) = Closure $ dimap hither yon $ first' p
