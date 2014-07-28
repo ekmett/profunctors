@@ -20,7 +20,9 @@ import Control.Arrow
 import Control.Category
 import Control.Comonad
 import Data.Profunctor
+import Data.Profunctor.Composition
 import Data.Profunctor.Monad
+import Data.Profunctor.Monoid
 import Data.Profunctor.Unsafe
 import Prelude hiding ((.), id)
 
@@ -31,6 +33,10 @@ newtype Cayley f p a b = Cayley { runCayley :: f (p a b) }
 instance Monad f => ProfunctorMonad (Cayley f) where
   proreturn = Cayley . return
   projoin (Cayley m) = Cayley $ m >>= runCayley
+
+instance (Applicative f, ProfunctorMonoid p) => ProfunctorMonoid (Cayley f p) where
+  eta = Cayley . pure . eta
+  mu (Procompose (Cayley f) (Cayley g)) = Cayley $ liftA2 (\p q -> mu $ Procompose p q) f g
 
 -- | Cayley transforms Comonads in @Hask@ into comonads on @Prof@
 instance Comonad f => ProfunctorComonad (Cayley f) where
