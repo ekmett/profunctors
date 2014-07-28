@@ -22,11 +22,16 @@ module Data.Profunctor.Rift
 
 import Control.Category
 import Data.Profunctor.Unsafe
+import Data.Profunctor.Monad
 import Data.Profunctor.Composition
 import Prelude hiding (id,(.))
 
 -- | This represents the right Kan lift of a 'Profunctor' @q@ along a 'Profunctor' @p@ in a limited version of the 2-category of Profunctors where the only object is the category Hask, 1-morphisms are profunctors composed and compose with Profunctor composition, and 2-morphisms are just natural transformations.
 newtype Rift p q a b = Rift { runRift :: forall x. p x a -> q x b }
+
+instance Category p => ProfunctorComonad (Rift p) where
+  proextract (Rift f) = f id
+  produplicate (Rift f) = Rift $ \ p -> Rift $ \q -> f (p . q)
 
 --  Ran f g a = forall b. (a -> f b) -> g b
 
