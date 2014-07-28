@@ -160,6 +160,6 @@ instance ProfunctorMonad Environment where
     op a (b, c) = o (p a b) c
     lm zr = l (m.zr)
 
-instance Environment -| Closure where
+instance ProfunctorAdjunction Environment Closure where
   counit (Environment g (Closure p) f) = dimap f g p
   unit p = Closure (Environment id p id)

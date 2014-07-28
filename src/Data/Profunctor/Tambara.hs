@@ -145,7 +145,7 @@ instance ProfunctorMonad Pastro where
          (c, g) -> (c, (f, g)) 
     lm (d, (f, g)) = l (m (d, g), f)
     
-instance Pastro -| Tambara where
+instance ProfunctorAdjunction Pastro Tambara where
   counit (Pastro g (Tambara p) f) = dimap f g p
   unit p = Tambara (Pastro id p id)
 
@@ -212,7 +212,7 @@ instance Profunctor p => Profunctor (Copastro p) where
   w #. Copastro l m r = Copastro (w #. l) m r
   Copastro l m r .# w = Copastro l m (r .# w)
 
-instance Copastro -| Cotambara where
+instance ProfunctorAdjunction Copastro Cotambara where
   counit (Copastro f (Cotambara g) h) = dimap h f g
   unit p = Cotambara $ Copastro id p id
 

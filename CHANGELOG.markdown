@@ -1,3 +1,7 @@
+4.2
+---
+* Rename -| to ProfunctorAdjunction because GHC 7.4 still exists in the wild.
+
 4.1
 ---
 * Flipped the order of 'Procompose'

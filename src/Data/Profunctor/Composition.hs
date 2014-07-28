@@ -251,6 +251,6 @@ decomposeRift :: Procompose p (Rift p q) -/-> q
 decomposeRift (Procompose p (Rift pq)) = pq p
 {-# INLINE decomposeRift #-}
 
-instance Procompose p -| Rift p where
+instance ProfunctorAdjunction (Procompose p) (Rift p) where
   counit (Procompose p (Rift pq)) = pq p
   unit q = Rift $ \p -> Procompose p q
