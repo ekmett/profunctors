@@ -124,18 +124,26 @@ untambara f p = dimap (\a -> (a,())) fst $ runTambara $ f p
 
 -- | Pastro -| Tambara
 data Pastro p a b where
-  Pastro :: (a -> (x, z)) -> p x (z -> b) -> Pastro p a b
+  Pastro :: ((y, z) -> b) -> p x y -> (a -> (x, z)) -> Pastro p a b
 
 instance Profunctor p => Profunctor (Pastro p) where
-  dimap f g (Pastro axz p) = Pastro (axz . f) (rmap (fmap g) p)
+  dimap f g (Pastro l m r) = Pastro (g . l) m (r . f)
+  lmap f (Pastro l m r) = Pastro l m (r . f)
+  rmap g (Pastro l m r) = Pastro (g . l) m r
+  w #. Pastro l m r = Pastro (w #. l) m r
+  Pastro l m r .# w = Pastro l m (r .# w)
 
 instance ProfunctorMonad Pastro where
-  proreturn p = Pastro (\a -> (a,())) $ rmap const p
-  projoin (Pastro f (Pastro g h)) = Pastro (\a -> case f a of (x, z) -> case g x of (y, w) -> (y, (w, z))) (rmap uncurry h)
-
+  proreturn p = Pastro fst p $ \a -> (a,())
+  projoin (Pastro l (Pastro m n o) p) = Pastro lm n op where
+    op a = case p a of
+      (b, f) -> case o b of
+         (c, g) -> (c, (f, g)) 
+    lm (d, (f, g)) = l (m (d, g), f)
+    
 instance Pastro -| Tambara where
-  counit (Pastro f (Tambara p)) = dimap f (uncurry id) p
-  unit p = Tambara (Pastro id (rmap (,) p))
+  counit (Pastro g (Tambara p) f) = dimap f g p
+  unit p = Tambara (Pastro id p id)
 
 ----------------------------------------------------------------------------
 -- * Cotambara
