@@ -5,6 +5,8 @@
 module Data.Profunctor.Closed
   ( Closed(..)
   , Closure(..)
+  , close
+  , unclose
   , Environment(..)
   ) where
 
@@ -116,6 +118,22 @@ instance (Profunctor p, ArrowPlus p) => Alternative (Closure p a) where
 instance (Profunctor p, Arrow p, Monoid b) => Monoid (Closure p a b) where
   mempty = pure mempty
   mappend = liftA2 mappend
+
+-- |
+-- @
+-- 'close' '.' 'unclose' ≡ 'id'
+-- 'unclose' '.' 'close' ≡ 'id'
+-- @
+close :: Closed p => (forall x y. p x y -> q x y) -> p a b -> Closure q a b
+close f p = Closure $ f $ closed p
+
+-- |
+-- @
+-- 'close' '.' 'unclose' ≡ 'id'
+-- 'unclose' '.' 'close' ≡ 'id'
+-- @
+unclose :: Profunctor q => (forall x y. p x y -> Closure q x y) -> p a b -> q a b
+unclose f p = dimap const ($ ()) $ runClosure $ f p
 
 --------------------------------------------------------------------------------
 -- * Environment
