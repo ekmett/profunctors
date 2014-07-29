@@ -34,7 +34,7 @@ module Data.Profunctor
   , WrappedArrow(..)
   , Forget(..)
 #ifndef HLINT
-  , type (:->)
+  , (:->)
 #endif
   ) where
 
