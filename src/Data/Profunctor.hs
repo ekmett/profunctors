@@ -51,6 +51,7 @@ import Data.Profunctor.Unsafe
 import Prelude hiding (id,(.),sequence)
 import Unsafe.Coerce
 
+infixr 0 :->
 type p :-> q = forall a b. p a b -> q a b
 
 ------------------------------------------------------------------------------
