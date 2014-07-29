@@ -1,3 +1,7 @@
+4.2.0.1
+-------
+* Avoided using 'type' in the export list, as that doesn't work on 7.4.
+
 4.2
 ---
 * Renamed `-|` to `ProfunctorAdjunction` because GHC 7.4 still exists in the wild.
