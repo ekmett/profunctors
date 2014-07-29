@@ -253,7 +253,7 @@ instance p ~ q => Category (Rift p q) where
 -- | The 2-morphism that defines a left Kan lift.
 --
 -- Note: When @p@ is right adjoint to @'Rift' p (->)@ then 'decomposeRift' is the 'counit' of the adjunction.
-decomposeRift :: Procompose p (Rift p q) -/-> q
+decomposeRift :: Procompose p (Rift p q) :-> q
 decomposeRift (Procompose p (Rift pq)) = pq p
 {-# INLINE decomposeRift #-}
 

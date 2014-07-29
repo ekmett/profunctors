@@ -1,6 +1,7 @@
 4.2
 ---
-* Rename -| to ProfunctorAdjunction because GHC 7.4 still exists in the wild.
+* Renamed `-|` to `ProfunctorAdjunction` because GHC 7.4 still exists in the wild.
+* Renamed `-/->` to `:->` for the same reason. Also the former was confusing as they conflated profunctor homomorphisms and profunctors themselves.
 
 4.1
 ---

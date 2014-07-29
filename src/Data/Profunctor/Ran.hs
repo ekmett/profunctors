@@ -66,18 +66,18 @@ instance p ~ q => Category (Ran p q) where
 -- | The 2-morphism that defines a right Kan extension.
 --
 -- Note: When @q@ is left adjoint to @'Ran' q (->)@ then 'decomposeRan' is the 'counit' of the adjunction.
-decomposeRan :: Procompose (Ran q p) q -/-> p
+decomposeRan :: Procompose (Ran q p) q :-> p
 decomposeRan (Procompose (Ran qp) q) = qp q
 {-# INLINE decomposeRan #-}
 
-precomposeRan :: Profunctor q => Procompose q (Ran p (->)) -/-> Ran p q
+precomposeRan :: Profunctor q => Procompose q (Ran p (->)) :-> Ran p q
 precomposeRan (Procompose p pf) = Ran (\pxa -> runRan pf pxa `lmap` p)
 {-# INLINE precomposeRan #-}
 
-curryRan :: (Procompose p q -/-> r) -> p -/-> Ran q r
+curryRan :: (Procompose p q :-> r) -> p :-> Ran q r
 curryRan f p = Ran $ \q -> f (Procompose p q)
 {-# INLINE curryRan #-}
 
-uncurryRan :: (p -/-> Ran q r) -> Procompose p q -/-> r
+uncurryRan :: (p :-> Ran q r) -> Procompose p q :-> r
 uncurryRan f (Procompose p q) = runRan (f p) q
 {-# INLINE uncurryRan #-}

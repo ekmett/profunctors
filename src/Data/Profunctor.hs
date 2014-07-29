@@ -34,7 +34,7 @@ module Data.Profunctor
   , WrappedArrow(..)
   , Forget(..)
 #ifndef HLINT
-  , type (-/->)
+  , type (:->)
 #endif
   ) where
 
@@ -51,7 +51,7 @@ import Data.Profunctor.Unsafe
 import Prelude hiding (id,(.),sequence)
 import Unsafe.Coerce
 
-type p -/-> q = forall a b. p a b -> q a b
+type p :-> q = forall a b. p a b -> q a b
 
 ------------------------------------------------------------------------------
 -- UpStar
