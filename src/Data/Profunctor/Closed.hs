@@ -65,7 +65,7 @@ instance (Distributive f, Monad f) => Closed (Kleisli f) where
 
 -- | 'Closure' adjoins a 'Closed' structure to any 'Profunctor'.
 --
--- Analogous to 'Data.Profunctor.Tambara.Tambara' for 'Closed'.
+-- Analogous to 'Data.Profunctor.Tambara.Tambara' for 'Strong'.
 
 newtype Closure p a b = Closure { runClosure :: forall x. p (x -> a) (x -> b) }
 
