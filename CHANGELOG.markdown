@@ -1,3 +1,9 @@
+4.3
+---
+* Removed the non law-abiding instance for `Closed (Forget r)`
+* `Forget` is `Representable`
+* MINIMAL pragmas
+
 4.2.0.1
 -------
 * Avoided using 'type' in the export list, as that doesn't work on 7.4.
