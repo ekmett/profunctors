@@ -56,8 +56,8 @@ instance Distributive f => Closed (UpStar f) where
 instance (Distributive f, Monad f) => Closed (Kleisli f) where
   closed (Kleisli afb) = Kleisli $ \xa -> distribute $ \x -> afb (xa x)
 
-instance Monoid r => Closed (Forget r) where
-  closed _ = Forget $ \_ -> mempty
+-- instance Monoid r => Closed (Forget r) where
+--  closed _ = Forget $ \_ -> mempty
 
 --------------------------------------------------------------------------------
 -- * Closure
