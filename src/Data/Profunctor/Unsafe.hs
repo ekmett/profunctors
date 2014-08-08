@@ -157,6 +157,10 @@ class Profunctor p where
   ( .# ) = \p -> p `seq` \f -> lmap f p
   {-# INLINE ( .# ) #-}
 
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 708
+  {-# MINIMAL dimap | (lmap, rmap) #-}
+#endif
+
 instance Profunctor (->) where
   dimap ab cd bc = cd . bc . ab
   {-# INLINE dimap #-}

@@ -184,8 +184,6 @@ instance Traversable (Forget r a) where
 
 -- | Generalizing 'UpStar' of a strong 'Functor'
 --
--- Minimal complete definition: 'first'' or 'second''
---
 -- /Note:/ Every 'Functor' in Haskell is strong.
 --
 -- <http://takeichi.ipl-lab.org/~asada/papers/arrStrMnd.pdf>
@@ -195,6 +193,10 @@ class Profunctor p => Strong p where
 
   second' :: p a b -> p (c, a) (c, b)
   second' = dimap swap swap . first'
+
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 708
+  {-# MINIMAL first' | second' #-}
+#endif
 
 instance Strong (->) where
   first' ab ~(a, c) = (ab a, c)
@@ -236,8 +238,6 @@ instance Strong (Forget r) where
 
 -- | The generalization of 'DownStar' of a \"costrong\" 'Functor'
 --
--- Minimal complete definition: 'left'' or 'right''
---
 -- /Note:/ We use 'traverse' and 'extract' as approximate costrength as needed.
 class Profunctor p => Choice p where
   left'  :: p a b -> p (Either a c) (Either b c)
@@ -245,6 +245,10 @@ class Profunctor p => Choice p where
 
   right' :: p a b -> p (Either c a) (Either c b)
   right' =  dimap (either Right Left) (either Right Left) . left'
+
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 708
+  {-# MINIMAL left' | right' #-}
+#endif
 
 instance Choice (->) where
   left' ab (Left a) = Left (ab a)
