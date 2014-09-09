@@ -28,6 +28,9 @@ module Data.Profunctor
   -- ** Profunctorial Strength
   , Strong(..)
   , Choice(..)
+  -- ** Profunctorial Costrength
+  , Costrong(..)
+  , Cochoice(..)
   -- ** Common Profunctors
   , UpStar(..)
   , DownStar(..)
@@ -42,6 +45,8 @@ import Control.Applicative hiding (WrappedArrow(..))
 import Control.Arrow
 import Control.Category
 import Control.Comonad
+import Control.Monad (liftM)
+import Control.Monad.Fix
 import Data.Foldable
 import Data.Monoid
 import Data.Tagged
@@ -184,7 +189,10 @@ instance Traversable (Forget r a) where
 
 -- | Generalizing 'UpStar' of a strong 'Functor'
 --
--- /Note:/ Every 'Functor' in Haskell is strong.
+-- /Note:/ Every 'Functor' in Haskell is strong with respect to (,).
+--
+-- This describes profunctor strength with respect to the product structure
+-- of Hask.
 --
 -- <http://takeichi.ipl-lab.org/~asada/papers/arrStrMnd.pdf>
 class Profunctor p => Strong p where
@@ -193,6 +201,7 @@ class Profunctor p => Strong p where
 
   second' :: p a b -> p (c, a) (c, b)
   second' = dimap swap swap . first'
+
 
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 708
   {-# MINIMAL first' | second' #-}
@@ -236,9 +245,11 @@ instance Strong (Forget r) where
 -- Choice
 ------------------------------------------------------------------------------
 
--- | The generalization of 'DownStar' of a \"costrong\" 'Functor'
+-- | The generalization of 'DownStar' of 'Functor' that is strong with respect
+-- to 'Either'.
 --
--- /Note:/ We use 'traverse' and 'extract' as approximate costrength as needed.
+-- Note: This is also a notion of strength, except with regards to another monoidal 
+-- structure that we can choose to equip Hask with: the cocartesian coproduct.
 class Profunctor p => Choice p where
   left'  :: p a b -> p (Either a c) (Either b c)
   left' =  dimap (either Right Left) (either Right Left) . right'
@@ -276,7 +287,7 @@ instance Comonad w => Choice (Cokleisli w) where
   right' = right
   {-# INLINE right' #-}
 
--- | 'sequence' approximates 'costrength'
+-- NB: This instance is highly questionable
 instance Traversable w => Choice (DownStar w) where
   left' (DownStar wab) = DownStar (either Right Left . fmap wab . traverse (either Right Left))
   {-# INLINE left' #-}
@@ -300,3 +311,41 @@ instance Monoid r => Choice (Forget r) where
   {-# INLINE left' #-}
   right' (Forget k) = Forget (either (const mempty) k)
   {-# INLINE right' #-}
+
+--------------------------------------------------------------------------------
+-- * Costrength for (,)
+--------------------------------------------------------------------------------
+
+-- | Analogous to 'ArrowLoop', 'loop' = 'unfirst'
+class Profunctor p => Costrong p where
+  unfirst  :: p (a, d) (b, d) -> p a b
+  unfirst = unsecond . dimap swap swap
+
+  unsecond :: p (d, a) (d, b) -> p a b
+  unsecond = unfirst . dimap swap swap
+
+instance Costrong (->) where
+  unfirst f a = b where (b, d) = f (a, d)
+  unsecond f a = b where (d, b) = f (d, a)
+
+instance Costrong Tagged where
+  unfirst (Tagged bd) = Tagged (fst bd)
+  unsecond (Tagged db) = Tagged (snd db)
+
+instance ArrowLoop p => Costrong (WrappedArrow p) where
+  unfirst (WrapArrow k) = WrapArrow (loop k)
+
+instance MonadFix m => Costrong (Kleisli m) where
+  unfirst (Kleisli f) = Kleisli (liftM fst . mfix . f')
+    where f' x y = f (x, snd y)
+
+--------------------------------------------------------------------------------
+-- * Costrength for Either
+--------------------------------------------------------------------------------
+
+class Profunctor p => Cochoice p where
+  unleft  :: p (Either a d) (Either b d) -> p a b
+  unleft = unright . dimap (either Right Left) (either Right Left)
+
+  unright :: p (Either d a) (Either d b) -> p a b
+  unright = unleft . dimap (either Right Left) (either Right Left)
