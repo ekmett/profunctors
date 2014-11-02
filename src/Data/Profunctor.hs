@@ -45,7 +45,7 @@ import Control.Applicative hiding (WrappedArrow(..))
 import Control.Arrow
 import Control.Category
 import Control.Comonad
-import Control.Monad (liftM)
+import Control.Monad (liftM, MonadPlus(..))
 import Control.Monad.Fix
 import Data.Foldable
 import Data.Monoid
@@ -81,6 +81,26 @@ instance Functor f => Functor (UpStar f a) where
   fmap = rmap
   {-# INLINE fmap #-}
 
+instance Applicative f => Applicative (UpStar f a) where
+  pure a = UpStar $ \_ -> pure a
+  UpStar ff <*> UpStar fx = UpStar $ \a -> ff a <*> fx a
+  UpStar ff  *> UpStar fx = UpStar $ \a -> ff a  *> fx a
+  UpStar ff <*  UpStar fx = UpStar $ \a -> ff a <*  fx a
+
+instance Alternative f => Alternative (UpStar f a) where
+  empty = UpStar $ \_ -> empty
+  UpStar f <|> UpStar g = UpStar $ \a -> f a <|> g a
+
+instance Monad f => Monad (UpStar f a) where
+  return a = UpStar $ \_ -> return a
+  UpStar m >>= f = UpStar $ \ e -> do
+    a <- m e
+    runUpStar (f a) e
+
+instance MonadPlus f => MonadPlus (UpStar f a) where
+  mzero = UpStar $ \_ -> mzero
+  UpStar f `mplus` UpStar g = UpStar $ \a -> f a `mplus` g a
+
 ------------------------------------------------------------------------------
 -- DownStar
 ------------------------------------------------------------------------------
@@ -102,6 +122,18 @@ instance Functor f => Profunctor (DownStar f) where
 instance Functor (DownStar f a) where
   fmap k (DownStar f) = DownStar (k . f)
   {-# INLINE fmap #-}
+  a <$ _ = DownStar $ \_ -> a
+  {-# INLINE (<$) #-}
+
+instance Applicative (DownStar f a) where
+  pure a = DownStar $ \_ -> a
+  DownStar ff <*> DownStar fx = DownStar $ \a -> ff a (fx a)
+  _ *> m = m
+  m <* _ = m
+
+instance Monad (DownStar f a) where
+  return a = DownStar $ \_ -> a
+  DownStar m >>= f = DownStar $ \ x -> runDownStar (f (m x)) x
 
 ------------------------------------------------------------------------------
 -- Wrapped Profunctors
@@ -317,6 +349,8 @@ instance Monoid r => Choice (Forget r) where
 --------------------------------------------------------------------------------
 
 -- | Analogous to 'ArrowLoop', 'loop' = 'unfirst'
+-- 
+-- unfirst . unfirst = 
 class Profunctor p => Costrong p where
   unfirst  :: p (a, d) (b, d) -> p a b
   unfirst = unsecond . dimap swap swap
