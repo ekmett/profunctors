@@ -1,3 +1,7 @@
+4.3.2
+-----
+* Added some missing instances for `UpStar` and `DownStar`.
+
 4.3
 ---
 * Removed the non law-abiding instance for `Closed (Forget r)`
