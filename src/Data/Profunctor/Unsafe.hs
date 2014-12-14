@@ -37,7 +37,13 @@ import Control.Comonad (Cokleisli(..))
 import Control.Monad (liftM)
 import Data.Tagged
 import Prelude hiding (id,(.),sequence)
+
+#if __GLASGOW_HASKELL__ >= 708
+import Data.Coerce
+import Data.Type.Coercion
+#else
 import Unsafe.Coerce
+#endif
 
 {-# ANN module "Hlint: ignore Redundant lambda" #-}
 {-# ANN module "Hlint: ignore Collapse lambdas" #-}
@@ -127,7 +133,11 @@ class Profunctor p where
   -- should match the default definition:
   --
   -- @('Profuctor.Unsafe.#.') ≡ \\f -> \\p -> p \`seq\` 'rmap' f p@
+#if __GLASGOW_HASKELL__ >= 708
+  ( #. ) :: Coercible b c => (b -> c) -> p a b -> p a c
+#else
   ( #. ) :: (b -> c) -> p a b -> p a c
+#endif
   ( #. ) = \f -> \p -> p `seq` rmap f p
   {-# INLINE ( #. ) #-}
 
@@ -153,7 +163,11 @@ class Profunctor p where
   -- operationally identity.
   --
   -- @('.#') ≡ \\p -> p \`seq\` \\f -> 'lmap' f p@
+#if __GLASGOW_HASKELL__ >= 708
+  ( .# ) :: Coercible a b => p b c -> (a -> b) -> p a c
+#else
   ( .# ) :: p b c -> (a -> b) -> p a c
+#endif
   ( .# ) = \p -> p `seq` \f -> lmap f p
   {-# INLINE ( .# ) #-}
 
@@ -168,9 +182,14 @@ instance Profunctor (->) where
   {-# INLINE lmap #-}
   rmap = (.)
   {-# INLINE rmap #-}
+#if __GLASGOW_HASKELL__ >= 708
+  ( #. ) _ = coerce
+  ( .# ) pbc _ = coerceWith (sym Coercion) pbc
+#else
   ( #. ) _ = unsafeCoerce
-  {-# INLINE ( #. ) #-}
   ( .# ) pbc _ = unsafeCoerce pbc
+#endif
+  {-# INLINE ( #. ) #-}
   {-# INLINE ( .# ) #-}
 
 instance Profunctor Tagged where
@@ -180,7 +199,11 @@ instance Profunctor Tagged where
   {-# INLINE lmap #-}
   rmap = fmap
   {-# INLINE rmap #-}
+#if __GLASGOW_HASKELL__ >= 708
+  ( #. ) _ = coerce
+#else
   ( #. ) _ = unsafeCoerce
+#endif
   {-# INLINE ( #. ) #-}
   Tagged s .# _ = Tagged s
   {-# INLINE ( .# ) #-}
@@ -193,7 +216,11 @@ instance Monad m => Profunctor (Kleisli m) where
   rmap k (Kleisli f) = Kleisli (liftM k . f)
   {-# INLINE rmap #-}
   -- We cannot safely overload (#.) because we didn't provide the 'Monad'.
+#if __GLASGOW_HASKELL__ >= 708
+  ( .# ) pbc _ = coerceWith (sym Coercion) pbc
+#else
   ( .# ) pbc _ = unsafeCoerce pbc
+#endif
   {-# INLINE ( .# ) #-}
 
 instance Functor w => Profunctor (Cokleisli w) where
@@ -204,5 +231,9 @@ instance Functor w => Profunctor (Cokleisli w) where
   rmap k (Cokleisli f) = Cokleisli (k . f)
   {-# INLINE rmap #-}
   -- We cannot safely overload (.#) because we didn't provide the 'Functor'.
+#if __GLASGOW_HASKELL__ >= 708
+  ( #. ) _ = coerce
+#else
   ( #. ) _ = unsafeCoerce
+#endif
   {-# INLINE ( #. ) #-}
