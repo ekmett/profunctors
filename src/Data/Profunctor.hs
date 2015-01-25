@@ -1,6 +1,7 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 702
 {-# LANGUAGE Trustworthy #-}
 #endif
@@ -54,7 +55,12 @@ import Data.Traversable
 import Data.Tuple
 import Data.Profunctor.Unsafe
 import Prelude hiding (id,(.),sequence)
+
+#if __GLASGOW_HASKELL__ >= 708
+import Data.Coerce
+#else
 import Unsafe.Coerce
+#endif
 
 infixr 0 :->
 type p :-> q = forall a b. p a b -> q a b
@@ -74,7 +80,11 @@ instance Functor f => Profunctor (UpStar f) where
   rmap k (UpStar f) = UpStar (fmap k . f)
   {-# INLINE rmap #-}
   -- We cannot safely overload ( #. ) because we didn't write the 'Functor'.
+#if __GLASGOW_HASKELL__ >= 708
+  p .# _ = coerce p
+#else
   p .# _ = unsafeCoerce p
+#endif
   {-# INLINE ( .# ) #-}
 
 instance Functor f => Functor (UpStar f a) where
@@ -115,7 +125,11 @@ instance Functor f => Profunctor (DownStar f) where
   {-# INLINE lmap #-}
   rmap k (DownStar f) = DownStar (k . f)
   {-# INLINE rmap #-}
+#if __GLASGOW_HASKELL__ >= 708
+  ( #. ) _ = coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
+#else
   ( #. ) _ = unsafeCoerce
+#endif
   {-# INLINE ( #. ) #-}
   -- We cannot overload ( .# ) because we didn't write the 'Functor'.
 
