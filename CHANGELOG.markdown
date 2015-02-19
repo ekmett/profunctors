@@ -1,3 +1,7 @@
+4.4
+-----
+* Added `Coercible` constraint to (#.) and (.#) when building with GHC 7.8
+
 4.3.2
 -----
 * Added some missing instances for `UpStar` and `DownStar`.
