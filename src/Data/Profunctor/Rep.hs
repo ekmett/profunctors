@@ -10,7 +10,7 @@
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Profunctor.Rep
--- Copyright   :  (C) 2011-2012 Edward Kmett,
+-- Copyright   :  (C) 2011-2015 Edward Kmett,
 -- License     :  BSD-style (see the file LICENSE)
 --
 -- Maintainer  :  Edward Kmett <ekmett@gmail.com>
@@ -22,6 +22,7 @@ module Data.Profunctor.Rep
   (
   -- * Representable Profunctors
     Representable(..), tabulated
+  , firstRep, secondRep
   -- * Corepresentable Profunctors
   , Corepresentable(..), cotabulated
   ) where
@@ -38,10 +39,18 @@ import Data.Tagged
 
 -- | A 'Profunctor' @p@ is 'Representable' if there exists a 'Functor' @f@ such that
 -- @p d c@ is isomorphic to @d -> f c@.
-class (Functor (Rep p), Profunctor p) => Representable p where
+class (Functor (Rep p), Strong p) => Representable p where
   type Rep p :: * -> *
   tabulate :: (d -> Rep p c) -> p d c
   rep :: p d c -> d -> Rep p c
+
+-- | Default definition for 'first'' given that p is 'Representable'.
+firstRep :: Representable p => p a b -> p (a, c) (b, c)
+firstRep p = tabulate $ \(a,c) -> (\b -> (b, c)) <$> rep p a
+
+-- | Default definition for 'second'' given that p is 'Representable'.
+secondRep :: Representable p => p a b -> p (c, a) (c, b)
+secondRep p = tabulate $ \(c,a) -> (,) c <$> rep p a
 
 instance Representable (->) where
   type Rep (->) = Identity
