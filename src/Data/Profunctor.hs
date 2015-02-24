@@ -240,7 +240,7 @@ instance Traversable (Forget r a) where
 -- This describes profunctor strength with respect to the product structure
 -- of Hask.
 --
--- <http://takeichi.ipl-lab.org/~asada/papers/arrStrMnd.pdf>
+-- <http://www-kb.is.s.u-tokyo.ac.jp/~asada/papers/arrStrMnd.pdf>
 class Profunctor p => Strong p where
   first' :: p a b  -> p (a, c) (b, c)
   first' = dimap swap swap . second'
