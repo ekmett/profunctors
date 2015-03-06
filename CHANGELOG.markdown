@@ -1,6 +1,7 @@
 4.4
 -----
 * Added `Coercible` constraint to (#.) and (.#) when building with GHC 7.8
+* `Strong` is now a superclass of `Representable`
 
 4.3.2
 -----
