@@ -2,6 +2,7 @@
 -----
 * Added `Coercible` constraint to (#.) and (.#) when building with GHC 7.8
 * `Strong` is now a superclass of `Representable`
+* Updated the URL of the "Arrows are Strong Monads" paper. The old URL is now a dead link.
 
 4.3.2
 -----
