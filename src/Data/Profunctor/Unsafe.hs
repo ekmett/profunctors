@@ -1,5 +1,7 @@
 {-# LANGUAGE CPP #-}
-#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 702
+#if __GLASGOW_HASKELL__ >= 708
+{-# LANGUAGE Trustworthy #-}
+#elif __GLASGOW_HASKELL__ >= 702
 {-# LANGUAGE Unsafe #-}
 #endif
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -171,7 +173,7 @@ class Profunctor p where
   ( .# ) = \p -> p `seq` \f -> lmap f p
   {-# INLINE ( .# ) #-}
 
-#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 708
+#if __GLASGOW_HASKELL__ >= 708
   {-# MINIMAL dimap | (lmap, rmap) #-}
 #endif
 

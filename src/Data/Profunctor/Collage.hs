@@ -4,7 +4,7 @@
 {-# LANGUAGE GADTs #-}
 {-# OPTIONS_GHC -fno-warn-incomplete-patterns #-}
 {-# LANGUAGE CPP #-}
-#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 702
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 702 && __GLASGOW_HASKELL__ <= 708
 {-# LANGUAGE Trustworthy #-}
 #endif
 -----------------------------------------------------------------------------
