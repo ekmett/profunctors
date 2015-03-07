@@ -2,19 +2,19 @@
 
 # See also https://github.com/hvr/multi-ghc-travis for more information
 env:
- - GHCVER=7.0.4 CABALVER=1.16
  # we have to use CABALVER=1.16 for GHC<7.6 as well, as there's
  # no package for earlier cabal versions in the PPA
  - GHCVER=7.4.2 CABALVER=1.16
  - GHCVER=7.6.3 CABALVER=1.16
- - GHCVER=7.8.2 CABALVER=1.18
+ - GHCVER=7.8.4 CABALVER=1.18
+ - GHCVER=7.10.1 CABALVER=1.20
  # NOTE: we can't use Cabal 1.20 yet due to
  #  https://github.com/haskell/cabal/issues/1806
- - GHCVER=head  CABALVER=1.20
+ - GHCVER=head CABALVER=1.20
 
 matrix:
   allow_failures:
-   - env: GHCVER=head  CABALVER=1.20
+   - env: GHCVER=head CABALVER=1.20
 
 # Note: the distinction between `before_install` and `install` is not
 #       important.
