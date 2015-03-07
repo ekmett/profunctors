@@ -1,3 +1,8 @@
+4.4.1
+-------
+* Using `SafeHaskell`, GHC 7.8+ `Data.Profunctor.Unsafe` now infers as `Trustworthy` and
+  `Data.Profunctor.Rep` and `Data.Profunctor.Collage` infer as `Safe`.
+
 4.4
 -----
 * Added `Coercible` constraint to (#.) and (.#) when building with GHC 7.8
