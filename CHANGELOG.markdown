@@ -1,11 +1,7 @@
-4.4.2
------
-* Many more modules now infer as `Safe`.
-
 4.4.1
 -------
 * Using `SafeHaskell`, GHC 7.8+ `Data.Profunctor.Unsafe` now infers as `Trustworthy` and
-  `Data.Profunctor.Rep` and `Data.Profunctor.Collage` infer as `Safe`.
+  many more modules now infer as `Safe`.
 
 4.4
 -----
