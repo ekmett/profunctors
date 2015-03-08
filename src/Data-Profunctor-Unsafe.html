@@ -8,243 +8,245 @@
 </head>
 <body>
 <pre><a name="line-1"></a><span class='hs-comment'>{-# LANGUAGE CPP #-}</span>
-<a name="line-2"></a><span class='hs-cpp'>#if defined(__GLASGOW_HASKELL__) &amp;&amp; __GLASGOW_HASKELL__ &gt;= 702</span>
-<a name="line-3"></a><span class='hs-comment'>{-# LANGUAGE Unsafe #-}</span>
-<a name="line-4"></a><span class='hs-cpp'>#endif</span>
-<a name="line-5"></a><span class='hs-comment'>{-# LANGUAGE ScopedTypeVariables #-}</span>
-<a name="line-6"></a><span class='hs-comment'>-----------------------------------------------------------------------------</span>
-<a name="line-7"></a><span class='hs-comment'>-- |</span>
-<a name="line-8"></a><span class='hs-comment'>-- Copyright   :  (C) 2011-2013 Edward Kmett</span>
-<a name="line-9"></a><span class='hs-comment'>-- License     :  BSD-style (see the file LICENSE)</span>
-<a name="line-10"></a><span class='hs-comment'>--</span>
-<a name="line-11"></a><span class='hs-comment'>-- Maintainer  :  Edward Kmett &lt;ekmett@gmail.com&gt;</span>
-<a name="line-12"></a><span class='hs-comment'>-- Stability   :  provisional</span>
-<a name="line-13"></a><span class='hs-comment'>-- Portability :  portable</span>
-<a name="line-14"></a><span class='hs-comment'>--</span>
-<a name="line-15"></a><span class='hs-comment'>-- For a good explanation of profunctors in Haskell see Dan Piponi's article:</span>
+<a name="line-2"></a><span class='hs-cpp'>#if __GLASGOW_HASKELL__ &gt;= 708</span>
+<a name="line-3"></a><span class='hs-comment'>{-# LANGUAGE Trustworthy #-}</span>
+<a name="line-4"></a><span class='hs-cpp'>#elif __GLASGOW_HASKELL__ &gt;= 702</span>
+<a name="line-5"></a><span class='hs-comment'>{-# LANGUAGE Unsafe #-}</span>
+<a name="line-6"></a><span class='hs-cpp'>#endif</span>
+<a name="line-7"></a><span class='hs-comment'>{-# LANGUAGE ScopedTypeVariables #-}</span>
+<a name="line-8"></a><span class='hs-comment'>-----------------------------------------------------------------------------</span>
+<a name="line-9"></a><span class='hs-comment'>-- |</span>
+<a name="line-10"></a><span class='hs-comment'>-- Copyright   :  (C) 2011-2013 Edward Kmett</span>
+<a name="line-11"></a><span class='hs-comment'>-- License     :  BSD-style (see the file LICENSE)</span>
+<a name="line-12"></a><span class='hs-comment'>--</span>
+<a name="line-13"></a><span class='hs-comment'>-- Maintainer  :  Edward Kmett &lt;ekmett@gmail.com&gt;</span>
+<a name="line-14"></a><span class='hs-comment'>-- Stability   :  provisional</span>
+<a name="line-15"></a><span class='hs-comment'>-- Portability :  portable</span>
 <a name="line-16"></a><span class='hs-comment'>--</span>
-<a name="line-17"></a><span class='hs-comment'>-- &lt;<a href="http://blog.sigfpe.com/2011/07/profunctors-in-haskell.html">http://blog.sigfpe.com/2011/07/profunctors-in-haskell.html</a>&gt;</span>
+<a name="line-17"></a><span class='hs-comment'>-- For a good explanation of profunctors in Haskell see Dan Piponi's article:</span>
 <a name="line-18"></a><span class='hs-comment'>--</span>
-<a name="line-19"></a><span class='hs-comment'>-- This module includes /unsafe/ composition operators that are useful in</span>
-<a name="line-20"></a><span class='hs-comment'>-- practice when it comes to generating optimal core in GHC.</span>
-<a name="line-21"></a><span class='hs-comment'>--</span>
-<a name="line-22"></a><span class='hs-comment'>-- If you import this module you are taking upon yourself the obligation</span>
-<a name="line-23"></a><span class='hs-comment'>-- that you will only call the operators with @#@ in their names with functions</span>
-<a name="line-24"></a><span class='hs-comment'>-- that are operationally identity such as @newtype@ constructors or the field</span>
-<a name="line-25"></a><span class='hs-comment'>-- accessor of a @newtype@.</span>
-<a name="line-26"></a><span class='hs-comment'>--</span>
-<a name="line-27"></a><span class='hs-comment'>-- If you are ever in doubt, use 'rmap' or 'lmap'.</span>
-<a name="line-28"></a><span class='hs-comment'>----------------------------------------------------------------------------</span>
-<a name="line-29"></a><span class='hs-keyword'>module</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Profunctor</span><span class='hs-varop'>.</span><span class='hs-conid'>Unsafe</span>
-<a name="line-30"></a>  <span class='hs-layout'>(</span>
-<a name="line-31"></a>  <span class='hs-comment'>-- * Profunctors</span>
-<a name="line-32"></a>    <span class='hs-conid'>Profunctor</span><span class='hs-layout'>(</span><span class='hs-keyglyph'>..</span><span class='hs-layout'>)</span>
-<a name="line-33"></a>  <span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
-<a name="line-34"></a>
-<a name="line-35"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Arrow</span>
-<a name="line-36"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Category</span>
-<a name="line-37"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Comonad</span> <span class='hs-layout'>(</span><span class='hs-conid'>Cokleisli</span><span class='hs-layout'>(</span><span class='hs-keyglyph'>..</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
-<a name="line-38"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Monad</span> <span class='hs-layout'>(</span><span class='hs-varid'>liftM</span><span class='hs-layout'>)</span>
-<a name="line-39"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Tagged</span>
-<a name="line-40"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Prelude</span> <span class='hs-varid'>hiding</span> <span class='hs-layout'>(</span><span class='hs-varid'>id</span><span class='hs-layout'>,</span><span class='hs-layout'>(</span><span class='hs-varop'>.</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span><span class='hs-varid'>sequence</span><span class='hs-layout'>)</span>
-<a name="line-41"></a>
-<a name="line-42"></a><span class='hs-cpp'>#if __GLASGOW_HASKELL__ &gt;= 708</span>
-<a name="line-43"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Coerce</span>
-<a name="line-44"></a><span class='hs-cpp'>#else</span>
-<a name="line-45"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Unsafe</span><span class='hs-varop'>.</span><span class='hs-conid'>Coerce</span>
-<a name="line-46"></a><span class='hs-cpp'>#endif</span>
-<a name="line-47"></a>
-<a name="line-48"></a><span class='hs-comment'>{-# ANN module "Hlint: ignore Redundant lambda" #-}</span>
-<a name="line-49"></a><span class='hs-comment'>{-# ANN module "Hlint: ignore Collapse lambdas" #-}</span>
-<a name="line-50"></a>
-<a name="line-51"></a><span class='hs-keyword'>infixr</span> <span class='hs-num'>9</span> <span class='hs-cpp'>#.</span>
-<a name="line-52"></a><span class='hs-keyword'>infixl</span> <span class='hs-num'>8</span> <span class='hs-varop'>.#</span>
-<a name="line-53"></a>
-<a name="line-54"></a><span class='hs-comment'>----------------------------------------------------------------------------</span>
-<a name="line-55"></a><span class='hs-comment'>-- Profunctors</span>
+<a name="line-19"></a><span class='hs-comment'>-- &lt;<a href="http://blog.sigfpe.com/2011/07/profunctors-in-haskell.html">http://blog.sigfpe.com/2011/07/profunctors-in-haskell.html</a>&gt;</span>
+<a name="line-20"></a><span class='hs-comment'>--</span>
+<a name="line-21"></a><span class='hs-comment'>-- This module includes /unsafe/ composition operators that are useful in</span>
+<a name="line-22"></a><span class='hs-comment'>-- practice when it comes to generating optimal core in GHC.</span>
+<a name="line-23"></a><span class='hs-comment'>--</span>
+<a name="line-24"></a><span class='hs-comment'>-- If you import this module you are taking upon yourself the obligation</span>
+<a name="line-25"></a><span class='hs-comment'>-- that you will only call the operators with @#@ in their names with functions</span>
+<a name="line-26"></a><span class='hs-comment'>-- that are operationally identity such as @newtype@ constructors or the field</span>
+<a name="line-27"></a><span class='hs-comment'>-- accessor of a @newtype@.</span>
+<a name="line-28"></a><span class='hs-comment'>--</span>
+<a name="line-29"></a><span class='hs-comment'>-- If you are ever in doubt, use 'rmap' or 'lmap'.</span>
+<a name="line-30"></a><span class='hs-comment'>----------------------------------------------------------------------------</span>
+<a name="line-31"></a><span class='hs-keyword'>module</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Profunctor</span><span class='hs-varop'>.</span><span class='hs-conid'>Unsafe</span>
+<a name="line-32"></a>  <span class='hs-layout'>(</span>
+<a name="line-33"></a>  <span class='hs-comment'>-- * Profunctors</span>
+<a name="line-34"></a>    <span class='hs-conid'>Profunctor</span><span class='hs-layout'>(</span><span class='hs-keyglyph'>..</span><span class='hs-layout'>)</span>
+<a name="line-35"></a>  <span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
+<a name="line-36"></a>
+<a name="line-37"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Arrow</span>
+<a name="line-38"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Category</span>
+<a name="line-39"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Comonad</span> <span class='hs-layout'>(</span><span class='hs-conid'>Cokleisli</span><span class='hs-layout'>(</span><span class='hs-keyglyph'>..</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+<a name="line-40"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Monad</span> <span class='hs-layout'>(</span><span class='hs-varid'>liftM</span><span class='hs-layout'>)</span>
+<a name="line-41"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Tagged</span>
+<a name="line-42"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Prelude</span> <span class='hs-varid'>hiding</span> <span class='hs-layout'>(</span><span class='hs-varid'>id</span><span class='hs-layout'>,</span><span class='hs-layout'>(</span><span class='hs-varop'>.</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span><span class='hs-varid'>sequence</span><span class='hs-layout'>)</span>
+<a name="line-43"></a>
+<a name="line-44"></a><span class='hs-cpp'>#if __GLASGOW_HASKELL__ &gt;= 708</span>
+<a name="line-45"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Coerce</span>
+<a name="line-46"></a><span class='hs-cpp'>#else</span>
+<a name="line-47"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Unsafe</span><span class='hs-varop'>.</span><span class='hs-conid'>Coerce</span>
+<a name="line-48"></a><span class='hs-cpp'>#endif</span>
+<a name="line-49"></a>
+<a name="line-50"></a><span class='hs-comment'>{-# ANN module "Hlint: ignore Redundant lambda" #-}</span>
+<a name="line-51"></a><span class='hs-comment'>{-# ANN module "Hlint: ignore Collapse lambdas" #-}</span>
+<a name="line-52"></a>
+<a name="line-53"></a><span class='hs-keyword'>infixr</span> <span class='hs-num'>9</span> <span class='hs-cpp'>#.</span>
+<a name="line-54"></a><span class='hs-keyword'>infixl</span> <span class='hs-num'>8</span> <span class='hs-varop'>.#</span>
+<a name="line-55"></a>
 <a name="line-56"></a><span class='hs-comment'>----------------------------------------------------------------------------</span>
-<a name="line-57"></a>
-<a name="line-58"></a><a name="Profunctor"></a><span class='hs-comment'>-- | Formally, the class 'Profunctor' represents a profunctor</span>
-<a name="line-59"></a><a name="Profunctor"></a><span class='hs-comment'>-- from @Hask@ -&gt; @Hask@.</span>
-<a name="line-60"></a><a name="Profunctor"></a><span class='hs-comment'>--</span>
-<a name="line-61"></a><a name="Profunctor"></a><span class='hs-comment'>-- Intuitively it is a bifunctor where the first argument is contravariant</span>
-<a name="line-62"></a><a name="Profunctor"></a><span class='hs-comment'>-- and the second argument is covariant.</span>
-<a name="line-63"></a><a name="Profunctor"></a><span class='hs-comment'>--</span>
-<a name="line-64"></a><a name="Profunctor"></a><span class='hs-comment'>-- You can define a 'Profunctor' by either defining 'dimap' or by defining both</span>
-<a name="line-65"></a><a name="Profunctor"></a><span class='hs-comment'>-- 'lmap' and 'rmap'.</span>
-<a name="line-66"></a><a name="Profunctor"></a><span class='hs-comment'>--</span>
-<a name="line-67"></a><a name="Profunctor"></a><span class='hs-comment'>-- If you supply 'dimap', you should ensure that:</span>
+<a name="line-57"></a><span class='hs-comment'>-- Profunctors</span>
+<a name="line-58"></a><span class='hs-comment'>----------------------------------------------------------------------------</span>
+<a name="line-59"></a>
+<a name="line-60"></a><a name="Profunctor"></a><span class='hs-comment'>-- | Formally, the class 'Profunctor' represents a profunctor</span>
+<a name="line-61"></a><a name="Profunctor"></a><span class='hs-comment'>-- from @Hask@ -&gt; @Hask@.</span>
+<a name="line-62"></a><a name="Profunctor"></a><span class='hs-comment'>--</span>
+<a name="line-63"></a><a name="Profunctor"></a><span class='hs-comment'>-- Intuitively it is a bifunctor where the first argument is contravariant</span>
+<a name="line-64"></a><a name="Profunctor"></a><span class='hs-comment'>-- and the second argument is covariant.</span>
+<a name="line-65"></a><a name="Profunctor"></a><span class='hs-comment'>--</span>
+<a name="line-66"></a><a name="Profunctor"></a><span class='hs-comment'>-- You can define a 'Profunctor' by either defining 'dimap' or by defining both</span>
+<a name="line-67"></a><a name="Profunctor"></a><span class='hs-comment'>-- 'lmap' and 'rmap'.</span>
 <a name="line-68"></a><a name="Profunctor"></a><span class='hs-comment'>--</span>
-<a name="line-69"></a><a name="Profunctor"></a><span class='hs-comment'>-- @'dimap' 'id' 'id' ≡ 'id'@</span>
+<a name="line-69"></a><a name="Profunctor"></a><span class='hs-comment'>-- If you supply 'dimap', you should ensure that:</span>
 <a name="line-70"></a><a name="Profunctor"></a><span class='hs-comment'>--</span>
-<a name="line-71"></a><a name="Profunctor"></a><span class='hs-comment'>-- If you supply 'lmap' and 'rmap', ensure:</span>
+<a name="line-71"></a><a name="Profunctor"></a><span class='hs-comment'>-- @'dimap' 'id' 'id' ≡ 'id'@</span>
 <a name="line-72"></a><a name="Profunctor"></a><span class='hs-comment'>--</span>
-<a name="line-73"></a><a name="Profunctor"></a><span class='hs-comment'>-- @</span>
-<a name="line-74"></a><a name="Profunctor"></a><span class='hs-comment'>-- 'lmap' 'id' ≡ 'id'</span>
-<a name="line-75"></a><a name="Profunctor"></a><span class='hs-comment'>-- 'rmap' 'id' ≡ 'id'</span>
-<a name="line-76"></a><a name="Profunctor"></a><span class='hs-comment'>-- @</span>
-<a name="line-77"></a><a name="Profunctor"></a><span class='hs-comment'>--</span>
-<a name="line-78"></a><a name="Profunctor"></a><span class='hs-comment'>-- If you supply both, you should also ensure:</span>
+<a name="line-73"></a><a name="Profunctor"></a><span class='hs-comment'>-- If you supply 'lmap' and 'rmap', ensure:</span>
+<a name="line-74"></a><a name="Profunctor"></a><span class='hs-comment'>--</span>
+<a name="line-75"></a><a name="Profunctor"></a><span class='hs-comment'>-- @</span>
+<a name="line-76"></a><a name="Profunctor"></a><span class='hs-comment'>-- 'lmap' 'id' ≡ 'id'</span>
+<a name="line-77"></a><a name="Profunctor"></a><span class='hs-comment'>-- 'rmap' 'id' ≡ 'id'</span>
+<a name="line-78"></a><a name="Profunctor"></a><span class='hs-comment'>-- @</span>
 <a name="line-79"></a><a name="Profunctor"></a><span class='hs-comment'>--</span>
-<a name="line-80"></a><a name="Profunctor"></a><span class='hs-comment'>-- @'dimap' f g ≡ 'lmap' f '.' 'rmap' g@</span>
+<a name="line-80"></a><a name="Profunctor"></a><span class='hs-comment'>-- If you supply both, you should also ensure:</span>
 <a name="line-81"></a><a name="Profunctor"></a><span class='hs-comment'>--</span>
-<a name="line-82"></a><a name="Profunctor"></a><span class='hs-comment'>-- These ensure by parametricity:</span>
+<a name="line-82"></a><a name="Profunctor"></a><span class='hs-comment'>-- @'dimap' f g ≡ 'lmap' f '.' 'rmap' g@</span>
 <a name="line-83"></a><a name="Profunctor"></a><span class='hs-comment'>--</span>
-<a name="line-84"></a><a name="Profunctor"></a><span class='hs-comment'>-- @</span>
-<a name="line-85"></a><a name="Profunctor"></a><span class='hs-comment'>-- 'dimap' (f '.' g) (h '.' i) ≡ 'dimap' g h '.' 'dimap' f i</span>
-<a name="line-86"></a><a name="Profunctor"></a><span class='hs-comment'>-- 'lmap' (f '.' g) ≡ 'lmap' g '.' 'lmap' f</span>
-<a name="line-87"></a><a name="Profunctor"></a><span class='hs-comment'>-- 'rmap' (f '.' g) ≡ 'rmap' f '.' 'rmap' g</span>
-<a name="line-88"></a><a name="Profunctor"></a><span class='hs-comment'>-- @</span>
-<a name="line-89"></a><a name="Profunctor"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>Profunctor</span> <span class='hs-varid'>p</span> <span class='hs-keyword'>where</span>
-<a name="line-90"></a>  <span class='hs-comment'>-- | Map over both arguments at the same time.</span>
-<a name="line-91"></a>  <span class='hs-comment'>--</span>
-<a name="line-92"></a>  <span class='hs-comment'>-- @'dimap' f g ≡ 'lmap' f '.' 'rmap' g@</span>
-<a name="line-93"></a>  <span class='hs-varid'>dimap</span> <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-layout'>(</span><span class='hs-varid'>c</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>d</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varid'>b</span> <span class='hs-varid'>c</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varid'>a</span> <span class='hs-varid'>d</span>
-<a name="line-94"></a>  <span class='hs-varid'>dimap</span> <span class='hs-varid'>f</span> <span class='hs-varid'>g</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>lmap</span> <span class='hs-varid'>f</span> <span class='hs-varop'>.</span> <span class='hs-varid'>rmap</span> <span class='hs-varid'>g</span>
-<a name="line-95"></a>  <span class='hs-comment'>{-# INLINE dimap #-}</span>
-<a name="line-96"></a>
-<a name="line-97"></a>  <span class='hs-comment'>-- | Map the first argument contravariantly.</span>
-<a name="line-98"></a>  <span class='hs-comment'>--</span>
-<a name="line-99"></a>  <span class='hs-comment'>-- @'lmap' f ≡ 'dimap' f 'id'@</span>
-<a name="line-100"></a>  <span class='hs-varid'>lmap</span> <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varid'>b</span> <span class='hs-varid'>c</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varid'>a</span> <span class='hs-varid'>c</span>
-<a name="line-101"></a>  <span class='hs-varid'>lmap</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>dimap</span> <span class='hs-varid'>f</span> <span class='hs-varid'>id</span>
-<a name="line-102"></a>  <span class='hs-comment'>{-# INLINE lmap #-}</span>
-<a name="line-103"></a>
-<a name="line-104"></a>  <span class='hs-comment'>-- | Map the second argument covariantly.</span>
-<a name="line-105"></a>  <span class='hs-comment'>--</span>
-<a name="line-106"></a>  <span class='hs-comment'>-- @'rmap' ≡ 'dimap' 'id'@</span>
-<a name="line-107"></a>  <span class='hs-varid'>rmap</span> <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varid'>a</span> <span class='hs-varid'>c</span>
-<a name="line-108"></a>  <span class='hs-varid'>rmap</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>dimap</span> <span class='hs-varid'>id</span>
-<a name="line-109"></a>  <span class='hs-comment'>{-# INLINE rmap #-}</span>
-<a name="line-110"></a>
-<a name="line-111"></a>  <span class='hs-comment'>-- | Strictly map the second argument argument</span>
-<a name="line-112"></a>  <span class='hs-comment'>-- covariantly with a function that is assumed</span>
-<a name="line-113"></a>  <span class='hs-comment'>-- operationally to be a cast, such as a newtype</span>
-<a name="line-114"></a>  <span class='hs-comment'>-- constructor.</span>
-<a name="line-115"></a>  <span class='hs-comment'>--</span>
-<a name="line-116"></a>  <span class='hs-comment'>-- /Note:/ This operation is explicitly /unsafe/</span>
-<a name="line-117"></a>  <span class='hs-comment'>-- since an implementation may choose to use</span>
-<a name="line-118"></a>  <span class='hs-comment'>-- 'unsafeCoerce' to implement this combinator</span>
-<a name="line-119"></a>  <span class='hs-comment'>-- and it has no way to validate that your function</span>
-<a name="line-120"></a>  <span class='hs-comment'>-- meets the requirements.</span>
-<a name="line-121"></a>  <span class='hs-comment'>--</span>
-<a name="line-122"></a>  <span class='hs-comment'>-- If you implement this combinator with</span>
-<a name="line-123"></a>  <span class='hs-comment'>-- 'unsafeCoerce', then you are taking upon yourself</span>
-<a name="line-124"></a>  <span class='hs-comment'>-- the obligation that you don't use GADT-like</span>
-<a name="line-125"></a>  <span class='hs-comment'>-- tricks to distinguish values.</span>
-<a name="line-126"></a>  <span class='hs-comment'>--</span>
-<a name="line-127"></a>  <span class='hs-comment'>-- If you import "Data.Profunctor.Unsafe" you are</span>
-<a name="line-128"></a>  <span class='hs-comment'>-- taking upon yourself the obligation that you</span>
-<a name="line-129"></a>  <span class='hs-comment'>-- will only call this with a first argument that is</span>
-<a name="line-130"></a>  <span class='hs-comment'>-- operationally identity.</span>
-<a name="line-131"></a>  <span class='hs-comment'>--</span>
-<a name="line-132"></a>  <span class='hs-comment'>-- The semantics of this function with respect to bottoms</span>
-<a name="line-133"></a>  <span class='hs-comment'>-- should match the default definition:</span>
-<a name="line-134"></a>  <span class='hs-comment'>--</span>
-<a name="line-135"></a>  <span class='hs-comment'>-- @('Profuctor.Unsafe.#.') ≡ \\f -&gt; \\p -&gt; p \`seq\` 'rmap' f p@</span>
-<a name="line-136"></a><span class='hs-cpp'>#if __GLASGOW_HASKELL__ &gt;= 708</span>
-<a name="line-137"></a>  <span class='hs-layout'>(</span> <span class='hs-cpp'>#.</span> <span class='hs-layout'>)</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Coercible</span> <span class='hs-varid'>c</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-layout'>(</span><span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varid'>a</span> <span class='hs-varid'>c</span>
-<a name="line-138"></a><span class='hs-cpp'>#else</span>
-<a name="line-139"></a>  <span class='hs-layout'>(</span> <span class='hs-cpp'>#.</span> <span class='hs-layout'>)</span> <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varid'>a</span> <span class='hs-varid'>c</span>
-<a name="line-140"></a><span class='hs-cpp'>#endif</span>
-<a name="line-141"></a>  <span class='hs-layout'>(</span> <span class='hs-cpp'>#.</span> <span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyglyph'>\</span><span class='hs-varid'>f</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-keyglyph'>\</span><span class='hs-varid'>p</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varop'>`seq`</span> <span class='hs-varid'>rmap</span> <span class='hs-varid'>f</span> <span class='hs-varid'>p</span>
-<a name="line-142"></a>  <span class='hs-comment'>{-# INLINE ( #. ) #-}</span>
-<a name="line-143"></a>
-<a name="line-144"></a>  <span class='hs-comment'>-- | Strictly map the first argument argument</span>
-<a name="line-145"></a>  <span class='hs-comment'>-- contravariantly with a function that is assumed</span>
-<a name="line-146"></a>  <span class='hs-comment'>-- operationally to be a cast, such as a newtype</span>
-<a name="line-147"></a>  <span class='hs-comment'>-- constructor.</span>
-<a name="line-148"></a>  <span class='hs-comment'>--</span>
-<a name="line-149"></a>  <span class='hs-comment'>-- /Note:/ This operation is explicitly /unsafe/</span>
-<a name="line-150"></a>  <span class='hs-comment'>-- since an implementation may choose to use</span>
-<a name="line-151"></a>  <span class='hs-comment'>-- 'unsafeCoerce' to implement this combinator</span>
-<a name="line-152"></a>  <span class='hs-comment'>-- and it has no way to validate that your function</span>
-<a name="line-153"></a>  <span class='hs-comment'>-- meets the requirements.</span>
-<a name="line-154"></a>  <span class='hs-comment'>--</span>
-<a name="line-155"></a>  <span class='hs-comment'>-- If you implement this combinator with</span>
-<a name="line-156"></a>  <span class='hs-comment'>-- 'unsafeCoerce', then you are taking upon yourself</span>
-<a name="line-157"></a>  <span class='hs-comment'>-- the obligation that you don't use GADT-like</span>
-<a name="line-158"></a>  <span class='hs-comment'>-- tricks to distinguish values.</span>
-<a name="line-159"></a>  <span class='hs-comment'>--</span>
-<a name="line-160"></a>  <span class='hs-comment'>-- If you import "Data.Profunctor.Unsafe" you are</span>
-<a name="line-161"></a>  <span class='hs-comment'>-- taking upon yourself the obligation that you</span>
-<a name="line-162"></a>  <span class='hs-comment'>-- will only call this with a second argument that is</span>
-<a name="line-163"></a>  <span class='hs-comment'>-- operationally identity.</span>
-<a name="line-164"></a>  <span class='hs-comment'>--</span>
-<a name="line-165"></a>  <span class='hs-comment'>-- @('.#') ≡ \\p -&gt; p \`seq\` \\f -&gt; 'lmap' f p@</span>
-<a name="line-166"></a><span class='hs-cpp'>#if __GLASGOW_HASKELL__ &gt;= 708</span>
-<a name="line-167"></a>  <span class='hs-layout'>(</span> <span class='hs-varop'>.#</span> <span class='hs-layout'>)</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Coercible</span> <span class='hs-varid'>b</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varid'>b</span> <span class='hs-varid'>c</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-layout'>(</span><span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varid'>a</span> <span class='hs-varid'>c</span>
-<a name="line-168"></a><span class='hs-cpp'>#else</span>
-<a name="line-169"></a>  <span class='hs-layout'>(</span> <span class='hs-varop'>.#</span> <span class='hs-layout'>)</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>p</span> <span class='hs-varid'>b</span> <span class='hs-varid'>c</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-layout'>(</span><span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varid'>a</span> <span class='hs-varid'>c</span>
-<a name="line-170"></a><span class='hs-cpp'>#endif</span>
-<a name="line-171"></a>  <span class='hs-layout'>(</span> <span class='hs-varop'>.#</span> <span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyglyph'>\</span><span class='hs-varid'>p</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varop'>`seq`</span> <span class='hs-keyglyph'>\</span><span class='hs-varid'>f</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>lmap</span> <span class='hs-varid'>f</span> <span class='hs-varid'>p</span>
-<a name="line-172"></a>  <span class='hs-comment'>{-# INLINE ( .# ) #-}</span>
-<a name="line-173"></a>
-<a name="line-174"></a><span class='hs-cpp'>#if defined(__GLASGOW_HASKELL__) &amp;&amp; __GLASGOW_HASKELL__ &gt;= 708</span>
-<a name="line-175"></a>  <span class='hs-comment'>{-# MINIMAL dimap | (lmap, rmap) #-}</span>
-<a name="line-176"></a><span class='hs-cpp'>#endif</span>
-<a name="line-177"></a>
-<a name="line-178"></a><a name="instance%20Profunctor%20(-%3e)"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>Profunctor</span> <span class='hs-layout'>(</span><span class='hs-keyglyph'>-&gt;</span><span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
-<a name="line-179"></a>  <span class='hs-varid'>dimap</span> <span class='hs-varid'>ab</span> <span class='hs-varid'>cd</span> <span class='hs-varid'>bc</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>cd</span> <span class='hs-varop'>.</span> <span class='hs-varid'>bc</span> <span class='hs-varop'>.</span> <span class='hs-varid'>ab</span>
-<a name="line-180"></a>  <span class='hs-comment'>{-# INLINE dimap #-}</span>
-<a name="line-181"></a>  <span class='hs-varid'>lmap</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>flip</span> <span class='hs-layout'>(</span><span class='hs-varop'>.</span><span class='hs-layout'>)</span>
-<a name="line-182"></a>  <span class='hs-comment'>{-# INLINE lmap #-}</span>
-<a name="line-183"></a>  <span class='hs-varid'>rmap</span> <span class='hs-keyglyph'>=</span> <span class='hs-layout'>(</span><span class='hs-varop'>.</span><span class='hs-layout'>)</span>
-<a name="line-184"></a>  <span class='hs-comment'>{-# INLINE rmap #-}</span>
-<a name="line-185"></a><span class='hs-cpp'>#if __GLASGOW_HASKELL__ &gt;= 708</span>
-<a name="line-186"></a>  <span class='hs-layout'>(</span> <span class='hs-cpp'>#.</span> <span class='hs-layout'>)</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>coerce</span> <span class='hs-layout'>(</span><span class='hs-keyglyph'>\</span><span class='hs-varid'>x</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>::</span> <span class='hs-keyword'>forall</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span><span class='hs-varop'>.</span> <span class='hs-conid'>Coercible</span> <span class='hs-varid'>b</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span>
-<a name="line-187"></a>  <span class='hs-layout'>(</span> <span class='hs-varop'>.#</span> <span class='hs-layout'>)</span> <span class='hs-varid'>pbc</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>coerce</span> <span class='hs-varid'>pbc</span>
-<a name="line-188"></a><span class='hs-cpp'>#else</span>
-<a name="line-189"></a>  <span class='hs-layout'>(</span> <span class='hs-cpp'>#.</span> <span class='hs-layout'>)</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>unsafeCoerce</span>
-<a name="line-190"></a>  <span class='hs-layout'>(</span> <span class='hs-varop'>.#</span> <span class='hs-layout'>)</span> <span class='hs-varid'>pbc</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>unsafeCoerce</span> <span class='hs-varid'>pbc</span>
-<a name="line-191"></a><span class='hs-cpp'>#endif</span>
-<a name="line-192"></a>  <span class='hs-comment'>{-# INLINE ( #. ) #-}</span>
-<a name="line-193"></a>  <span class='hs-comment'>{-# INLINE ( .# ) #-}</span>
-<a name="line-194"></a>
-<a name="line-195"></a><a name="instance%20Profunctor%20Tagged"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>Profunctor</span> <span class='hs-conid'>Tagged</span> <span class='hs-keyword'>where</span>
-<a name="line-196"></a>  <span class='hs-varid'>dimap</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>f</span> <span class='hs-layout'>(</span><span class='hs-conid'>Tagged</span> <span class='hs-varid'>s</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Tagged</span> <span class='hs-layout'>(</span><span class='hs-varid'>f</span> <span class='hs-varid'>s</span><span class='hs-layout'>)</span>
-<a name="line-197"></a>  <span class='hs-comment'>{-# INLINE dimap #-}</span>
-<a name="line-198"></a>  <span class='hs-varid'>lmap</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>retag</span>
-<a name="line-199"></a>  <span class='hs-comment'>{-# INLINE lmap #-}</span>
-<a name="line-200"></a>  <span class='hs-varid'>rmap</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>fmap</span>
-<a name="line-201"></a>  <span class='hs-comment'>{-# INLINE rmap #-}</span>
-<a name="line-202"></a><span class='hs-cpp'>#if __GLASGOW_HASKELL__ &gt;= 708</span>
-<a name="line-203"></a>  <span class='hs-layout'>(</span> <span class='hs-cpp'>#.</span> <span class='hs-layout'>)</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>coerce</span> <span class='hs-layout'>(</span><span class='hs-keyglyph'>\</span><span class='hs-varid'>x</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>::</span> <span class='hs-keyword'>forall</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span><span class='hs-varop'>.</span> <span class='hs-conid'>Coercible</span> <span class='hs-varid'>b</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span>
-<a name="line-204"></a><span class='hs-cpp'>#else</span>
-<a name="line-205"></a>  <span class='hs-layout'>(</span> <span class='hs-cpp'>#.</span> <span class='hs-layout'>)</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>unsafeCoerce</span>
-<a name="line-206"></a><span class='hs-cpp'>#endif</span>
-<a name="line-207"></a>  <span class='hs-comment'>{-# INLINE ( #. ) #-}</span>
-<a name="line-208"></a>  <span class='hs-conid'>Tagged</span> <span class='hs-varid'>s</span> <span class='hs-varop'>.#</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Tagged</span> <span class='hs-varid'>s</span>
-<a name="line-209"></a>  <span class='hs-comment'>{-# INLINE ( .# ) #-}</span>
-<a name="line-210"></a>
-<a name="line-211"></a><a name="instance%20Profunctor%20(Kleisli%20m)"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>Monad</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>Profunctor</span> <span class='hs-layout'>(</span><span class='hs-conid'>Kleisli</span> <span class='hs-varid'>m</span><span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
-<a name="line-212"></a>  <span class='hs-varid'>dimap</span> <span class='hs-varid'>f</span> <span class='hs-varid'>g</span> <span class='hs-layout'>(</span><span class='hs-conid'>Kleisli</span> <span class='hs-varid'>h</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Kleisli</span> <span class='hs-layout'>(</span><span class='hs-varid'>liftM</span> <span class='hs-varid'>g</span> <span class='hs-varop'>.</span> <span class='hs-varid'>h</span> <span class='hs-varop'>.</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span>
-<a name="line-213"></a>  <span class='hs-comment'>{-# INLINE dimap #-}</span>
-<a name="line-214"></a>  <span class='hs-varid'>lmap</span> <span class='hs-varid'>k</span> <span class='hs-layout'>(</span><span class='hs-conid'>Kleisli</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Kleisli</span> <span class='hs-layout'>(</span><span class='hs-varid'>f</span> <span class='hs-varop'>.</span> <span class='hs-varid'>k</span><span class='hs-layout'>)</span>
-<a name="line-215"></a>  <span class='hs-comment'>{-# INLINE lmap #-}</span>
-<a name="line-216"></a>  <span class='hs-varid'>rmap</span> <span class='hs-varid'>k</span> <span class='hs-layout'>(</span><span class='hs-conid'>Kleisli</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Kleisli</span> <span class='hs-layout'>(</span><span class='hs-varid'>liftM</span> <span class='hs-varid'>k</span> <span class='hs-varop'>.</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span>
-<a name="line-217"></a>  <span class='hs-comment'>{-# INLINE rmap #-}</span>
-<a name="line-218"></a>  <span class='hs-comment'>-- We cannot safely overload (#.) because we didn't provide the 'Monad'.</span>
-<a name="line-219"></a><span class='hs-cpp'>#if __GLASGOW_HASKELL__ &gt;= 708</span>
-<a name="line-220"></a>  <span class='hs-layout'>(</span> <span class='hs-varop'>.#</span> <span class='hs-layout'>)</span> <span class='hs-varid'>pbc</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>coerce</span> <span class='hs-varid'>pbc</span>
-<a name="line-221"></a><span class='hs-cpp'>#else</span>
-<a name="line-222"></a>  <span class='hs-layout'>(</span> <span class='hs-varop'>.#</span> <span class='hs-layout'>)</span> <span class='hs-varid'>pbc</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>unsafeCoerce</span> <span class='hs-varid'>pbc</span>
-<a name="line-223"></a><span class='hs-cpp'>#endif</span>
-<a name="line-224"></a>  <span class='hs-comment'>{-# INLINE ( .# ) #-}</span>
-<a name="line-225"></a>
-<a name="line-226"></a><a name="instance%20Profunctor%20(Cokleisli%20w)"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>Functor</span> <span class='hs-varid'>w</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>Profunctor</span> <span class='hs-layout'>(</span><span class='hs-conid'>Cokleisli</span> <span class='hs-varid'>w</span><span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
-<a name="line-227"></a>  <span class='hs-varid'>dimap</span> <span class='hs-varid'>f</span> <span class='hs-varid'>g</span> <span class='hs-layout'>(</span><span class='hs-conid'>Cokleisli</span> <span class='hs-varid'>h</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Cokleisli</span> <span class='hs-layout'>(</span><span class='hs-varid'>g</span> <span class='hs-varop'>.</span> <span class='hs-varid'>h</span> <span class='hs-varop'>.</span> <span class='hs-varid'>fmap</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span>
-<a name="line-228"></a>  <span class='hs-comment'>{-# INLINE dimap #-}</span>
-<a name="line-229"></a>  <span class='hs-varid'>lmap</span> <span class='hs-varid'>k</span> <span class='hs-layout'>(</span><span class='hs-conid'>Cokleisli</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Cokleisli</span> <span class='hs-layout'>(</span><span class='hs-varid'>f</span> <span class='hs-varop'>.</span> <span class='hs-varid'>fmap</span> <span class='hs-varid'>k</span><span class='hs-layout'>)</span>
-<a name="line-230"></a>  <span class='hs-comment'>{-# INLINE lmap #-}</span>
-<a name="line-231"></a>  <span class='hs-varid'>rmap</span> <span class='hs-varid'>k</span> <span class='hs-layout'>(</span><span class='hs-conid'>Cokleisli</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Cokleisli</span> <span class='hs-layout'>(</span><span class='hs-varid'>k</span> <span class='hs-varop'>.</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span>
-<a name="line-232"></a>  <span class='hs-comment'>{-# INLINE rmap #-}</span>
-<a name="line-233"></a>  <span class='hs-comment'>-- We cannot safely overload (.#) because we didn't provide the 'Functor'.</span>
-<a name="line-234"></a><span class='hs-cpp'>#if __GLASGOW_HASKELL__ &gt;= 708</span>
-<a name="line-235"></a>  <span class='hs-layout'>(</span> <span class='hs-cpp'>#.</span> <span class='hs-layout'>)</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>coerce</span> <span class='hs-layout'>(</span><span class='hs-keyglyph'>\</span><span class='hs-varid'>x</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>::</span> <span class='hs-keyword'>forall</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span><span class='hs-varop'>.</span> <span class='hs-conid'>Coercible</span> <span class='hs-varid'>b</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span>
-<a name="line-236"></a><span class='hs-cpp'>#else</span>
-<a name="line-237"></a>  <span class='hs-layout'>(</span> <span class='hs-cpp'>#.</span> <span class='hs-layout'>)</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>unsafeCoerce</span>
-<a name="line-238"></a><span class='hs-cpp'>#endif</span>
-<a name="line-239"></a>  <span class='hs-comment'>{-# INLINE ( #. ) #-}</span>
+<a name="line-84"></a><a name="Profunctor"></a><span class='hs-comment'>-- These ensure by parametricity:</span>
+<a name="line-85"></a><a name="Profunctor"></a><span class='hs-comment'>--</span>
+<a name="line-86"></a><a name="Profunctor"></a><span class='hs-comment'>-- @</span>
+<a name="line-87"></a><a name="Profunctor"></a><span class='hs-comment'>-- 'dimap' (f '.' g) (h '.' i) ≡ 'dimap' g h '.' 'dimap' f i</span>
+<a name="line-88"></a><a name="Profunctor"></a><span class='hs-comment'>-- 'lmap' (f '.' g) ≡ 'lmap' g '.' 'lmap' f</span>
+<a name="line-89"></a><a name="Profunctor"></a><span class='hs-comment'>-- 'rmap' (f '.' g) ≡ 'rmap' f '.' 'rmap' g</span>
+<a name="line-90"></a><a name="Profunctor"></a><span class='hs-comment'>-- @</span>
+<a name="line-91"></a><a name="Profunctor"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>Profunctor</span> <span class='hs-varid'>p</span> <span class='hs-keyword'>where</span>
+<a name="line-92"></a>  <span class='hs-comment'>-- | Map over both arguments at the same time.</span>
+<a name="line-93"></a>  <span class='hs-comment'>--</span>
+<a name="line-94"></a>  <span class='hs-comment'>-- @'dimap' f g ≡ 'lmap' f '.' 'rmap' g@</span>
+<a name="line-95"></a>  <span class='hs-varid'>dimap</span> <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-layout'>(</span><span class='hs-varid'>c</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>d</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varid'>b</span> <span class='hs-varid'>c</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varid'>a</span> <span class='hs-varid'>d</span>
+<a name="line-96"></a>  <span class='hs-varid'>dimap</span> <span class='hs-varid'>f</span> <span class='hs-varid'>g</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>lmap</span> <span class='hs-varid'>f</span> <span class='hs-varop'>.</span> <span class='hs-varid'>rmap</span> <span class='hs-varid'>g</span>
+<a name="line-97"></a>  <span class='hs-comment'>{-# INLINE dimap #-}</span>
+<a name="line-98"></a>
+<a name="line-99"></a>  <span class='hs-comment'>-- | Map the first argument contravariantly.</span>
+<a name="line-100"></a>  <span class='hs-comment'>--</span>
+<a name="line-101"></a>  <span class='hs-comment'>-- @'lmap' f ≡ 'dimap' f 'id'@</span>
+<a name="line-102"></a>  <span class='hs-varid'>lmap</span> <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varid'>b</span> <span class='hs-varid'>c</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varid'>a</span> <span class='hs-varid'>c</span>
+<a name="line-103"></a>  <span class='hs-varid'>lmap</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>dimap</span> <span class='hs-varid'>f</span> <span class='hs-varid'>id</span>
+<a name="line-104"></a>  <span class='hs-comment'>{-# INLINE lmap #-}</span>
+<a name="line-105"></a>
+<a name="line-106"></a>  <span class='hs-comment'>-- | Map the second argument covariantly.</span>
+<a name="line-107"></a>  <span class='hs-comment'>--</span>
+<a name="line-108"></a>  <span class='hs-comment'>-- @'rmap' ≡ 'dimap' 'id'@</span>
+<a name="line-109"></a>  <span class='hs-varid'>rmap</span> <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varid'>a</span> <span class='hs-varid'>c</span>
+<a name="line-110"></a>  <span class='hs-varid'>rmap</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>dimap</span> <span class='hs-varid'>id</span>
+<a name="line-111"></a>  <span class='hs-comment'>{-# INLINE rmap #-}</span>
+<a name="line-112"></a>
+<a name="line-113"></a>  <span class='hs-comment'>-- | Strictly map the second argument argument</span>
+<a name="line-114"></a>  <span class='hs-comment'>-- covariantly with a function that is assumed</span>
+<a name="line-115"></a>  <span class='hs-comment'>-- operationally to be a cast, such as a newtype</span>
+<a name="line-116"></a>  <span class='hs-comment'>-- constructor.</span>
+<a name="line-117"></a>  <span class='hs-comment'>--</span>
+<a name="line-118"></a>  <span class='hs-comment'>-- /Note:/ This operation is explicitly /unsafe/</span>
+<a name="line-119"></a>  <span class='hs-comment'>-- since an implementation may choose to use</span>
+<a name="line-120"></a>  <span class='hs-comment'>-- 'unsafeCoerce' to implement this combinator</span>
+<a name="line-121"></a>  <span class='hs-comment'>-- and it has no way to validate that your function</span>
+<a name="line-122"></a>  <span class='hs-comment'>-- meets the requirements.</span>
+<a name="line-123"></a>  <span class='hs-comment'>--</span>
+<a name="line-124"></a>  <span class='hs-comment'>-- If you implement this combinator with</span>
+<a name="line-125"></a>  <span class='hs-comment'>-- 'unsafeCoerce', then you are taking upon yourself</span>
+<a name="line-126"></a>  <span class='hs-comment'>-- the obligation that you don't use GADT-like</span>
+<a name="line-127"></a>  <span class='hs-comment'>-- tricks to distinguish values.</span>
+<a name="line-128"></a>  <span class='hs-comment'>--</span>
+<a name="line-129"></a>  <span class='hs-comment'>-- If you import "Data.Profunctor.Unsafe" you are</span>
+<a name="line-130"></a>  <span class='hs-comment'>-- taking upon yourself the obligation that you</span>
+<a name="line-131"></a>  <span class='hs-comment'>-- will only call this with a first argument that is</span>
+<a name="line-132"></a>  <span class='hs-comment'>-- operationally identity.</span>
+<a name="line-133"></a>  <span class='hs-comment'>--</span>
+<a name="line-134"></a>  <span class='hs-comment'>-- The semantics of this function with respect to bottoms</span>
+<a name="line-135"></a>  <span class='hs-comment'>-- should match the default definition:</span>
+<a name="line-136"></a>  <span class='hs-comment'>--</span>
+<a name="line-137"></a>  <span class='hs-comment'>-- @('Profuctor.Unsafe.#.') ≡ \\f -&gt; \\p -&gt; p \`seq\` 'rmap' f p@</span>
+<a name="line-138"></a><span class='hs-cpp'>#if __GLASGOW_HASKELL__ &gt;= 708</span>
+<a name="line-139"></a>  <span class='hs-layout'>(</span> <span class='hs-cpp'>#.</span> <span class='hs-layout'>)</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Coercible</span> <span class='hs-varid'>c</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-layout'>(</span><span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varid'>a</span> <span class='hs-varid'>c</span>
+<a name="line-140"></a><span class='hs-cpp'>#else</span>
+<a name="line-141"></a>  <span class='hs-layout'>(</span> <span class='hs-cpp'>#.</span> <span class='hs-layout'>)</span> <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varid'>a</span> <span class='hs-varid'>c</span>
+<a name="line-142"></a><span class='hs-cpp'>#endif</span>
+<a name="line-143"></a>  <span class='hs-layout'>(</span> <span class='hs-cpp'>#.</span> <span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyglyph'>\</span><span class='hs-varid'>f</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-keyglyph'>\</span><span class='hs-varid'>p</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varop'>`seq`</span> <span class='hs-varid'>rmap</span> <span class='hs-varid'>f</span> <span class='hs-varid'>p</span>
+<a name="line-144"></a>  <span class='hs-comment'>{-# INLINE ( #. ) #-}</span>
+<a name="line-145"></a>
+<a name="line-146"></a>  <span class='hs-comment'>-- | Strictly map the first argument argument</span>
+<a name="line-147"></a>  <span class='hs-comment'>-- contravariantly with a function that is assumed</span>
+<a name="line-148"></a>  <span class='hs-comment'>-- operationally to be a cast, such as a newtype</span>
+<a name="line-149"></a>  <span class='hs-comment'>-- constructor.</span>
+<a name="line-150"></a>  <span class='hs-comment'>--</span>
+<a name="line-151"></a>  <span class='hs-comment'>-- /Note:/ This operation is explicitly /unsafe/</span>
+<a name="line-152"></a>  <span class='hs-comment'>-- since an implementation may choose to use</span>
+<a name="line-153"></a>  <span class='hs-comment'>-- 'unsafeCoerce' to implement this combinator</span>
+<a name="line-154"></a>  <span class='hs-comment'>-- and it has no way to validate that your function</span>
+<a name="line-155"></a>  <span class='hs-comment'>-- meets the requirements.</span>
+<a name="line-156"></a>  <span class='hs-comment'>--</span>
+<a name="line-157"></a>  <span class='hs-comment'>-- If you implement this combinator with</span>
+<a name="line-158"></a>  <span class='hs-comment'>-- 'unsafeCoerce', then you are taking upon yourself</span>
+<a name="line-159"></a>  <span class='hs-comment'>-- the obligation that you don't use GADT-like</span>
+<a name="line-160"></a>  <span class='hs-comment'>-- tricks to distinguish values.</span>
+<a name="line-161"></a>  <span class='hs-comment'>--</span>
+<a name="line-162"></a>  <span class='hs-comment'>-- If you import "Data.Profunctor.Unsafe" you are</span>
+<a name="line-163"></a>  <span class='hs-comment'>-- taking upon yourself the obligation that you</span>
+<a name="line-164"></a>  <span class='hs-comment'>-- will only call this with a second argument that is</span>
+<a name="line-165"></a>  <span class='hs-comment'>-- operationally identity.</span>
+<a name="line-166"></a>  <span class='hs-comment'>--</span>
+<a name="line-167"></a>  <span class='hs-comment'>-- @('.#') ≡ \\p -&gt; p \`seq\` \\f -&gt; 'lmap' f p@</span>
+<a name="line-168"></a><span class='hs-cpp'>#if __GLASGOW_HASKELL__ &gt;= 708</span>
+<a name="line-169"></a>  <span class='hs-layout'>(</span> <span class='hs-varop'>.#</span> <span class='hs-layout'>)</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Coercible</span> <span class='hs-varid'>b</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varid'>b</span> <span class='hs-varid'>c</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-layout'>(</span><span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varid'>a</span> <span class='hs-varid'>c</span>
+<a name="line-170"></a><span class='hs-cpp'>#else</span>
+<a name="line-171"></a>  <span class='hs-layout'>(</span> <span class='hs-varop'>.#</span> <span class='hs-layout'>)</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>p</span> <span class='hs-varid'>b</span> <span class='hs-varid'>c</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-layout'>(</span><span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varid'>a</span> <span class='hs-varid'>c</span>
+<a name="line-172"></a><span class='hs-cpp'>#endif</span>
+<a name="line-173"></a>  <span class='hs-layout'>(</span> <span class='hs-varop'>.#</span> <span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyglyph'>\</span><span class='hs-varid'>p</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>p</span> <span class='hs-varop'>`seq`</span> <span class='hs-keyglyph'>\</span><span class='hs-varid'>f</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>lmap</span> <span class='hs-varid'>f</span> <span class='hs-varid'>p</span>
+<a name="line-174"></a>  <span class='hs-comment'>{-# INLINE ( .# ) #-}</span>
+<a name="line-175"></a>
+<a name="line-176"></a><span class='hs-cpp'>#if __GLASGOW_HASKELL__ &gt;= 708</span>
+<a name="line-177"></a>  <span class='hs-comment'>{-# MINIMAL dimap | (lmap, rmap) #-}</span>
+<a name="line-178"></a><span class='hs-cpp'>#endif</span>
+<a name="line-179"></a>
+<a name="line-180"></a><a name="instance%20Profunctor%20(-%3e)"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>Profunctor</span> <span class='hs-layout'>(</span><span class='hs-keyglyph'>-&gt;</span><span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
+<a name="line-181"></a>  <span class='hs-varid'>dimap</span> <span class='hs-varid'>ab</span> <span class='hs-varid'>cd</span> <span class='hs-varid'>bc</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>cd</span> <span class='hs-varop'>.</span> <span class='hs-varid'>bc</span> <span class='hs-varop'>.</span> <span class='hs-varid'>ab</span>
+<a name="line-182"></a>  <span class='hs-comment'>{-# INLINE dimap #-}</span>
+<a name="line-183"></a>  <span class='hs-varid'>lmap</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>flip</span> <span class='hs-layout'>(</span><span class='hs-varop'>.</span><span class='hs-layout'>)</span>
+<a name="line-184"></a>  <span class='hs-comment'>{-# INLINE lmap #-}</span>
+<a name="line-185"></a>  <span class='hs-varid'>rmap</span> <span class='hs-keyglyph'>=</span> <span class='hs-layout'>(</span><span class='hs-varop'>.</span><span class='hs-layout'>)</span>
+<a name="line-186"></a>  <span class='hs-comment'>{-# INLINE rmap #-}</span>
+<a name="line-187"></a><span class='hs-cpp'>#if __GLASGOW_HASKELL__ &gt;= 708</span>
+<a name="line-188"></a>  <span class='hs-layout'>(</span> <span class='hs-cpp'>#.</span> <span class='hs-layout'>)</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>coerce</span> <span class='hs-layout'>(</span><span class='hs-keyglyph'>\</span><span class='hs-varid'>x</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>::</span> <span class='hs-keyword'>forall</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span><span class='hs-varop'>.</span> <span class='hs-conid'>Coercible</span> <span class='hs-varid'>b</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span>
+<a name="line-189"></a>  <span class='hs-layout'>(</span> <span class='hs-varop'>.#</span> <span class='hs-layout'>)</span> <span class='hs-varid'>pbc</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>coerce</span> <span class='hs-varid'>pbc</span>
+<a name="line-190"></a><span class='hs-cpp'>#else</span>
+<a name="line-191"></a>  <span class='hs-layout'>(</span> <span class='hs-cpp'>#.</span> <span class='hs-layout'>)</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>unsafeCoerce</span>
+<a name="line-192"></a>  <span class='hs-layout'>(</span> <span class='hs-varop'>.#</span> <span class='hs-layout'>)</span> <span class='hs-varid'>pbc</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>unsafeCoerce</span> <span class='hs-varid'>pbc</span>
+<a name="line-193"></a><span class='hs-cpp'>#endif</span>
+<a name="line-194"></a>  <span class='hs-comment'>{-# INLINE ( #. ) #-}</span>
+<a name="line-195"></a>  <span class='hs-comment'>{-# INLINE ( .# ) #-}</span>
+<a name="line-196"></a>
+<a name="line-197"></a><a name="instance%20Profunctor%20Tagged"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>Profunctor</span> <span class='hs-conid'>Tagged</span> <span class='hs-keyword'>where</span>
+<a name="line-198"></a>  <span class='hs-varid'>dimap</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>f</span> <span class='hs-layout'>(</span><span class='hs-conid'>Tagged</span> <span class='hs-varid'>s</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Tagged</span> <span class='hs-layout'>(</span><span class='hs-varid'>f</span> <span class='hs-varid'>s</span><span class='hs-layout'>)</span>
+<a name="line-199"></a>  <span class='hs-comment'>{-# INLINE dimap #-}</span>
+<a name="line-200"></a>  <span class='hs-varid'>lmap</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>retag</span>
+<a name="line-201"></a>  <span class='hs-comment'>{-# INLINE lmap #-}</span>
+<a name="line-202"></a>  <span class='hs-varid'>rmap</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>fmap</span>
+<a name="line-203"></a>  <span class='hs-comment'>{-# INLINE rmap #-}</span>
+<a name="line-204"></a><span class='hs-cpp'>#if __GLASGOW_HASKELL__ &gt;= 708</span>
+<a name="line-205"></a>  <span class='hs-layout'>(</span> <span class='hs-cpp'>#.</span> <span class='hs-layout'>)</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>coerce</span> <span class='hs-layout'>(</span><span class='hs-keyglyph'>\</span><span class='hs-varid'>x</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>::</span> <span class='hs-keyword'>forall</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span><span class='hs-varop'>.</span> <span class='hs-conid'>Coercible</span> <span class='hs-varid'>b</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span>
+<a name="line-206"></a><span class='hs-cpp'>#else</span>
+<a name="line-207"></a>  <span class='hs-layout'>(</span> <span class='hs-cpp'>#.</span> <span class='hs-layout'>)</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>unsafeCoerce</span>
+<a name="line-208"></a><span class='hs-cpp'>#endif</span>
+<a name="line-209"></a>  <span class='hs-comment'>{-# INLINE ( #. ) #-}</span>
+<a name="line-210"></a>  <span class='hs-conid'>Tagged</span> <span class='hs-varid'>s</span> <span class='hs-varop'>.#</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Tagged</span> <span class='hs-varid'>s</span>
+<a name="line-211"></a>  <span class='hs-comment'>{-# INLINE ( .# ) #-}</span>
+<a name="line-212"></a>
+<a name="line-213"></a><a name="instance%20Profunctor%20(Kleisli%20m)"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>Monad</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>Profunctor</span> <span class='hs-layout'>(</span><span class='hs-conid'>Kleisli</span> <span class='hs-varid'>m</span><span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
+<a name="line-214"></a>  <span class='hs-varid'>dimap</span> <span class='hs-varid'>f</span> <span class='hs-varid'>g</span> <span class='hs-layout'>(</span><span class='hs-conid'>Kleisli</span> <span class='hs-varid'>h</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Kleisli</span> <span class='hs-layout'>(</span><span class='hs-varid'>liftM</span> <span class='hs-varid'>g</span> <span class='hs-varop'>.</span> <span class='hs-varid'>h</span> <span class='hs-varop'>.</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span>
+<a name="line-215"></a>  <span class='hs-comment'>{-# INLINE dimap #-}</span>
+<a name="line-216"></a>  <span class='hs-varid'>lmap</span> <span class='hs-varid'>k</span> <span class='hs-layout'>(</span><span class='hs-conid'>Kleisli</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Kleisli</span> <span class='hs-layout'>(</span><span class='hs-varid'>f</span> <span class='hs-varop'>.</span> <span class='hs-varid'>k</span><span class='hs-layout'>)</span>
+<a name="line-217"></a>  <span class='hs-comment'>{-# INLINE lmap #-}</span>
+<a name="line-218"></a>  <span class='hs-varid'>rmap</span> <span class='hs-varid'>k</span> <span class='hs-layout'>(</span><span class='hs-conid'>Kleisli</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Kleisli</span> <span class='hs-layout'>(</span><span class='hs-varid'>liftM</span> <span class='hs-varid'>k</span> <span class='hs-varop'>.</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span>
+<a name="line-219"></a>  <span class='hs-comment'>{-# INLINE rmap #-}</span>
+<a name="line-220"></a>  <span class='hs-comment'>-- We cannot safely overload (#.) because we didn't provide the 'Monad'.</span>
+<a name="line-221"></a><span class='hs-cpp'>#if __GLASGOW_HASKELL__ &gt;= 708</span>
+<a name="line-222"></a>  <span class='hs-layout'>(</span> <span class='hs-varop'>.#</span> <span class='hs-layout'>)</span> <span class='hs-varid'>pbc</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>coerce</span> <span class='hs-varid'>pbc</span>
+<a name="line-223"></a><span class='hs-cpp'>#else</span>
+<a name="line-224"></a>  <span class='hs-layout'>(</span> <span class='hs-varop'>.#</span> <span class='hs-layout'>)</span> <span class='hs-varid'>pbc</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>unsafeCoerce</span> <span class='hs-varid'>pbc</span>
+<a name="line-225"></a><span class='hs-cpp'>#endif</span>
+<a name="line-226"></a>  <span class='hs-comment'>{-# INLINE ( .# ) #-}</span>
+<a name="line-227"></a>
+<a name="line-228"></a><a name="instance%20Profunctor%20(Cokleisli%20w)"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>Functor</span> <span class='hs-varid'>w</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>Profunctor</span> <span class='hs-layout'>(</span><span class='hs-conid'>Cokleisli</span> <span class='hs-varid'>w</span><span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
+<a name="line-229"></a>  <span class='hs-varid'>dimap</span> <span class='hs-varid'>f</span> <span class='hs-varid'>g</span> <span class='hs-layout'>(</span><span class='hs-conid'>Cokleisli</span> <span class='hs-varid'>h</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Cokleisli</span> <span class='hs-layout'>(</span><span class='hs-varid'>g</span> <span class='hs-varop'>.</span> <span class='hs-varid'>h</span> <span class='hs-varop'>.</span> <span class='hs-varid'>fmap</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span>
+<a name="line-230"></a>  <span class='hs-comment'>{-# INLINE dimap #-}</span>
+<a name="line-231"></a>  <span class='hs-varid'>lmap</span> <span class='hs-varid'>k</span> <span class='hs-layout'>(</span><span class='hs-conid'>Cokleisli</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Cokleisli</span> <span class='hs-layout'>(</span><span class='hs-varid'>f</span> <span class='hs-varop'>.</span> <span class='hs-varid'>fmap</span> <span class='hs-varid'>k</span><span class='hs-layout'>)</span>
+<a name="line-232"></a>  <span class='hs-comment'>{-# INLINE lmap #-}</span>
+<a name="line-233"></a>  <span class='hs-varid'>rmap</span> <span class='hs-varid'>k</span> <span class='hs-layout'>(</span><span class='hs-conid'>Cokleisli</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Cokleisli</span> <span class='hs-layout'>(</span><span class='hs-varid'>k</span> <span class='hs-varop'>.</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span>
+<a name="line-234"></a>  <span class='hs-comment'>{-# INLINE rmap #-}</span>
+<a name="line-235"></a>  <span class='hs-comment'>-- We cannot safely overload (.#) because we didn't provide the 'Functor'.</span>
+<a name="line-236"></a><span class='hs-cpp'>#if __GLASGOW_HASKELL__ &gt;= 708</span>
+<a name="line-237"></a>  <span class='hs-layout'>(</span> <span class='hs-cpp'>#.</span> <span class='hs-layout'>)</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>coerce</span> <span class='hs-layout'>(</span><span class='hs-keyglyph'>\</span><span class='hs-varid'>x</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>::</span> <span class='hs-keyword'>forall</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span><span class='hs-varop'>.</span> <span class='hs-conid'>Coercible</span> <span class='hs-varid'>b</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span>
+<a name="line-238"></a><span class='hs-cpp'>#else</span>
+<a name="line-239"></a>  <span class='hs-layout'>(</span> <span class='hs-cpp'>#.</span> <span class='hs-layout'>)</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>unsafeCoerce</span>
+<a name="line-240"></a><span class='hs-cpp'>#endif</span>
+<a name="line-241"></a>  <span class='hs-comment'>{-# INLINE ( #. ) #-}</span>
 </pre></body>
 </html>
