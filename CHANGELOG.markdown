@@ -2,6 +2,7 @@
 -------
 * Using `SafeHaskell`, GHC 7.8+ `Data.Profunctor.Unsafe` now infers as `Trustworthy` and
   many more modules now infer as `Safe`.
+* We now build warning-free on GHC 7.10.0.20150307
 
 4.4
 -----
