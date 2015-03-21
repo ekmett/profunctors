@@ -4,6 +4,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE UndecidableInstances #-}
 #if __GLASGOW_HASKELL__ >= 702 && __GLASGOW_HASKELL__ <= 708
 {-# LANGUAGE Trustworthy #-}
 #endif
@@ -89,21 +90,25 @@ instance Profunctor p => Functor (Procompose p q a) where
   fmap k (Procompose f g) = Procompose (rmap k f) g
   {-# INLINE fmap #-}
 
+instance (Sieve p f, Sieve q g) => Sieve (Procompose p q) (Compose g f) where
+  sieve (Procompose g f) d = Compose $ sieve g <$> sieve f d
+  {-# INLINE sieve #-}
+
 -- | The composition of two 'Representable' 'Profunctor's is 'Representable' by
 -- the composition of their representations.
 instance (Representable p, Representable q) => Representable (Procompose p q) where
   type Rep (Procompose p q) = Compose (Rep q) (Rep p)
   tabulate f = Procompose (tabulate id) (tabulate (getCompose . f))
   {-# INLINE tabulate #-}
-  rep (Procompose g f) d = Compose $ rep g <$> rep f d
-  {-# INLINE rep #-}
+
+instance (Cosieve p f, Cosieve q g) => Cosieve (Procompose p q) (Compose f g) where
+  cosieve (Procompose g f) (Compose d) = cosieve g $ cosieve f <$> d
+  {-# INLINE cosieve #-}
 
 instance (Corepresentable p, Corepresentable q) => Corepresentable (Procompose p q) where
   type Corep (Procompose p q) = Compose (Corep p) (Corep q)
   cotabulate f = Procompose (cotabulate (f . Compose)) (cotabulate id)
   {-# INLINE cotabulate #-}
-  corep (Procompose g f) (Compose d) = corep g $ corep f <$> d
-  {-# INLINE corep #-}
 
 instance (Strong p, Strong q) => Strong (Procompose p q) where
   first' (Procompose x y) = Procompose (first' x) (first' y)
