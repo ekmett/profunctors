@@ -30,7 +30,11 @@ import Data.Profunctor
 import Data.Proxy
 import Data.Tagged
 
--- | A 'Profunctor' @p@ is a 'Sieve' on 'f' if it is a subprofunctor of 'Star f'.
+-- | A 'Profunctor' @p@ is a 'Sieve' __on__ @f@ if it is a subprofunctor of @'Star' f@.
+--
+-- That is to say it is a subset of @Hom(-,f=)@ closed under 'lmap' and 'rmap'.
+--
+-- Alternately, you can view it as a sieve __in__ the comma category @Hask/f@.
 class (Profunctor p, Functor f) => Sieve p f | p -> f where
   sieve :: p a b -> a -> f b
 
@@ -50,6 +54,11 @@ instance Sieve (Forget r) (Const r) where
   sieve = (Const .) . runForget
   {-# INLINE sieve #-}
 
+-- | A 'Profunctor' @p@ is a 'Sieve' __on__ @f@ if it is a subprofunctor of @'Costar' f@.
+--
+-- That is to say it is a subset of @Hom(f-,=)@ closed under 'lmap' and 'rmap'.
+--
+-- Alternately, you can view it as a cosieve __in__ the comma category @f/Hask@.
 class (Profunctor p, Functor f) => Cosieve p f | p -> f where
   cosieve :: p a b -> f a -> b
 
