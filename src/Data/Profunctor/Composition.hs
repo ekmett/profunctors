@@ -46,6 +46,7 @@ import Data.Profunctor.Adjunction
 import Data.Profunctor.Closed
 import Data.Profunctor.Monad
 import Data.Profunctor.Rep
+import Data.Profunctor.Sieve
 import Data.Profunctor.Unsafe
 import Prelude hiding ((.),id)
 

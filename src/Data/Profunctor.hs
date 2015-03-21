@@ -235,7 +235,7 @@ instance Traversable (Forget r a) where
 
 -- | Generalizing 'Star' of a strong 'Functor'
 --
--- /Note:/ Every 'Functor' in Haskell is strong with respect to (,).
+-- /Note:/ Every 'Functor' in Haskell is strong with respect to @(,)@.
 --
 -- This describes profunctor strength with respect to the product structure
 -- of Hask.
@@ -274,7 +274,7 @@ instance Functor m => Strong (Star m) where
   second' (Star f) = Star $ \ ~(c, a) -> (,) c <$> f a
   {-# INLINE second' #-}
 
--- | Every Arrow is a Strong Monad in Prof
+-- | 'Arrow' is 'Strong' 'Category'
 instance Arrow p => Strong (WrappedArrow p) where
   first' (WrapArrow k) = WrapArrow (first k)
   {-# INLINE first' #-}
@@ -363,8 +363,6 @@ instance Monoid r => Choice (Forget r) where
 --------------------------------------------------------------------------------
 
 -- | Analogous to 'ArrowLoop', 'loop' = 'unfirst'
--- 
--- unfirst . unfirst = 
 class Profunctor p => Costrong p where
   unfirst  :: p (a, d) (b, d) -> p a b
   unfirst = unsecond . dimap swap swap

@@ -3,8 +3,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE CPP #-}
 #if __GLASGOW_HASKELL__ >= 702 && __GLASGOW_HASKELL__ <= 708
 {-# LANGUAGE Trustworthy #-}
@@ -23,12 +21,10 @@
 module Data.Profunctor.Rep
   (
   -- * Representable Profunctors
-    Sieve(..)
-  , Representable(..)
+    Representable(..)
   , tabulated
   , firstRep, secondRep
   -- * Corepresentable Profunctors
-  , Cosieve(..)
   , Corepresentable(..)
   , cotabulated
   ) where
@@ -38,28 +34,9 @@ import Control.Arrow
 import Control.Comonad
 import Data.Functor.Identity
 import Data.Profunctor
+import Data.Profunctor.Sieve
 import Data.Proxy
 import Data.Tagged
-
--- | A 'Profunctor' @p@ is a 'Sieve' on 'f' if it is a subprofunctor of 'Star f'.
-class (Profunctor p, Functor f) => Sieve p f | p -> f where
-  sieve :: p a b -> a -> f b
-
-instance Sieve (->) Identity where
-  sieve f = Identity . f
-  {-# INLINE sieve #-}
-
-instance (Monad m, Functor m) => Sieve (Kleisli m) m where
-  sieve = runKleisli
-  {-# INLINE sieve #-}
-
-instance Functor f => Sieve (Star f) f where
-  sieve = runStar
-  {-# INLINE sieve #-}
-
-instance Sieve (Forget r) (Const r) where
-  sieve = (Const .) . runForget
-  {-# INLINE sieve #-}
 
 -- * Representable Profunctors
 
@@ -107,25 +84,6 @@ type Iso s t a b = forall p f. (Profunctor p, Functor f) => p a (f b) -> p s (f 
 tabulated :: (Representable p, Representable q) => Iso (d -> Rep p c) (d' -> Rep q c') (p d c) (q d' c')
 tabulated = dimap tabulate (fmap sieve)
 {-# INLINE tabulated #-}
-
-class (Profunctor p, Functor f) => Cosieve p f | p -> f where
-  cosieve :: p a b -> f a -> b
-
-instance Cosieve (->) Identity where
-  cosieve f (Identity d) = f d
-  {-# INLINE cosieve #-}
-
-instance Functor w => Cosieve (Cokleisli w) w where
-  cosieve = runCokleisli
-  {-# INLINE cosieve #-}
-
-instance Cosieve Tagged Proxy where
-  cosieve (Tagged a) _ = a
-  {-# INLINE cosieve #-}
-
-instance Functor f => Cosieve (Costar f) f where
-  cosieve = runCostar
-  {-# INLINE cosieve #-}
 
 -- * Corepresentable Profunctors
 

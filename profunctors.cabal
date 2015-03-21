@@ -47,6 +47,7 @@ library
     Data.Profunctor.Monoid
     Data.Profunctor.Ran
     Data.Profunctor.Rep
+    Data.Profunctor.Sieve
     Data.Profunctor.Tambara
     Data.Profunctor.Trace
     Data.Profunctor.Unsafe
