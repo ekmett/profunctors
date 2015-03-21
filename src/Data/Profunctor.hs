@@ -33,8 +33,8 @@ module Data.Profunctor
   , Costrong(..)
   , Cochoice(..)
   -- ** Common Profunctors
-  , UpStar(..)
-  , DownStar(..)
+  , Star(..)
+  , Costar(..)
   , WrappedArrow(..)
   , Forget(..)
 #ifndef HLINT
@@ -66,18 +66,18 @@ infixr 0 :->
 type p :-> q = forall a b. p a b -> q a b
 
 ------------------------------------------------------------------------------
--- UpStar
+-- Star
 ------------------------------------------------------------------------------
 
 -- | Lift a 'Functor' into a 'Profunctor' (forwards).
-newtype UpStar f d c = UpStar { runUpStar :: d -> f c }
+newtype Star f d c = Star { runStar :: d -> f c }
 
-instance Functor f => Profunctor (UpStar f) where
-  dimap ab cd (UpStar bfc) = UpStar (fmap cd . bfc . ab)
+instance Functor f => Profunctor (Star f) where
+  dimap ab cd (Star bfc) = Star (fmap cd . bfc . ab)
   {-# INLINE dimap #-}
-  lmap k (UpStar f) = UpStar (f . k)
+  lmap k (Star f) = Star (f . k)
   {-# INLINE lmap #-}
-  rmap k (UpStar f) = UpStar (fmap k . f)
+  rmap k (Star f) = Star (fmap k . f)
   {-# INLINE rmap #-}
   -- We cannot safely overload ( #. ) because we didn't write the 'Functor'.
 #if __GLASGOW_HASKELL__ >= 708
@@ -87,43 +87,43 @@ instance Functor f => Profunctor (UpStar f) where
 #endif
   {-# INLINE ( .# ) #-}
 
-instance Functor f => Functor (UpStar f a) where
+instance Functor f => Functor (Star f a) where
   fmap = rmap
   {-# INLINE fmap #-}
 
-instance Applicative f => Applicative (UpStar f a) where
-  pure a = UpStar $ \_ -> pure a
-  UpStar ff <*> UpStar fx = UpStar $ \a -> ff a <*> fx a
-  UpStar ff  *> UpStar fx = UpStar $ \a -> ff a  *> fx a
-  UpStar ff <*  UpStar fx = UpStar $ \a -> ff a <*  fx a
+instance Applicative f => Applicative (Star f a) where
+  pure a = Star $ \_ -> pure a
+  Star ff <*> Star fx = Star $ \a -> ff a <*> fx a
+  Star ff  *> Star fx = Star $ \a -> ff a  *> fx a
+  Star ff <*  Star fx = Star $ \a -> ff a <*  fx a
 
-instance Alternative f => Alternative (UpStar f a) where
-  empty = UpStar $ \_ -> empty
-  UpStar f <|> UpStar g = UpStar $ \a -> f a <|> g a
+instance Alternative f => Alternative (Star f a) where
+  empty = Star $ \_ -> empty
+  Star f <|> Star g = Star $ \a -> f a <|> g a
 
-instance Monad f => Monad (UpStar f a) where
-  return a = UpStar $ \_ -> return a
-  UpStar m >>= f = UpStar $ \ e -> do
+instance Monad f => Monad (Star f a) where
+  return a = Star $ \_ -> return a
+  Star m >>= f = Star $ \ e -> do
     a <- m e
-    runUpStar (f a) e
+    runStar (f a) e
 
-instance MonadPlus f => MonadPlus (UpStar f a) where
-  mzero = UpStar $ \_ -> mzero
-  UpStar f `mplus` UpStar g = UpStar $ \a -> f a `mplus` g a
+instance MonadPlus f => MonadPlus (Star f a) where
+  mzero = Star $ \_ -> mzero
+  Star f `mplus` Star g = Star $ \a -> f a `mplus` g a
 
 ------------------------------------------------------------------------------
--- DownStar
+-- Costar
 ------------------------------------------------------------------------------
 
 -- | Lift a 'Functor' into a 'Profunctor' (backwards).
-newtype DownStar f d c = DownStar { runDownStar :: f d -> c }
+newtype Costar f d c = Costar { runCostar :: f d -> c }
 
-instance Functor f => Profunctor (DownStar f) where
-  dimap ab cd (DownStar fbc) = DownStar (cd . fbc . fmap ab)
+instance Functor f => Profunctor (Costar f) where
+  dimap ab cd (Costar fbc) = Costar (cd . fbc . fmap ab)
   {-# INLINE dimap #-}
-  lmap k (DownStar f) = DownStar (f . fmap k)
+  lmap k (Costar f) = Costar (f . fmap k)
   {-# INLINE lmap #-}
-  rmap k (DownStar f) = DownStar (k . f)
+  rmap k (Costar f) = Costar (k . f)
   {-# INLINE rmap #-}
 #if __GLASGOW_HASKELL__ >= 708
   ( #. ) _ = coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
@@ -133,21 +133,21 @@ instance Functor f => Profunctor (DownStar f) where
   {-# INLINE ( #. ) #-}
   -- We cannot overload ( .# ) because we didn't write the 'Functor'.
 
-instance Functor (DownStar f a) where
-  fmap k (DownStar f) = DownStar (k . f)
+instance Functor (Costar f a) where
+  fmap k (Costar f) = Costar (k . f)
   {-# INLINE fmap #-}
-  a <$ _ = DownStar $ \_ -> a
+  a <$ _ = Costar $ \_ -> a
   {-# INLINE (<$) #-}
 
-instance Applicative (DownStar f a) where
-  pure a = DownStar $ \_ -> a
-  DownStar ff <*> DownStar fx = DownStar $ \a -> ff a (fx a)
+instance Applicative (Costar f a) where
+  pure a = Costar $ \_ -> a
+  Costar ff <*> Costar fx = Costar $ \a -> ff a (fx a)
   _ *> m = m
   m <* _ = m
 
-instance Monad (DownStar f a) where
-  return a = DownStar $ \_ -> a
-  DownStar m >>= f = DownStar $ \ x -> runDownStar (f (m x)) x
+instance Monad (Costar f a) where
+  return a = Costar $ \_ -> a
+  Costar m >>= f = Costar $ \ x -> runCostar (f (m x)) x
 
 ------------------------------------------------------------------------------
 -- Wrapped Profunctors
@@ -233,7 +233,7 @@ instance Traversable (Forget r a) where
 -- Strong
 ------------------------------------------------------------------------------
 
--- | Generalizing 'UpStar' of a strong 'Functor'
+-- | Generalizing 'Star' of a strong 'Functor'
 --
 -- /Note:/ Every 'Functor' in Haskell is strong with respect to (,).
 --
@@ -268,10 +268,10 @@ instance Monad m => Strong (Kleisli m) where
      return (c, b)
   {-# INLINE second' #-}
 
-instance Functor m => Strong (UpStar m) where
-  first' (UpStar f) = UpStar $ \ ~(a, c) -> (\b' -> (b', c)) <$> f a
+instance Functor m => Strong (Star m) where
+  first' (Star f) = Star $ \ ~(a, c) -> (\b' -> (b', c)) <$> f a
   {-# INLINE first' #-}
-  second' (UpStar f) = UpStar $ \ ~(c, a) -> (,) c <$> f a
+  second' (Star f) = Star $ \ ~(c, a) -> (,) c <$> f a
   {-# INLINE second' #-}
 
 -- | Every Arrow is a Strong Monad in Prof
@@ -291,7 +291,7 @@ instance Strong (Forget r) where
 -- Choice
 ------------------------------------------------------------------------------
 
--- | The generalization of 'DownStar' of 'Functor' that is strong with respect
+-- | The generalization of 'Costar' of 'Functor' that is strong with respect
 -- to 'Either'.
 --
 -- Note: This is also a notion of strength, except with regards to another monoidal 
@@ -320,10 +320,10 @@ instance Monad m => Choice (Kleisli m) where
   right' = right
   {-# INLINE right' #-}
 
-instance Applicative f => Choice (UpStar f) where
-  left' (UpStar f) = UpStar $ either (fmap Left . f) (fmap Right . pure)
+instance Applicative f => Choice (Star f) where
+  left' (Star f) = Star $ either (fmap Left . f) (fmap Right . pure)
   {-# INLINE left' #-}
-  right' (UpStar f) = UpStar $ either (fmap Left . pure) (fmap Right . f)
+  right' (Star f) = Star $ either (fmap Left . pure) (fmap Right . f)
   {-# INLINE right' #-}
 
 -- | 'extract' approximates 'costrength'
@@ -334,10 +334,10 @@ instance Comonad w => Choice (Cokleisli w) where
   {-# INLINE right' #-}
 
 -- NB: This instance is highly questionable
-instance Traversable w => Choice (DownStar w) where
-  left' (DownStar wab) = DownStar (either Right Left . fmap wab . traverse (either Right Left))
+instance Traversable w => Choice (Costar w) where
+  left' (Costar wab) = Costar (either Right Left . fmap wab . traverse (either Right Left))
   {-# INLINE left' #-}
-  right' (DownStar wab) = DownStar (fmap wab . sequence)
+  right' (Costar wab) = Costar (fmap wab . sequence)
   {-# INLINE right' #-}
 
 instance Choice Tagged where

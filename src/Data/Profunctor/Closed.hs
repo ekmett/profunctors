@@ -44,14 +44,14 @@ instance Closed Tagged where
 instance Closed (->) where
   closed = (.)
 
-instance Functor f => Closed (DownStar f) where
-  closed (DownStar fab) = DownStar $ \fxa x -> fab (fmap ($x) fxa)
+instance Functor f => Closed (Costar f) where
+  closed (Costar fab) = Costar $ \fxa x -> fab (fmap ($x) fxa)
 
 instance Functor f => Closed (Cokleisli f) where
   closed (Cokleisli fab) = Cokleisli $ \fxa x -> fab (fmap ($x) fxa)
 
-instance Distributive f => Closed (UpStar f) where
-  closed (UpStar afb) = UpStar $ \xa -> distribute $ \x -> afb (xa x)
+instance Distributive f => Closed (Star f) where
+  closed (Star afb) = Star $ \xa -> distribute $ \x -> afb (xa x)
 
 instance (Distributive f, Monad f) => Closed (Kleisli f) where
   closed (Kleisli afb) = Kleisli $ \xa -> distribute $ \x -> afb (xa x)
