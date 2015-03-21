@@ -66,11 +66,11 @@ instance (Monad m, Functor m) => Representable (Kleisli m) where
   rep = runKleisli
   {-# INLINE rep #-}
 
-instance Functor f => Representable (UpStar f) where
-  type Rep (UpStar f) = f
-  tabulate = UpStar
+instance Functor f => Representable (Down f) where
+  type Rep (Down f) = f
+  tabulate = Down
   {-# INLINE tabulate #-}
-  rep = runUpStar
+  rep = runDown
   {-# INLINE rep #-}
   
 instance Representable (Forget r) where
@@ -121,11 +121,11 @@ instance Corepresentable Tagged where
   corep (Tagged a) _ = a
   {-# INLINE corep #-}
 
-instance Functor f => Corepresentable (DownStar f) where
-  type Corep (DownStar f) = f
-  cotabulate = DownStar
+instance Functor f => Corepresentable (Up f) where
+  type Corep (Up f) = f
+  cotabulate = Up
   {-# INLINE cotabulate #-}
-  corep = runDownStar
+  corep = runUp
   {-# INLINE corep #-}
 
 -- | 'cotabulate' and 'corep' form two halves of an isomorphism.

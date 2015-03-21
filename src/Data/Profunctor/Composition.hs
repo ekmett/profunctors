@@ -28,8 +28,8 @@ module Data.Profunctor.Composition
   , idr
   , assoc
   -- * Generalized Composition
-  , upstars, kleislis
-  , downstars, cokleislis
+  , downs, kleislis
+  , ups, cokleislis
   -- * Right Kan Lift
   , Rift(..)
   , decomposeRift
@@ -164,32 +164,32 @@ assoc = dimap (\(Procompose f (Procompose g h)) -> Procompose (Procompose f g) h
 -- This is the first, which shows that @exists b. (a -> f b, b -> g c)@ is
 -- isomorphic to @a -> f (g c)@.
 --
--- @'upstars' :: 'Functor' f => Iso' ('Procompose' ('UpStar' f) ('UpStar' g) d c) ('UpStar' ('Compose' f g) d c)@
-upstars :: Functor g
-        => Iso (Procompose (UpStar f ) (UpStar g ) d  c )
-               (Procompose (UpStar f') (UpStar g') d' c')
-               (UpStar (Compose g  f ) d  c )
-               (UpStar (Compose g' f') d' c')
-upstars = dimap hither (fmap yon) where
-  hither (Procompose (UpStar xgc) (UpStar dfx)) = UpStar (Compose . fmap xgc . dfx)
-  yon (UpStar dfgc) = Procompose (UpStar id) (UpStar (getCompose . dfgc))
+-- @'downs' :: 'Functor' f => Iso' ('Procompose' ('Down' f) ('Down' g) d c) ('Down' ('Compose' f g) d c)@
+downs :: Functor g
+        => Iso (Procompose (Down f ) (Down g ) d  c )
+               (Procompose (Down f') (Down g') d' c')
+               (Down (Compose g  f ) d  c )
+               (Down (Compose g' f') d' c')
+downs = dimap hither (fmap yon) where
+  hither (Procompose (Down xgc) (Down dfx)) = Down (Compose . fmap xgc . dfx)
+  yon (Down dfgc) = Procompose (Down id) (Down (getCompose . dfgc))
 
 -- | 'Profunctor' composition generalizes 'Functor' composition in two ways.
 --
 -- This is the second, which shows that @exists b. (f a -> b, g b -> c)@ is
 -- isomorphic to @g (f a) -> c@.
 --
--- @'downstars' :: 'Functor' f => Iso' ('Procompose' ('DownStar' f) ('DownStar' g) d c) ('DownStar' ('Compose' g f) d c)@
-downstars :: Functor f
-          => Iso (Procompose (DownStar f ) (DownStar g ) d  c )
-                 (Procompose (DownStar f') (DownStar g') d' c')
-                 (DownStar (Compose f  g ) d  c )
-                 (DownStar (Compose f' g') d' c')
-downstars = dimap hither (fmap yon) where
-  hither (Procompose (DownStar gxc) (DownStar fdx)) = DownStar (gxc . fmap fdx . getCompose)
-  yon (DownStar dgfc) = Procompose (DownStar (dgfc . Compose)) (DownStar id)
+-- @'ups' :: 'Functor' f => Iso' ('Procompose' ('Up' f) ('Up' g) d c) ('Up' ('Compose' g f) d c)@
+ups :: Functor f
+          => Iso (Procompose (Up f ) (Up g ) d  c )
+                 (Procompose (Up f') (Up g') d' c')
+                 (Up (Compose f  g ) d  c )
+                 (Up (Compose f' g') d' c')
+ups = dimap hither (fmap yon) where
+  hither (Procompose (Up gxc) (Up fdx)) = Up (gxc . fmap fdx . getCompose)
+  yon (Up dgfc) = Procompose (Up (dgfc . Compose)) (Up id)
 
--- | This is a variant on 'upstars' that uses 'Kleisli' instead of 'UpStar'.
+-- | This is a variant on 'downs' that uses 'Kleisli' instead of 'Down'.
 --
 -- @'kleislis' :: 'Monad' f => Iso' ('Procompose' ('Kleisli' f) ('Kleisli' g) d c) ('Kleisli' ('Compose' f g) d c)@
 kleislis :: Monad g
@@ -201,8 +201,8 @@ kleislis = dimap hither (fmap yon) where
   hither (Procompose (Kleisli xgc) (Kleisli dfx)) = Kleisli (Compose . liftM xgc . dfx)
   yon (Kleisli dfgc) = Procompose (Kleisli id) (Kleisli (getCompose . dfgc))
 
--- | This is a variant on 'downstars' that uses 'Cokleisli' instead
--- of 'DownStar'.
+-- | This is a variant on 'ups' that uses 'Cokleisli' instead
+-- of 'Up'.
 --
 -- @'cokleislis' :: 'Functor' f => Iso' ('Procompose' ('Cokleisli' f) ('Cokleisli' g) d c) ('Cokleisli' ('Compose' g f) d c)@
 cokleislis :: Functor f
