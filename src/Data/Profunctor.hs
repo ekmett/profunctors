@@ -48,6 +48,7 @@ import Control.Category
 import Control.Comonad
 import Control.Monad (liftM, MonadPlus(..))
 import Control.Monad.Fix
+import Data.Distributive
 import Data.Foldable
 import Data.Monoid
 import Data.Tagged
@@ -111,6 +112,9 @@ instance MonadPlus f => MonadPlus (Star f a) where
   mzero = Star $ \_ -> mzero
   Star f `mplus` Star g = Star $ \a -> f a `mplus` g a
 
+instance Distributive f => Distributive (Star f a) where
+  distribute fs = Star $ \a -> collect (($ a) .# runStar) fs
+
 ------------------------------------------------------------------------------
 -- Costar
 ------------------------------------------------------------------------------
@@ -132,6 +136,9 @@ instance Functor f => Profunctor (Costar f) where
 #endif
   {-# INLINE ( #. ) #-}
   -- We cannot overload ( .# ) because we didn't write the 'Functor'.
+
+instance Distributive (Costar f d) where
+  distribute fs = Costar $ \gd -> fmap (($ gd) .# runCostar) fs
 
 instance Functor (Costar f a) where
   fmap k (Costar f) = Costar (k . f)
