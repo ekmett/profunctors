@@ -1,3 +1,7 @@
+4.5
+---
+* Support `semigroupoids` 4.5.
+
 4.4.1
 -------
 * Using `SafeHaskell`, GHC 7.8+ `Data.Profunctor.Unsafe` now infers as `Trustworthy` and
