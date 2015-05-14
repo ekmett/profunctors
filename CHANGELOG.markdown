@@ -1,3 +1,8 @@
+5
+-
+* `UpStar` and `DownStar` have become `Star` and `Costar`.
+* Split representability into sieves and representability.
+
 4.4.1
 -------
 * Using `SafeHaskell`, GHC 7.8+ `Data.Profunctor.Unsafe` now infers as `Trustworthy` and
