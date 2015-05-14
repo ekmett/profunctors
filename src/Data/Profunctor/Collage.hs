@@ -1,6 +1,8 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE GADTs #-}
 {-# OPTIONS_GHC -fno-warn-incomplete-patterns #-}
 {-# LANGUAGE CPP #-}
@@ -24,14 +26,13 @@ module Data.Profunctor.Collage
 
 import Data.Semigroupoid
 import Data.Semigroupoid.Ob
-import Data.Semigroupoid.Coproduct (L, R)
 import Data.Profunctor
 
 -- | The cograph of a 'Profunctor'.
 data Collage k b a where
-  L :: (b -> b') -> Collage k (L b) (L b')
-  R :: (a -> a') -> Collage k (R a) (R a')
-  C :: k b a     -> Collage k (L b) (R a)
+  L :: (b -> b') -> Collage k (Left b) (Left b')
+  R :: (a -> a') -> Collage k (Right a) (Right a')
+  C :: k b a     -> Collage k (Left b) (Right a)
 
 instance Profunctor k => Semigroupoid (Collage k) where
   L f `o` L g = L (f . g)
@@ -39,8 +40,8 @@ instance Profunctor k => Semigroupoid (Collage k) where
   R f `o` C g = C (rmap f g)
   C f `o` L g = C (lmap g f)
 
-instance Profunctor k => Ob (Collage k) (L a) where
+instance Profunctor k => Ob (Collage k) (Left a) where
   semiid = L semiid
 
-instance Profunctor k => Ob (Collage k) (R a) where
+instance Profunctor k => Ob (Collage k) (Right a) where
   semiid = R semiid
