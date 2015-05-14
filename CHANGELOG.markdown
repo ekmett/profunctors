@@ -1,7 +1,9 @@
 5
 -
-* `UpStar` and `DownStar` have become `Star` and `Costar`.
+* `UpStar` and `DownStar` have become `Star` and `Costar`. `Star` is analogous to `Kleisli`, `Costar` is analogous to `Cokleisli`.
 * Split representability into sieves and representability.
+* Moved `Data.Profunctor.Collage` to `semigroupoids` 5, and removed the `semigroupoids` dependency. 
+* Rather greatly widened the range of GHC versions we can support.
 
 4.4.1
 -------

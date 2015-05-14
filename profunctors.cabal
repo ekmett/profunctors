@@ -9,7 +9,7 @@ maintainer:    Edward A. Kmett <ekmett@gmail.com>
 stability:     experimental
 homepage:      http://github.com/ekmett/profunctors/
 bug-reports:   http://github.com/ekmett/profunctors/issues
-copyright:     Copyright (C) 2011-2014 Edward A. Kmett
+copyright:     Copyright (C) 2011-2015 Edward A. Kmett
 synopsis:      Profunctors
 description:   Profunctors
 build-type:    Simple
@@ -31,7 +31,6 @@ library
     base                >= 4     && < 5,
     comonad             >= 4     && < 5,
     distributive        >= 0.4.4 && < 1,
-    semigroupoids       >= 4.5   && < 5,
     tagged              >= 0.4.4 && < 1,
     transformers        >= 0.2   && < 0.5
 
@@ -42,7 +41,6 @@ library
     Data.Profunctor.Closed
     Data.Profunctor.Codensity
     Data.Profunctor.Composition
-    Data.Profunctor.Collage
     Data.Profunctor.Monad
     Data.Profunctor.Monoid
     Data.Profunctor.Ran
