@@ -10,48 +10,49 @@
 <pre><a name="line-1"></a><span class='hs-comment'>{-# LANGUAGE MultiParamTypeClasses #-}</span>
 <a name="line-2"></a><span class='hs-comment'>{-# LANGUAGE UndecidableInstances #-}</span>
 <a name="line-3"></a><span class='hs-comment'>{-# LANGUAGE FlexibleInstances #-}</span>
-<a name="line-4"></a><span class='hs-comment'>{-# LANGUAGE GADTs #-}</span>
-<a name="line-5"></a><span class='hs-comment'>{-# OPTIONS_GHC -fno-warn-incomplete-patterns #-}</span>
-<a name="line-6"></a><span class='hs-comment'>{-# LANGUAGE CPP #-}</span>
-<a name="line-7"></a><span class='hs-cpp'>#if __GLASGOW_HASKELL__ &gt;= 702 &amp;&amp; __GLASGOW_HASKELL__ &lt;= 708</span>
-<a name="line-8"></a><span class='hs-comment'>{-# LANGUAGE Trustworthy #-}</span>
-<a name="line-9"></a><span class='hs-cpp'>#endif</span>
-<a name="line-10"></a><span class='hs-comment'>-----------------------------------------------------------------------------</span>
-<a name="line-11"></a><span class='hs-comment'>-- |</span>
-<a name="line-12"></a><span class='hs-comment'>-- Module      :  Data.Profunctor.Collage</span>
-<a name="line-13"></a><span class='hs-comment'>-- Copyright   :  (C) 2011-2012 Edward Kmett,</span>
-<a name="line-14"></a><span class='hs-comment'>-- License     :  BSD-style (see the file LICENSE)</span>
-<a name="line-15"></a><span class='hs-comment'>--</span>
-<a name="line-16"></a><span class='hs-comment'>-- Maintainer  :  Edward Kmett &lt;ekmett@gmail.com&gt;</span>
-<a name="line-17"></a><span class='hs-comment'>-- Stability   :  provisional</span>
-<a name="line-18"></a><span class='hs-comment'>-- Portability :  MPTCs</span>
-<a name="line-19"></a><span class='hs-comment'>--</span>
-<a name="line-20"></a><span class='hs-comment'>----------------------------------------------------------------------------</span>
-<a name="line-21"></a><span class='hs-keyword'>module</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Profunctor</span><span class='hs-varop'>.</span><span class='hs-conid'>Collage</span>
-<a name="line-22"></a>  <span class='hs-layout'>(</span> <span class='hs-conid'>Collage</span><span class='hs-layout'>(</span><span class='hs-keyglyph'>..</span><span class='hs-layout'>)</span>
-<a name="line-23"></a>  <span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
-<a name="line-24"></a>
-<a name="line-25"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Semigroupoid</span>
-<a name="line-26"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Semigroupoid</span><span class='hs-varop'>.</span><span class='hs-conid'>Ob</span>
-<a name="line-27"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Semigroupoid</span><span class='hs-varop'>.</span><span class='hs-conid'>Coproduct</span> <span class='hs-layout'>(</span><span class='hs-conid'>L</span><span class='hs-layout'>,</span> <span class='hs-conid'>R</span><span class='hs-layout'>)</span>
-<a name="line-28"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Profunctor</span>
-<a name="line-29"></a>
-<a name="line-30"></a><a name="Semigroupoid"></a><span class='hs-comment'>-- | The cograph of a 'Profunctor'.</span>
-<a name="line-31"></a><a name="Semigroupoid"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>Collage</span> <span class='hs-varid'>k</span> <span class='hs-varid'>b</span> <span class='hs-varid'>a</span> <span class='hs-keyword'>where</span>
-<a name="line-32"></a>  <span class='hs-conid'>L</span> <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b'</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Collage</span> <span class='hs-varid'>k</span> <span class='hs-layout'>(</span><span class='hs-conid'>L</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-conid'>L</span> <span class='hs-varid'>b'</span><span class='hs-layout'>)</span>
-<a name="line-33"></a>  <span class='hs-conid'>R</span> <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>a'</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Collage</span> <span class='hs-varid'>k</span> <span class='hs-layout'>(</span><span class='hs-conid'>R</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-conid'>R</span> <span class='hs-varid'>a'</span><span class='hs-layout'>)</span>
-<a name="line-34"></a>  <span class='hs-conid'>C</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>k</span> <span class='hs-varid'>b</span> <span class='hs-varid'>a</span>     <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Collage</span> <span class='hs-varid'>k</span> <span class='hs-layout'>(</span><span class='hs-conid'>L</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-conid'>R</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span>
-<a name="line-35"></a>
-<a name="line-36"></a><a name="instance%20Semigroupoid%20(Collage%20k)"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>Profunctor</span> <span class='hs-varid'>k</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>Semigroupoid</span> <span class='hs-layout'>(</span><span class='hs-conid'>Collage</span> <span class='hs-varid'>k</span><span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
-<a name="line-37"></a>  <span class='hs-conid'>L</span> <span class='hs-varid'>f</span> <span class='hs-varop'>`o`</span> <span class='hs-conid'>L</span> <span class='hs-varid'>g</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>L</span> <span class='hs-layout'>(</span><span class='hs-varid'>f</span> <span class='hs-varop'>.</span> <span class='hs-varid'>g</span><span class='hs-layout'>)</span>
-<a name="line-38"></a>  <span class='hs-conid'>R</span> <span class='hs-varid'>f</span> <span class='hs-varop'>`o`</span> <span class='hs-conid'>R</span> <span class='hs-varid'>g</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>R</span> <span class='hs-layout'>(</span><span class='hs-varid'>f</span> <span class='hs-varop'>.</span> <span class='hs-varid'>g</span><span class='hs-layout'>)</span>
-<a name="line-39"></a>  <span class='hs-conid'>R</span> <span class='hs-varid'>f</span> <span class='hs-varop'>`o`</span> <span class='hs-conid'>C</span> <span class='hs-varid'>g</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>C</span> <span class='hs-layout'>(</span><span class='hs-varid'>rmap</span> <span class='hs-varid'>f</span> <span class='hs-varid'>g</span><span class='hs-layout'>)</span>
-<a name="line-40"></a>  <span class='hs-conid'>C</span> <span class='hs-varid'>f</span> <span class='hs-varop'>`o`</span> <span class='hs-conid'>L</span> <span class='hs-varid'>g</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>C</span> <span class='hs-layout'>(</span><span class='hs-varid'>lmap</span> <span class='hs-varid'>g</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span>
-<a name="line-41"></a>
-<a name="line-42"></a><a name="instance%20Ob%20(Collage%20k)%20(L%20a)"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>Profunctor</span> <span class='hs-varid'>k</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>Ob</span> <span class='hs-layout'>(</span><span class='hs-conid'>Collage</span> <span class='hs-varid'>k</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-conid'>L</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
-<a name="line-43"></a>  <span class='hs-varid'>semiid</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>L</span> <span class='hs-varid'>semiid</span>
-<a name="line-44"></a>
-<a name="line-45"></a><a name="instance%20Ob%20(Collage%20k)%20(R%20a)"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>Profunctor</span> <span class='hs-varid'>k</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>Ob</span> <span class='hs-layout'>(</span><span class='hs-conid'>Collage</span> <span class='hs-varid'>k</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-conid'>R</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
-<a name="line-46"></a>  <span class='hs-varid'>semiid</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>R</span> <span class='hs-varid'>semiid</span>
+<a name="line-4"></a><span class='hs-comment'>{-# LANGUAGE DataKinds #-}</span>
+<a name="line-5"></a><span class='hs-comment'>{-# LANGUAGE PolyKinds #-}</span>
+<a name="line-6"></a><span class='hs-comment'>{-# LANGUAGE GADTs #-}</span>
+<a name="line-7"></a><span class='hs-comment'>{-# OPTIONS_GHC -fno-warn-incomplete-patterns #-}</span>
+<a name="line-8"></a><span class='hs-comment'>{-# LANGUAGE CPP #-}</span>
+<a name="line-9"></a><span class='hs-cpp'>#if __GLASGOW_HASKELL__ &gt;= 702 &amp;&amp; __GLASGOW_HASKELL__ &lt;= 708</span>
+<a name="line-10"></a><span class='hs-comment'>{-# LANGUAGE Trustworthy #-}</span>
+<a name="line-11"></a><span class='hs-cpp'>#endif</span>
+<a name="line-12"></a><span class='hs-comment'>-----------------------------------------------------------------------------</span>
+<a name="line-13"></a><span class='hs-comment'>-- |</span>
+<a name="line-14"></a><span class='hs-comment'>-- Module      :  Data.Profunctor.Collage</span>
+<a name="line-15"></a><span class='hs-comment'>-- Copyright   :  (C) 2011-2012 Edward Kmett,</span>
+<a name="line-16"></a><span class='hs-comment'>-- License     :  BSD-style (see the file LICENSE)</span>
+<a name="line-17"></a><span class='hs-comment'>--</span>
+<a name="line-18"></a><span class='hs-comment'>-- Maintainer  :  Edward Kmett &lt;ekmett@gmail.com&gt;</span>
+<a name="line-19"></a><span class='hs-comment'>-- Stability   :  provisional</span>
+<a name="line-20"></a><span class='hs-comment'>-- Portability :  MPTCs</span>
+<a name="line-21"></a><span class='hs-comment'>--</span>
+<a name="line-22"></a><span class='hs-comment'>----------------------------------------------------------------------------</span>
+<a name="line-23"></a><span class='hs-keyword'>module</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Profunctor</span><span class='hs-varop'>.</span><span class='hs-conid'>Collage</span>
+<a name="line-24"></a>  <span class='hs-layout'>(</span> <span class='hs-conid'>Collage</span><span class='hs-layout'>(</span><span class='hs-keyglyph'>..</span><span class='hs-layout'>)</span>
+<a name="line-25"></a>  <span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
+<a name="line-26"></a>
+<a name="line-27"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Semigroupoid</span>
+<a name="line-28"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Semigroupoid</span><span class='hs-varop'>.</span><span class='hs-conid'>Ob</span>
+<a name="line-29"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Profunctor</span>
+<a name="line-30"></a>
+<a name="line-31"></a><a name="Semigroupoid"></a><span class='hs-comment'>-- | The cograph of a 'Profunctor'.</span>
+<a name="line-32"></a><a name="Semigroupoid"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>Collage</span> <span class='hs-varid'>k</span> <span class='hs-varid'>b</span> <span class='hs-varid'>a</span> <span class='hs-keyword'>where</span>
+<a name="line-33"></a>  <span class='hs-conid'>L</span> <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b'</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Collage</span> <span class='hs-varid'>k</span> <span class='hs-layout'>(</span><span class='hs-conid'>Left</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-conid'>Left</span> <span class='hs-varid'>b'</span><span class='hs-layout'>)</span>
+<a name="line-34"></a>  <span class='hs-conid'>R</span> <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>a'</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Collage</span> <span class='hs-varid'>k</span> <span class='hs-layout'>(</span><span class='hs-conid'>Right</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-conid'>Right</span> <span class='hs-varid'>a'</span><span class='hs-layout'>)</span>
+<a name="line-35"></a>  <span class='hs-conid'>C</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>k</span> <span class='hs-varid'>b</span> <span class='hs-varid'>a</span>     <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Collage</span> <span class='hs-varid'>k</span> <span class='hs-layout'>(</span><span class='hs-conid'>Left</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-conid'>Right</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span>
+<a name="line-36"></a>
+<a name="line-37"></a><a name="instance%20Semigroupoid%20(Collage%20k)"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>Profunctor</span> <span class='hs-varid'>k</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>Semigroupoid</span> <span class='hs-layout'>(</span><span class='hs-conid'>Collage</span> <span class='hs-varid'>k</span><span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
+<a name="line-38"></a>  <span class='hs-conid'>L</span> <span class='hs-varid'>f</span> <span class='hs-varop'>`o`</span> <span class='hs-conid'>L</span> <span class='hs-varid'>g</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>L</span> <span class='hs-layout'>(</span><span class='hs-varid'>f</span> <span class='hs-varop'>.</span> <span class='hs-varid'>g</span><span class='hs-layout'>)</span>
+<a name="line-39"></a>  <span class='hs-conid'>R</span> <span class='hs-varid'>f</span> <span class='hs-varop'>`o`</span> <span class='hs-conid'>R</span> <span class='hs-varid'>g</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>R</span> <span class='hs-layout'>(</span><span class='hs-varid'>f</span> <span class='hs-varop'>.</span> <span class='hs-varid'>g</span><span class='hs-layout'>)</span>
+<a name="line-40"></a>  <span class='hs-conid'>R</span> <span class='hs-varid'>f</span> <span class='hs-varop'>`o`</span> <span class='hs-conid'>C</span> <span class='hs-varid'>g</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>C</span> <span class='hs-layout'>(</span><span class='hs-varid'>rmap</span> <span class='hs-varid'>f</span> <span class='hs-varid'>g</span><span class='hs-layout'>)</span>
+<a name="line-41"></a>  <span class='hs-conid'>C</span> <span class='hs-varid'>f</span> <span class='hs-varop'>`o`</span> <span class='hs-conid'>L</span> <span class='hs-varid'>g</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>C</span> <span class='hs-layout'>(</span><span class='hs-varid'>lmap</span> <span class='hs-varid'>g</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span>
+<a name="line-42"></a>
+<a name="line-43"></a><a name="instance%20Ob%20(Collage%20k)%20(Left%20a)"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>Profunctor</span> <span class='hs-varid'>k</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>Ob</span> <span class='hs-layout'>(</span><span class='hs-conid'>Collage</span> <span class='hs-varid'>k</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-conid'>Left</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
+<a name="line-44"></a>  <span class='hs-varid'>semiid</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>L</span> <span class='hs-varid'>semiid</span>
+<a name="line-45"></a>
+<a name="line-46"></a><a name="instance%20Ob%20(Collage%20k)%20(Right%20a)"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>Profunctor</span> <span class='hs-varid'>k</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>Ob</span> <span class='hs-layout'>(</span><span class='hs-conid'>Collage</span> <span class='hs-varid'>k</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-conid'>Right</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
+<a name="line-47"></a>  <span class='hs-varid'>semiid</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>R</span> <span class='hs-varid'>semiid</span>
 </pre></body>
 </html>
