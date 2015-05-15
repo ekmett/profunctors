@@ -54,7 +54,7 @@ instance Sieve (Forget r) (Const r) where
   sieve = (Const .) . runForget
   {-# INLINE sieve #-}
 
--- | A 'Profunctor' @p@ is a 'Sieve' __on__ @f@ if it is a subprofunctor of @'Costar' f@.
+-- | A 'Profunctor' @p@ is a 'Cosieve' __on__ @f@ if it is a subprofunctor of @'Costar' f@.
 --
 -- That is to say it is a subset of @Hom(f-,=)@ closed under 'lmap' and 'rmap'.
 --
