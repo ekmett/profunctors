@@ -1,3 +1,7 @@
+5.0.0.1
+-------
+* Documentation fix
+
 5
 -
 * `UpStar` and `DownStar` have become `Star` and `Costar`. `Star` is analogous to `Kleisli`, `Costar` is analogous to `Cokleisli`.
