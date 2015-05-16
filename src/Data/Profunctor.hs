@@ -385,6 +385,10 @@ instance Costrong (->) where
   unfirst f a = b where (b, d) = f (a, d)
   unsecond f a = b where (d, b) = f (d, a)
 
+instance Functor f => Costrong (Costar f) where
+  unfirst (Costar f) = Costar f'
+    where f' fa = b where (b, d) = f ((\a -> (a, d)) <$> fa)
+
 instance Costrong Tagged where
   unfirst (Tagged bd) = Tagged (fst bd)
   unsecond (Tagged db) = Tagged (snd db)
@@ -410,3 +414,14 @@ class Profunctor p => Cochoice p where
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 708
   {-# MINIMAL unleft | unright #-}
 #endif
+
+instance Cochoice (->) where
+  unleft f = go . Left where go = either id (go . Right) . f
+  unright f = go . Right where go = either (go . Left) id . f
+
+instance Functor f => Cochoice (Costar f) where
+  unleft (Costar f) = Costar f'
+    where
+      f' fa = go (Left <$> fa)
+        where
+          go = either id (go . (<$ fa) . Right) . f
