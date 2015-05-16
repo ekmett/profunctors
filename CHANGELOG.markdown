@@ -1,3 +1,8 @@
+5.0.1
+-----
+* MINIMAL pragma for `Costrong` and `Cochoice`.
+* More `Costrong` and `Cochoice` instances.
+
 5.0.0.1
 -------
 * Documentation fix
