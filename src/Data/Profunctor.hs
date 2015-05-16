@@ -301,7 +301,7 @@ instance Strong (Forget r) where
 -- | The generalization of 'Costar' of 'Functor' that is strong with respect
 -- to 'Either'.
 --
--- Note: This is also a notion of strength, except with regards to another monoidal 
+-- Note: This is also a notion of strength, except with regards to another monoidal
 -- structure that we can choose to equip Hask with: the cocartesian coproduct.
 class Profunctor p => Choice p where
   left'  :: p a b -> p (Either a c) (Either b c)
@@ -377,9 +377,17 @@ class Profunctor p => Costrong p where
   unsecond :: p (d, a) (d, b) -> p a b
   unsecond = unfirst . dimap swap swap
 
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 708
+  {-# MINIMAL unfirst | unsecond #-}
+#endif
+
 instance Costrong (->) where
   unfirst f a = b where (b, d) = f (a, d)
   unsecond f a = b where (d, b) = f (d, a)
+
+instance Functor f => Costrong (Costar f) where
+  unfirst (Costar f) = Costar f'
+    where f' fa = b where (b, d) = f ((\a -> (a, d)) <$> fa)
 
 instance Costrong Tagged where
   unfirst (Tagged bd) = Tagged (fst bd)
@@ -402,3 +410,18 @@ class Profunctor p => Cochoice p where
 
   unright :: p (Either d a) (Either d b) -> p a b
   unright = unleft . dimap (either Right Left) (either Right Left)
+
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 708
+  {-# MINIMAL unleft | unright #-}
+#endif
+
+instance Cochoice (->) where
+  unleft f = go . Left where go = either id (go . Right) . f
+  unright f = go . Right where go = either (go . Left) id . f
+
+instance Functor f => Cochoice (Costar f) where
+  unleft (Costar f) = Costar f'
+    where
+      f' fa = go (Left <$> fa)
+        where
+          go = either id (go . (<$ fa) . Right) . f
