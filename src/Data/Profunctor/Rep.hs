@@ -27,6 +27,7 @@ module Data.Profunctor.Rep
   -- * Corepresentable Profunctors
   , Corepresentable(..)
   , cotabulated
+  , unfirstCorep, unsecondCorep
   ) where
 
 import Control.Applicative
@@ -68,7 +69,7 @@ instance Functor f => Representable (Star f) where
   type Rep (Star f) = f
   tabulate = Star
   {-# INLINE tabulate #-}
-  
+
 instance Representable (Forget r) where
   type Rep (Forget r) = Const r
   tabulate = Forget . (getConst .)
@@ -89,9 +90,19 @@ tabulated = dimap tabulate (fmap sieve)
 
 -- | A 'Profunctor' @p@ is 'Corepresentable' if there exists a 'Functor' @f@ such that
 -- @p d c@ is isomorphic to @f d -> c@.
-class Cosieve p (Corep p) => Corepresentable p where
+class (Cosieve p (Corep p), Costrong p) => Corepresentable p where
   type Corep p :: * -> *
   cotabulate :: (Corep p d -> c) -> p d c
+
+-- | Default definition for 'unfirst' given that p is 'Corepresentable'.
+unfirstCorep :: Corepresentable p => p (a, d) (b, d) -> p a b
+unfirstCorep p = cotabulate f
+  where f fa = b where (b, d) = cosieve p ((\a -> (a, d)) <$> fa)
+
+-- | Default definition for 'unsecond' given that p is 'Corepresentable'.
+unsecondCorep :: Corepresentable p => p (d, a) (d, b) -> p a b
+unsecondCorep p = cotabulate f
+  where f fa = b where (d, b) = cosieve p ((,) d <$> fa)
 
 instance Corepresentable (->) where
   type Corep (->) = Identity

@@ -127,6 +127,10 @@ instance (Closed p, Closed q) => Closed (Procompose p q) where
   closed (Procompose x y) = Procompose (closed x) (closed y)
   {-# INLINE closed #-}
 
+instance (Corepresentable p, Corepresentable q) => Costrong (Procompose p q) where
+  unfirst = unfirstCorep
+  unsecond = unsecondCorep
+
 -- * Lax identity
 
 -- | @(->)@ functions as a lax identity for 'Profunctor' composition.

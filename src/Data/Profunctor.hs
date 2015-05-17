@@ -328,9 +328,9 @@ instance Monad m => Choice (Kleisli m) where
   {-# INLINE right' #-}
 
 instance Applicative f => Choice (Star f) where
-  left' (Star f) = Star $ either (fmap Left . f) (fmap Right . pure)
+  left' (Star f) = Star $ either (fmap Left . f) (pure . Right)
   {-# INLINE left' #-}
-  right' (Star f) = Star $ either (fmap Left . pure) (fmap Right . f)
+  right' (Star f) = Star $ either (pure . Left) (fmap Right . f)
   {-# INLINE right' #-}
 
 -- | 'extract' approximates 'costrength'
@@ -388,6 +388,8 @@ instance Costrong (->) where
 instance Functor f => Costrong (Costar f) where
   unfirst (Costar f) = Costar f'
     where f' fa = b where (b, d) = f ((\a -> (a, d)) <$> fa)
+  unsecond (Costar f) = Costar f'
+    where f' fa = b where (d, b) = f ((,) d <$> fa)
 
 instance Costrong Tagged where
   unfirst (Tagged bd) = Tagged (fst bd)
@@ -399,6 +401,10 @@ instance ArrowLoop p => Costrong (WrappedArrow p) where
 instance MonadFix m => Costrong (Kleisli m) where
   unfirst (Kleisli f) = Kleisli (liftM fst . mfix . f')
     where f' x y = f (x, snd y)
+
+instance Functor f => Costrong (Cokleisli f) where
+  unfirst (Cokleisli f) = Cokleisli f'
+    where f' fa = b where (b, d) = f ((\a -> (a, d)) <$> fa)
 
 --------------------------------------------------------------------------------
 -- * Costrength for Either
@@ -419,9 +425,11 @@ instance Cochoice (->) where
   unleft f = go . Left where go = either id (go . Right) . f
   unright f = go . Right where go = either (go . Left) id . f
 
-instance Functor f => Cochoice (Costar f) where
-  unleft (Costar f) = Costar f'
-    where
-      f' fa = go (Left <$> fa)
-        where
-          go = either id (go . (<$ fa) . Right) . f
+instance Applicative f => Cochoice (Costar f) where
+  unleft (Costar f) = Costar (go . fmap Left)
+    where go = either id (go . pure . Right) . f
+
+-- NB: Another instance that's highly questionable
+instance Traversable f => Cochoice (Star f) where
+  unright (Star f) = Star (go . Right)
+    where go = either (go . Left) id . sequence . f
