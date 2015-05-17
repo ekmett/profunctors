@@ -1,3 +1,9 @@
+5.1
+---
+* `instance Costrong (Cokleisli f)`.
+* `instance Cochoice (Star f)`.
+* Changed the instance for `Cochoice (Costar f)`.
+
 5.0.1
 -----
 * MINIMAL pragma for `Costrong` and `Cochoice`.
