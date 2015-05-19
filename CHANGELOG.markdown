@@ -1,3 +1,7 @@
+5.1.1
+-----
+* Add proper support for GHC 7.0+.
+
 5.1
 ---
 * `instance Costrong (Cokleisli f)`.
