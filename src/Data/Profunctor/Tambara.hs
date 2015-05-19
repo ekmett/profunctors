@@ -51,7 +51,10 @@ instance ProfunctorFunctor Tambara where
 instance ProfunctorComonad Tambara where
   proextract (Tambara p) = dimap (\a -> (a,())) fst p
   produplicate (Tambara p) = Tambara (Tambara $ dimap hither yon p) where
+    hither :: ((a, b), c) -> (a, (b, c))
     hither ~(~(x,y),z) = (x,(y,z))
+
+    yon    :: (a, (b, c)) -> ((a, b), c)
     yon    ~(x,~(y,z)) = ((x,y),z)
 
 instance Profunctor p => Strong (Tambara p) where
@@ -60,8 +63,11 @@ instance Profunctor p => Strong (Tambara p) where
 
 instance Choice p => Choice (Tambara p) where
   left' (Tambara f) = Tambara $ dimap hither yon $ left' f where
+    hither :: (Either a b, c) -> Either (a, c) (b, c)
     hither (Left y, s) = Left (y, s)
     hither (Right z, s) = Right (z, s)
+    
+    yon :: Either (a, c) (b, c) -> (Either a b, c)
     yon (Left (y, s)) = (Left y, s)
     yon (Right (z, s)) = (Right z, s)
 
@@ -72,12 +78,16 @@ instance Category p => Category (Tambara p) where
 instance Arrow p => Arrow (Tambara p) where
   arr f = Tambara $ arr $ first f
   first (Tambara f) = Tambara (arr go . first f . arr go) where
+    go :: ((a, b), c) -> ((a, c), b)
     go ~(~(x,y),z) = ((x,z),y)
 
 instance ArrowChoice p => ArrowChoice (Tambara p) where
   left (Tambara f) = Tambara (arr yon . left f . arr hither) where
+    hither :: (Either a b, c) -> Either (a, c) (b, c)
     hither (Left y, s) = Left (y, s)
     hither (Right z, s) = Right (z, s)
+    
+    yon :: Either (a, c) (b, c) -> (Either a b, c)
     yon (Left (y, s)) = (Left y, s)
     yon (Right (z, s)) = (Right z, s)
 
@@ -86,6 +96,7 @@ instance ArrowApply p => ArrowApply (Tambara p) where
 
 instance ArrowLoop p => ArrowLoop (Tambara p) where
   loop (Tambara f) = Tambara (loop (arr go . f . arr go)) where
+    go :: ((a, b), c) -> ((a, c), b)
     go ~(~(x,y),z) = ((x,z),y)
 
 instance ArrowZero p => ArrowZero (Tambara p) where
@@ -168,9 +179,12 @@ instance ProfunctorFunctor Cotambara where
 instance ProfunctorComonad Cotambara where
   proextract (Cotambara p)   = dimap Left (\(Left a) -> a) p
   produplicate (Cotambara p) = Cotambara (Cotambara $ dimap hither yon p) where
+    hither :: Either (Either a b) c -> Either a (Either b c)
     hither (Left (Left x))   = Left x
     hither (Left (Right y))  = Right (Left y)
     hither (Right z)         = Right (Right z)
+
+    yon    :: Either a (Either b c) -> Either (Either a b) c
     yon    (Left x)          = Left (Left x)
     yon    (Right (Left y))  = Left (Right y)
     yon    (Right (Right z)) = Right z
