@@ -66,7 +66,7 @@ instance Choice p => Choice (Tambara p) where
     hither :: (Either a b, c) -> Either (a, c) (b, c)
     hither (Left y, s) = Left (y, s)
     hither (Right z, s) = Right (z, s)
-    
+
     yon :: Either (a, c) (b, c) -> (Either a b, c)
     yon (Left (y, s)) = (Left y, s)
     yon (Right (z, s)) = (Right z, s)
@@ -86,7 +86,7 @@ instance ArrowChoice p => ArrowChoice (Tambara p) where
     hither :: (Either a b, c) -> Either (a, c) (b, c)
     hither (Left y, s) = Left (y, s)
     hither (Right z, s) = Right (z, s)
-    
+
     yon :: Either (a, c) (b, c) -> (Either a b, c)
     yon (Left (y, s)) = (Left y, s)
     yon (Right (z, s)) = (Right z, s)
@@ -159,9 +159,9 @@ instance ProfunctorMonad Pastro where
   projoin (Pastro l (Pastro m n o) p) = Pastro lm n op where
     op a = case p a of
       (b, f) -> case o b of
-         (c, g) -> (c, (f, g)) 
+         (c, g) -> (c, (f, g))
     lm (d, (f, g)) = l (m (d, g), f)
-    
+
 instance ProfunctorAdjunction Pastro Tambara where
   counit (Pastro g (Tambara p) f) = dimap f g p
   unit p = Tambara (Pastro id p id)
