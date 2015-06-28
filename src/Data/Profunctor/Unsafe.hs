@@ -38,6 +38,9 @@ import Control.Arrow
 import Control.Category
 import Control.Comonad (Cokleisli(..))
 import Control.Monad (liftM)
+import Data.Bifunctor.Clown (Clown(..))
+import Data.Bifunctor.Joker (Joker(..))
+import Data.Functor.Contravariant (Contravariant(..))
 import Data.Tagged
 import Prelude hiding (id,(.),sequence)
 
@@ -239,3 +242,19 @@ instance Functor w => Profunctor (Cokleisli w) where
   ( #. ) _ = unsafeCoerce
 #endif
   {-# INLINE ( #. ) #-}
+
+instance Contravariant f => Profunctor (Clown f) where
+  lmap f (Clown fa) = Clown (contramap f fa)
+  {-# INLINE lmap #-}
+  rmap _ (Clown fa) = Clown fa
+  {-# INLINE rmap #-}
+  dimap f _ (Clown fa) = Clown (contramap f fa)
+  {-# INLINE dimap #-}
+
+instance Functor f => Profunctor (Joker f) where
+  lmap _ (Joker fb) = Joker fb
+  {-# INLINE lmap #-}
+  rmap g (Joker fb) = Joker (fmap g fb)
+  {-# INLINE rmap #-}
+  dimap _ g (Joker fb) = Joker (fmap g fb)
+  {-# INLINE dimap #-}
