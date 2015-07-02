@@ -50,10 +50,11 @@ import Control.Monad (liftM, MonadPlus(..))
 import Control.Monad.Fix
 import Data.Bifunctor.Clown (Clown(..))
 import Data.Bifunctor.Joker (Joker(..))
+import Data.Bifunctor.Product (Product(..))
 import Data.Distributive
 import Data.Foldable
 import Data.Functor.Contravariant (Contravariant(..))
-import Data.Monoid
+import Data.Monoid hiding (Product)
 import Data.Tagged
 import Data.Traversable
 import Data.Tuple
@@ -303,6 +304,12 @@ instance Contravariant f => Strong (Clown f) where
   second' (Clown fa) = Clown (contramap snd fa)
   {-# INLINE second' #-}
 
+instance (Strong p, Strong q) => Strong (Product p q) where
+  first' (Pair p q) = Pair (first' p) (first' q)
+  {-# INLINE first' #-}
+  second' (Pair p q) = Pair (second' p) (second' q)
+  {-# INLINE second' #-}
+
 ------------------------------------------------------------------------------
 -- Choice
 ------------------------------------------------------------------------------
@@ -378,6 +385,12 @@ instance Functor f => Choice (Joker f) where
   left' (Joker fb) = Joker (fmap Left fb)
   {-# INLINE left' #-}
   right' (Joker fb) = Joker (fmap Right fb)
+  {-# INLINE right' #-}
+
+instance (Choice p, Choice q) => Choice (Product p q) where
+  left' (Pair p q) = Pair (left' p) (left' q)
+  {-# INLINE left' #-}
+  right' (Pair p q) = Pair (right' p) (right' q)
   {-# INLINE right' #-}
 
 --------------------------------------------------------------------------------
