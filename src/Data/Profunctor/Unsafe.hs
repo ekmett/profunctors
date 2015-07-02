@@ -40,6 +40,7 @@ import Control.Comonad (Cokleisli(..))
 import Control.Monad (liftM)
 import Data.Bifunctor.Clown (Clown(..))
 import Data.Bifunctor.Joker (Joker(..))
+import Data.Bifunctor.Product (Product(..))
 import Data.Functor.Contravariant (Contravariant(..))
 import Data.Tagged
 import Prelude hiding (id,(.),sequence)
@@ -257,4 +258,12 @@ instance Functor f => Profunctor (Joker f) where
   rmap g (Joker fb) = Joker (fmap g fb)
   {-# INLINE rmap #-}
   dimap _ g (Joker fb) = Joker (fmap g fb)
+  {-# INLINE dimap #-}
+
+instance (Profunctor p, Profunctor q) => Profunctor (Product p q) where
+  lmap  f   (Pair p q) = Pair (lmap f p) (lmap f q)
+  {-# INLINE lmap #-}
+  rmap    g (Pair p q) = Pair (rmap g p) (rmap g q)
+  {-# INLINE rmap #-}
+  dimap f g (Pair p q) = Pair (dimap f g p) (dimap f g q)
   {-# INLINE dimap #-}
