@@ -48,8 +48,11 @@ import Control.Category
 import Control.Comonad
 import Control.Monad (liftM, MonadPlus(..))
 import Control.Monad.Fix
+import Data.Bifunctor.Clown (Clown(..))
+import Data.Bifunctor.Joker (Joker(..))
 import Data.Distributive
 import Data.Foldable
+import Data.Functor.Contravariant (Contravariant(..))
 import Data.Monoid
 import Data.Tagged
 import Data.Traversable
@@ -294,6 +297,12 @@ instance Strong (Forget r) where
   second' (Forget k) = Forget (k . snd)
   {-# INLINE second' #-}
 
+instance Contravariant f => Strong (Clown f) where
+  first' (Clown fa) = Clown (contramap fst fa)
+  {-# INLINE first' #-}
+  second' (Clown fa) = Clown (contramap snd fa)
+  {-# INLINE second' #-}
+
 ------------------------------------------------------------------------------
 -- Choice
 ------------------------------------------------------------------------------
@@ -363,6 +372,12 @@ instance Monoid r => Choice (Forget r) where
   left' (Forget k) = Forget (either k (const mempty))
   {-# INLINE left' #-}
   right' (Forget k) = Forget (either (const mempty) k)
+  {-# INLINE right' #-}
+
+instance Functor f => Choice (Joker f) where
+  left' (Joker fb) = Joker (fmap Left fb)
+  {-# INLINE left' #-}
+  right' (Joker fb) = Joker (fmap Right fb)
   {-# INLINE right' #-}
 
 --------------------------------------------------------------------------------
