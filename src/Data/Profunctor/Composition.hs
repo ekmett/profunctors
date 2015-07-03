@@ -23,7 +23,7 @@ module Data.Profunctor.Composition
   (
   -- * Profunctor Composition
     Procompose(..)
-  , procomposed
+  , procomposed, procomposed'
   -- * Unitors and Associator
   , idl
   , idr
@@ -48,6 +48,7 @@ import Data.Profunctor.Monad
 import Data.Profunctor.Rep
 import Data.Profunctor.Sieve
 import Data.Profunctor.Unsafe
+import Data.Semigroupoid
 import Prelude hiding ((.),id)
 
 type Iso s t a b = forall p f. (Profunctor p, Functor f) => p a (f b) -> p s (f t)
@@ -74,6 +75,10 @@ instance Category p => ProfunctorMonad (Procompose p) where
 procomposed :: Category p => Procompose p p a b -> p a b
 procomposed (Procompose pxc pdx) = pxc . pdx
 {-# INLINE procomposed #-}
+
+procomposed' :: Semigroupoid p => Procompose p p a b -> p a b
+procomposed' (Procompose pxc pdx) = pxc `o` pdx
+{-# INLINE procomposed' #-}
 
 instance (Profunctor p, Profunctor q) => Profunctor (Procompose p q) where
   dimap l r (Procompose f g) = Procompose (rmap r f) (lmap l g)
