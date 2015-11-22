@@ -141,6 +141,10 @@ untambara f p = dimap (\a -> (a,())) fst $ runTambara $ f p
 ----------------------------------------------------------------------------
 
 -- | Pastro -| Tambara
+--
+-- @
+-- Pastro p ~ exists z. Costar ((,)z) `Procompose` p `Procompose` Star ((,)z)
+-- @
 data Pastro p a b where
   Pastro :: ((y, z) -> b) -> p x y -> (a -> (x, z)) -> Pastro p a b
 
@@ -171,6 +175,8 @@ instance ProfunctorAdjunction Pastro Tambara where
 ----------------------------------------------------------------------------
 
 -- | Cotambara is freely adjoins respect for cocartesian structure to a profunctor
+--
+-- Note: this is not dual to 'Tambara'. It is 'Tambara' with respect to a different tensor.
 newtype Cotambara p a b = Cotambara { runCotambara :: forall c. p (Either a c) (Either b c) }
 
 instance ProfunctorFunctor Cotambara where
