@@ -103,7 +103,9 @@ instance Alternative f => Alternative (Star f a) where
   Star f <|> Star g = Star $ \a -> f a <|> g a
 
 instance Monad f => Monad (Star f a) where
+#if __GLASGOW_HASKELL__ < 710
   return a = Star $ \_ -> return a
+#endif
   Star m >>= f = Star $ \ e -> do
     a <- m e
     runStar (f a) e
@@ -153,7 +155,7 @@ instance Applicative (Costar f a) where
   m <* _ = m
 
 instance Monad (Costar f a) where
-  return a = Costar $ \_ -> a
+  return = pure
   Costar m >>= f = Costar $ \ x -> runCostar (f (m x)) x
 
 ------------------------------------------------------------------------------
