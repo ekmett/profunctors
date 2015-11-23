@@ -3,6 +3,8 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE CPP #-}
 #if __GLASGOW_HASKELL__ >= 702 && __GLASGOW_HASKELL__ <= 708
 {-# LANGUAGE Trustworthy #-}
@@ -28,6 +30,18 @@ module Data.Profunctor.Rep
   , Corepresentable(..)
   , cotabulated
   , unfirstCorep, unsecondCorep
+  -- * Prep -| Star
+  , Prep(..)
+  , prepAdj
+  , unprepAdj
+  , prepUnit
+  , prepCounit
+  -- * Coprep -| Costar
+  , Coprep(..)
+  , coprepAdj
+  , uncoprepAdj
+  , coprepUnit
+  , coprepCounit
   ) where
 
 import Control.Applicative
@@ -74,6 +88,7 @@ instance Representable (Forget r) where
   type Rep (Forget r) = Const r
   tabulate = Forget . (getConst .)
   {-# INLINE tabulate #-}
+
 
 type Iso s t a b = forall p f. (Profunctor p, Functor f) => p a (f b) -> p s (f t)
 
@@ -132,3 +147,67 @@ instance Functor f => Corepresentable (Costar f) where
 cotabulated :: (Corepresentable p, Corepresentable q) => Iso (Corep p d -> c) (Corep q d' -> c') (p d c) (q d' c')
 cotabulated = dimap cotabulate (fmap cosieve)
 {-# INLINE cotabulated #-}
+
+--------------------------------------------------------------------------------
+-- * Prep
+--------------------------------------------------------------------------------
+
+-- | @'Prep' -| 'Star' :: Prof -> [Hask, Hask]@
+--
+-- This gives rise to a monad in @Prof@, @('Star'.'Prep')@, and
+-- a comonad in @[Hask,Hask]@ @('Prep'.'Star')@
+data Prep p a where
+  Prep :: x -> p x a -> Prep p a
+
+instance Profunctor p => Functor (Prep p) where
+  fmap f (Prep x p) = Prep x (rmap f p)
+
+instance (Applicative (Rep p), Representable p) => Applicative (Prep p) where
+  pure a = Prep () $ tabulate $ const $ pure a
+  Prep xf pf <*> Prep xa pa = Prep (xf,xa) (tabulate go) where
+    go (xf',xa') = sieve pf xf' <*> sieve pa xa'
+
+instance (Monad (Rep p), Representable p) => Monad (Prep p) where
+  return a = Prep () $ tabulate $ const $ return a
+  Prep xa pa >>= f = Prep xa $ tabulate $ \xa' -> sieve pa xa' >>= \a -> case f a of
+    Prep xb pb -> sieve pb xb
+
+prepAdj :: (forall a. Prep p a -> g a) -> p :-> Star g
+prepAdj k p = Star $ \x -> k (Prep x p)
+
+unprepAdj :: (p :-> Star g) -> Prep p a -> g a
+unprepAdj k (Prep x p) = runStar (k p) x
+
+prepUnit :: p :-> Star (Prep p)
+prepUnit p = Star $ \x -> Prep x p
+
+prepCounit :: Prep (Star f) a -> f a
+prepCounit (Prep x p) = runStar p x
+
+--------------------------------------------------------------------------------
+-- * Coprep
+--------------------------------------------------------------------------------
+
+newtype Coprep p a = Coprep { runCoprep :: forall r. p a r -> r }
+
+instance Profunctor p => Functor (Coprep p) where
+  fmap f (Coprep g) = Coprep (g . lmap f)
+
+-- | @'Coprep' -| 'Costar' :: Prof -> [Hask, Hask]^op@
+--
+-- Like all adjunctions this gives rise to a monad and a comonad.
+--
+-- This gives rise to a monad on Prof @('Costar'.'Coprep')@ and
+-- a comonad on @[Hask, Hask]^op@ given by @('Coprep'.'Costar')@ which
+-- is a monad in the @[Hask,Hask]@
+coprepAdj :: (forall a. f a -> Coprep p a) -> p :-> Costar f
+coprepAdj k p = Costar $ \f -> runCoprep (k f) p
+
+uncoprepAdj :: (p :-> Costar f) -> f a -> Coprep p a
+uncoprepAdj k f = Coprep $ \p -> runCostar (k p) f
+
+coprepUnit :: p :-> Costar (Coprep p)
+coprepUnit p = Costar $ \f -> runCoprep f p
+
+coprepCounit :: f a -> Coprep (Costar f) a
+coprepCounit f = Coprep $ \p -> runCostar p f
