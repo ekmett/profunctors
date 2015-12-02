@@ -19,6 +19,7 @@ import Control.Applicative
 import Control.Arrow
 import Control.Category
 import Control.Comonad
+import Data.Bifunctor.Product as Bifunctor
 import Data.Distributive
 import Data.Monoid
 import Data.Profunctor
@@ -55,6 +56,9 @@ instance Distributive f => Closed (Star f) where
 
 instance (Distributive f, Monad f) => Closed (Kleisli f) where
   closed (Kleisli afb) = Kleisli $ \xa -> distribute $ \x -> afb (xa x)
+
+instance (Closed p, Closed q) => Closed (Bifunctor.Product p q) where
+  closed (Pair p q) = Pair (closed p) (closed q)
 
 -- instance Monoid r => Closed (Forget r) where
 --  closed _ = Forget $ \_ -> mempty
