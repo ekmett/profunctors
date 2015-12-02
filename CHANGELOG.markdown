@@ -1,3 +1,8 @@
+5.2
+---
+* Renamed `Cotambara` to `TambaraSum` and `Pastro` to `PastroSum`.
+* Added a true `Cotambara` and `Copastro` construction for (co)freely generating costrength.
+
 5.1.2
 -----
 * Added `Prep` and `Coprep` along with witnesses to the adjunctions `Prep -| Star : [Hask,Hask] -> Prof` and `Coprep -| Costar : [Hask,Hask]^op -> Prof`.

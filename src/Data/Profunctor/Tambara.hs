@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+{-# LANGUAGE CPP #-
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE TypeOperators #-}
@@ -174,38 +174,24 @@ instance ProfunctorAdjunction Pastro Tambara where
 -- * Cotambara
 ----------------------------------------------------------------------------
 
--- | Cotambara is freely adjoins respect for cocartesian structure to a profunctor
---
--- Note: this is not dual to 'Tambara'. It is 'Tambara' with respect to a different tensor.
-newtype Cotambara p a b = Cotambara { runCotambara :: forall c. p (Either a c) (Either b c) }
-
-instance ProfunctorFunctor Cotambara where
-  promap f (Cotambara p) = Cotambara (f p)
-
-instance ProfunctorComonad Cotambara where
-  proextract (Cotambara p)   = dimap Left (\(Left a) -> a) p
-  produplicate (Cotambara p) = Cotambara (Cotambara $ dimap hither yon p) where
-    hither :: Either (Either a b) c -> Either a (Either b c)
-    hither (Left (Left x))   = Left x
-    hither (Left (Right y))  = Right (Left y)
-    hither (Right z)         = Right (Right z)
-
-    yon    :: Either a (Either b c) -> Either (Either a b) c
-    yon    (Left x)          = Left (Left x)
-    yon    (Right (Left y))  = Left (Right y)
-    yon    (Right (Right z)) = Right z
+-- | Cotambara cofreely constructs costrength
+data Cotambara q a b where
+    Cotambara :: Costrong r => (r :-> q) -> r a b -> Cotambara q a b
 
 instance Profunctor p => Profunctor (Cotambara p) where
-  dimap f g (Cotambara p) = Cotambara $ dimap (left f) (left g) p
-  {-# INLINE dimap #-}
+  lmap f (Cotambara n p) = Cotambara n (lmap f p)
+  rmap g (Cotambara n p) = Cotambara n (rmap g p)
+  dimap f g (Cotambara n p) = Cotambara n (dimap f g p)
 
-instance Profunctor p => Choice (Cotambara p) where
-  left' = runCotambara . produplicate
-  {-# INLINE left' #-}
+instance ProfunctorFunctor Cotambara where
+  promap f (Cotambara n p) = Cotambara (f . n) p
 
-instance Category p => Category (Cotambara p) where
-  id = Cotambara id
-  Cotambara p . Cotambara q = Cotambara (p . q)
+instance ProfunctorComonad Cotambara where
+  proextract (Cotambara n p)  = n p
+  produplicate (Cotambara n p) = Cotambara id (Cotambara n p)
+
+instance Profunctor p => Costrong (Cotambara p) where
+  unfirst (Cotambara n p) = Cotambara n (unfirst p)
 
 instance Profunctor p => Functor (Cotambara p a) where
   fmap = rmap
@@ -215,8 +201,8 @@ instance Profunctor p => Functor (Cotambara p a) where
 -- 'cotambara' '.' 'uncotambara' ≡ 'id'
 -- 'uncotambara' '.' 'cotambara' ≡ 'id'
 -- @
-cotambara :: Choice p => (p :-> q) -> p :-> Cotambara q
-cotambara f p = Cotambara $ f $ left' p
+cotambara :: Costrong p => (p :-> q) -> p :-> Cotambara q
+cotambara = Cotambara
 
 -- |
 -- @
@@ -224,38 +210,33 @@ cotambara f p = Cotambara $ f $ left' p
 -- 'uncotambara' '.' 'cotambara' ≡ 'id'
 -- @
 uncotambara :: Profunctor q => (p :-> Cotambara q) -> p :-> q
-uncotambara f p = dimap Left (\(Left a) -> a) $ runCotambara $ f p
+uncotambara f p = proextract (f p)
 
 ----------------------------------------------------------------------------
 -- * Copastro
 ----------------------------------------------------------------------------
 
 -- | Copastro -| Cotambara
-data Copastro p a b where
-  Copastro :: (Either y z -> b) -> p x y -> (a -> Either x z) -> Copastro p a b
+--
+-- Copastro freely constructs costrength
+newtype Copastro p a b = Copastro { runCopastro :: forall r. Costrong r => (p :-> r) -> r a b }
 
 instance Profunctor p => Profunctor (Copastro p) where
-  dimap f g (Copastro l m r) = Copastro (g . l) m (r . f)
-  lmap f (Copastro l m r) = Copastro l m (r . f)
-  rmap g (Copastro l m r) = Copastro (g . l) m r
-  w #. Copastro l m r = Copastro (w #. l) m r
-  Copastro l m r .# w = Copastro l m (r .# w)
+  dimap f g (Copastro h) = Copastro $ \ n -> dimap f g (h n)
+  lmap f (Copastro h) = Copastro $ \ n -> lmap f (h n)
+  rmap g (Copastro h) = Copastro $ \ n -> rmap g (h n)
 
 instance ProfunctorAdjunction Copastro Cotambara where
-  counit (Copastro f (Cotambara g) h) = dimap h f g
-  unit p = Cotambara $ Copastro id p id
+ unit p = Cotambara id (proreturn p)
+ counit (Copastro h) = proextract (h id)
 
 instance ProfunctorFunctor Copastro where
-  promap f (Copastro l m r) = Copastro l (f m) r
+  promap f (Copastro h) = Copastro $ \n -> h (n . f)
 
 instance ProfunctorMonad Copastro where
-  proreturn p = Copastro (\(Left a)-> a) p Left
-  projoin (Copastro l (Copastro m n o) q) = Copastro lm n oq where
-    oq a = case q a of
-      Left b -> case o b of
-        Left c -> Left c
-        Right z -> Right (Left z)
-      Right z -> Right (Right z)
-    lm (Left x) = l $ Left $ m $ Left x
-    lm (Right (Left y)) = l $ Left $ m $ Right y
-    lm (Right (Right z)) = l $ Right z
+  proreturn p = Copastro $ \n -> n p
+  projoin p = Copastro $ \c -> runCopastro p (\x -> runCopastro x c)
+
+instance Profunctor p => Costrong (Copastro p) where
+  unfirst (Copastro p) = Copastro $ \n -> unfirst (p n)
+  unsecond (Copastro p) = Copastro $ \n -> unsecond (p n)

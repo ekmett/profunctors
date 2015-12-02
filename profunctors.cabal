@@ -1,6 +1,6 @@
 name:          profunctors
 category:      Control, Categories
-version:       5.1.2
+version:       5.2
 license:       BSD3
 cabal-version: >= 1.10
 license-file:  LICENSE
@@ -50,6 +50,7 @@ library
     Data.Profunctor.Rep
     Data.Profunctor.Sieve
     Data.Profunctor.Tambara
+    Data.Profunctor.Tambara.Sum
     Data.Profunctor.Trace
     Data.Profunctor.Unsafe
 
