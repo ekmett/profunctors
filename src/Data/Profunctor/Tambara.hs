@@ -39,6 +39,7 @@ import Prelude hiding (id,(.))
 -- * Tambara
 ----------------------------------------------------------------------------
 
+-- | 'Tambara' cofreely makes any 'Profunctor' 'Strong'.
 newtype Tambara p a b = Tambara { runTambara :: forall c. p (a, c) (b, c) }
 
 instance Profunctor p => Profunctor (Tambara p) where
@@ -145,6 +146,8 @@ untambara f p = dimap (\a -> (a,())) fst $ runTambara $ f p
 -- @
 -- Pastro p ~ exists z. Costar ((,)z) `Procompose` p `Procompose` Star ((,)z)
 -- @
+--
+-- 'Pastro' freely makes any 'Profunctor' 'Strong'.
 data Pastro p a b where
   Pastro :: ((y, z) -> b) -> p x y -> (a -> (x, z)) -> Pastro p a b
 
