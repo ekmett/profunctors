@@ -20,6 +20,7 @@ import Control.Arrow
 import Control.Category
 import Control.Comonad
 import Data.Bifunctor.Product as Bifunctor
+import Data.Bifunctor.Tannen
 import Data.Distributive
 import Data.Monoid
 import Data.Profunctor
@@ -59,6 +60,9 @@ instance (Distributive f, Monad f) => Closed (Kleisli f) where
 
 instance (Closed p, Closed q) => Closed (Bifunctor.Product p q) where
   closed (Pair p q) = Pair (closed p) (closed q)
+
+instance (Functor f, Closed p) => Closed (Tannen f p) where
+  closed (Tannen fp) = Tannen (fmap closed fp)
 
 -- instance Monoid r => Closed (Forget r) where
 --  closed _ = Forget $ \_ -> mempty

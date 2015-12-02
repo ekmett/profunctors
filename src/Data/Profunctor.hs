@@ -51,6 +51,7 @@ import Control.Monad.Fix
 import Data.Bifunctor.Clown (Clown(..))
 import Data.Bifunctor.Joker (Joker(..))
 import Data.Bifunctor.Product (Product(..))
+import Data.Bifunctor.Tannen (Tannen(..))
 import Data.Distributive
 import Data.Foldable
 import Data.Functor.Contravariant (Contravariant(..))
@@ -312,6 +313,12 @@ instance (Strong p, Strong q) => Strong (Product p q) where
   second' (Pair p q) = Pair (second' p) (second' q)
   {-# INLINE second' #-}
 
+instance (Functor f, Strong p) => Strong (Tannen f p) where
+  first' (Tannen fp) = Tannen (fmap first' fp)
+  {-# INLINE first' #-}
+  second' (Tannen fp) = Tannen (fmap second' fp)
+  {-# INLINE second' #-}
+
 ------------------------------------------------------------------------------
 -- Choice
 ------------------------------------------------------------------------------
@@ -395,6 +402,12 @@ instance (Choice p, Choice q) => Choice (Product p q) where
   right' (Pair p q) = Pair (right' p) (right' q)
   {-# INLINE right' #-}
 
+instance (Functor f, Choice p) => Choice (Tannen f p) where
+  left' (Tannen fp) = Tannen (fmap left' fp)
+  {-# INLINE left' #-}
+  right' (Tannen fp) = Tannen (fmap right' fp)
+  {-# INLINE right' #-}
+
 --------------------------------------------------------------------------------
 -- * Costrength for (,)
 --------------------------------------------------------------------------------
@@ -436,6 +449,14 @@ instance Functor f => Costrong (Cokleisli f) where
   unfirst (Cokleisli f) = Cokleisli f'
     where f' fa = b where (b, d) = f ((\a -> (a, d)) <$> fa)
 
+instance (Functor f, Costrong p) => Costrong (Tannen f p) where
+  unfirst (Tannen fp) = Tannen (fmap unfirst fp)
+  unsecond (Tannen fp) = Tannen (fmap unsecond fp)
+
+instance (Costrong p, Costrong q) => Costrong (Product p q) where
+  unfirst (Pair p q) = Pair (unfirst p) (unfirst q)
+  unsecond (Pair p q) = Pair (unsecond p) (unsecond q)
+
 --------------------------------------------------------------------------------
 -- * Costrength for Either
 --------------------------------------------------------------------------------
@@ -463,3 +484,13 @@ instance Applicative f => Cochoice (Costar f) where
 instance Traversable f => Cochoice (Star f) where
   unright (Star f) = Star (go . Right)
     where go = either (go . Left) id . sequence . f
+
+instance (Functor f, Cochoice p) => Cochoice (Tannen f p) where
+  unleft (Tannen fp) = Tannen (fmap unleft fp)
+  {-# INLINE unleft #-}
+  unright (Tannen fp) = Tannen (fmap unright fp)
+  {-# INLINE unright #-}
+
+instance (Cochoice p, Cochoice q) => Cochoice (Product p q) where
+  unleft (Pair p q) = Pair (unleft p) (unleft q)
+  unright (Pair p q) = Pair (unright p) (unright q)

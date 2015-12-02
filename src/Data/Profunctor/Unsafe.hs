@@ -41,6 +41,7 @@ import Control.Monad (liftM)
 import Data.Bifunctor.Clown (Clown(..))
 import Data.Bifunctor.Joker (Joker(..))
 import Data.Bifunctor.Product (Product(..))
+import Data.Bifunctor.Tannen (Tannen(..))
 import Data.Functor.Contravariant (Contravariant(..))
 import Data.Tagged
 import Prelude hiding (id,(.),sequence)
@@ -267,3 +268,19 @@ instance (Profunctor p, Profunctor q) => Profunctor (Product p q) where
   {-# INLINE rmap #-}
   dimap f g (Pair p q) = Pair (dimap f g p) (dimap f g q)
   {-# INLINE dimap #-}
+  ( #. ) f (Pair p q) = Pair (f #. p) (f #. q)
+  {-# INLINE ( #. ) #-}
+  ( .# ) (Pair p q) f = Pair (p .# f) (q .# f)
+  {-# INLINE ( .# ) #-}
+
+instance (Functor f, Profunctor p) => Profunctor (Tannen f p) where
+  lmap f (Tannen h) = Tannen (lmap f <$> h)
+  {-# INLINE lmap #-}
+  rmap g (Tannen h) = Tannen (rmap g <$> h)
+  {-# INLINE rmap #-}
+  dimap f g (Tannen h) = Tannen (dimap f g <$> h)
+  {-# INLINE dimap #-}
+  ( #. ) f (Tannen h) = Tannen ((f #.) <$> h)
+  {-# INLINE ( #. ) #-}
+  ( .# ) (Tannen h) f = Tannen ((.# f) <$> h)
+  {-# INLINE ( .# ) #-}
