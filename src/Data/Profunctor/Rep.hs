@@ -199,7 +199,7 @@ instance Profunctor p => Functor (Coprep p) where
 --
 -- This gives rise to a monad on Prof @('Costar'.'Coprep')@ and
 -- a comonad on @[Hask, Hask]^op@ given by @('Coprep'.'Costar')@ which
--- is a monad in the @[Hask,Hask]@
+-- is a monad in @[Hask,Hask]@
 coprepAdj :: (forall a. f a -> Coprep p a) -> p :-> Costar f
 coprepAdj k p = Costar $ \f -> runCoprep (k f) p
 
