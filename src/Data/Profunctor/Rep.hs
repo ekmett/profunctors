@@ -152,7 +152,7 @@ cotabulated = dimap cotabulate (fmap cosieve)
 -- * Prep
 --------------------------------------------------------------------------------
 
--- | @'Prep' -| 'Star' :: Prof -> [Hask, Hask]@
+-- | @'Prep' -| 'Star' :: [Hask, Hask] -> Prof@
 --
 -- This gives rise to a monad in @Prof@, @('Star'.'Prep')@, and
 -- a comonad in @[Hask,Hask]@ @('Prep'.'Star')@
@@ -193,7 +193,7 @@ newtype Coprep p a = Coprep { runCoprep :: forall r. p a r -> r }
 instance Profunctor p => Functor (Coprep p) where
   fmap f (Coprep g) = Coprep (g . lmap f)
 
--- | @'Coprep' -| 'Costar' :: Prof -> [Hask, Hask]^op@
+-- | @'Coprep' -| 'Costar' :: [Hask, Hask]^op -> Prof@
 --
 -- Like all adjunctions this gives rise to a monad and a comonad.
 --

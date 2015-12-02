@@ -1,3 +1,7 @@
+5.1.2
+-----
+* Added `Prep` and `Coprep` along with witnesses to the adjunctions `Prep -| Star : [Hask,Hask] -> Prof` and `Coprep -| Costar : [Hask,Hask]^op -> Prof`.
+
 5.1.1
 -----
 * Add proper support for GHC 7.0+.
