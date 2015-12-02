@@ -38,6 +38,7 @@ import Control.Arrow
 import Control.Category
 import Control.Comonad (Cokleisli(..))
 import Control.Monad (liftM)
+import Data.Bifunctor.Biff (Biff(..))
 import Data.Bifunctor.Clown (Clown(..))
 import Data.Bifunctor.Joker (Joker(..))
 import Data.Bifunctor.Product (Product(..))
@@ -260,6 +261,11 @@ instance Functor f => Profunctor (Joker f) where
   {-# INLINE rmap #-}
   dimap _ g (Joker fb) = Joker (fmap g fb)
   {-# INLINE dimap #-}
+
+instance (Profunctor p, Functor f, Functor g) => Profunctor (Biff p f g) where
+  lmap f (Biff p) = Biff (lmap (fmap f) p)
+  rmap g (Biff p) = Biff (rmap (fmap g) p)
+  dimap f g (Biff p) = Biff (dimap (fmap f) (fmap g) p)
 
 instance (Profunctor p, Profunctor q) => Profunctor (Product p q) where
   lmap  f   (Pair p q) = Pair (lmap f p) (lmap f q)
