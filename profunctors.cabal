@@ -50,7 +50,7 @@ library
     Data.Profunctor.Rep
     Data.Profunctor.Sieve
     Data.Profunctor.Tambara
-    Data.Profunctor.Tambara.Sum
+    Data.Profunctor.Tambara.Choice
     Data.Profunctor.Trace
     Data.Profunctor.Unsafe
 
