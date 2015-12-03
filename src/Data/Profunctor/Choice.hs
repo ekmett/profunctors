@@ -47,7 +47,7 @@ import Data.Tagged
 #if __GLASGOW_HASKELL__ < 710
 import Data.Traversable
 #endif
-import Prelude hiding (id,(.))
+import Prelude hiding (id,(.),sequence)
 
 ------------------------------------------------------------------------------
 -- Choice
