@@ -1,7 +1,8 @@
 5.2
 ---
 * Renamed `Cotambara` to `TambaraChoice` and `Pastro` to `PastroChoice`.
-* Added a true `Cotambara` and `Copastro` construction for (co)freely generating costrength, along with `CotambaraChoice` and `CopastroChoice` variants
+* Added a true `Cotambara` and `Copastro` construction for (co)freely generating costrength, along with `CotambaraSum` and `CopastroSum` variants.
+* Engaged in a fair bit of bikeshedding about the module structure for lesser used modules in this package.
 
 5.1.2
 -----
