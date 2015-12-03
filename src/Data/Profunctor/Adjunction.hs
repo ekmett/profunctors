@@ -2,6 +2,16 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE RankNTypes #-}
+-----------------------------------------------------------------------------
+-- |
+-- Copyright   :  (C) 2015 Edward Kmett
+-- License     :  BSD-style (see the file LICENSE)
+--
+-- Maintainer  :  Edward Kmett <ekmett@gmail.com>
+-- Stability   :  experimental
+-- Portability :  non-portable, MPTCs, fundeps
+--
+----------------------------------------------------------------------------
 module Data.Profunctor.Adjunction where
 
 import Data.Profunctor.Types
