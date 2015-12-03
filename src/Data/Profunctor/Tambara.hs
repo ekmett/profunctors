@@ -173,6 +173,16 @@ instance ProfunctorAdjunction Pastro Tambara where
   counit (Pastro g (Tambara p) f) = dimap f g p
   unit p = Tambara (Pastro id p id)
 
+instance Profunctor p => Strong (Pastro p) where
+  first' (Pastro l m r) = Pastro l' m r' where
+    r' (a,c) = case r a of
+      (x,z) -> (x,(z,c))
+    l' (y,(z,c)) = (l (y,z), c)
+  second' (Pastro l m r) = Pastro l' m r' where
+    r' (c,a) = case r a of
+      (x,z) -> (x,(c,z))
+    l' (y,(c,z)) = (c,l (y,z))
+
 ----------------------------------------------------------------------------
 -- * Cotambara
 ----------------------------------------------------------------------------
