@@ -43,6 +43,9 @@ import Data.Bifunctor.Clown (Clown(..))
 import Data.Bifunctor.Joker (Joker(..))
 import Data.Bifunctor.Product (Product(..))
 import Data.Bifunctor.Tannen (Tannen(..))
+#if __GLASGOW_HASKELL__ < 710
+import Data.Functor
+#endif
 import Data.Functor.Contravariant (Contravariant(..))
 import Data.Tagged
 import Prelude hiding (id,(.),sequence)
