@@ -16,22 +16,128 @@
 -- Portability :  Rank2Types
 --
 ----------------------------------------------------------------------------
-module Data.Profunctor.Tambara.Choice
-  ( TambaraChoice(..)
+module Data.Profunctor.Choice
+  ( Choice(..)
+  , TambaraChoice(..)
   , tambaraChoice, untambaraChoice
   , PastroChoice(..)
-  , CotambaraChoice(..)
-  , cotambaraChoice, uncotambaraChoice
-  , CopastroChoice(..)
   ) where
 
+import Control.Applicative hiding (WrappedArrow(..))
 import Control.Arrow
 import Control.Category
-import Data.Profunctor
+import Control.Comonad
+import Data.Bifunctor.Joker (Joker(..))
+import Data.Bifunctor.Product (Product(..))
+import Data.Bifunctor.Tannen (Tannen(..))
+import Data.Monoid hiding (Product)
 import Data.Profunctor.Adjunction
 import Data.Profunctor.Monad
+import Data.Profunctor.Strong
+import Data.Profunctor.Types
 import Data.Profunctor.Unsafe
+import Data.Tagged
 import Prelude hiding (id,(.))
+
+------------------------------------------------------------------------------
+-- Choice
+------------------------------------------------------------------------------
+
+-- | The generalization of 'Costar' of 'Functor' that is strong with respect
+-- to 'Either'.
+--
+-- Note: This is also a notion of strength, except with regards to another monoidal
+-- structure that we can choose to equip Hask with: the cocartesian coproduct.
+class Profunctor p => Choice p where
+  left'  :: p a b -> p (Either a c) (Either b c)
+  left' =  dimap (either Right Left) (either Right Left) . right'
+
+  right' :: p a b -> p (Either c a) (Either c b)
+  right' =  dimap (either Right Left) (either Right Left) . left'
+
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 708
+  {-# MINIMAL left' | right' #-}
+#endif
+
+instance Choice (->) where
+  left' ab (Left a) = Left (ab a)
+  left' _ (Right c) = Right c
+  {-# INLINE left' #-}
+  right' = fmap
+  {-# INLINE right' #-}
+
+instance Monad m => Choice (Kleisli m) where
+  left' = left
+  {-# INLINE left' #-}
+  right' = right
+  {-# INLINE right' #-}
+
+instance Applicative f => Choice (Star f) where
+  left' (Star f) = Star $ either (fmap Left . f) (pure . Right)
+  {-# INLINE left' #-}
+  right' (Star f) = Star $ either (pure . Left) (fmap Right . f)
+  {-# INLINE right' #-}
+
+-- | 'extract' approximates 'costrength'
+instance Comonad w => Choice (Cokleisli w) where
+  left' = left
+  {-# INLINE left' #-}
+  right' = right
+  {-# INLINE right' #-}
+
+-- NB: This instance is highly questionable
+instance Traversable w => Choice (Costar w) where
+  left' (Costar wab) = Costar (either Right Left . fmap wab . traverse (either Right Left))
+  {-# INLINE left' #-}
+  right' (Costar wab) = Costar (fmap wab . sequence)
+  {-# INLINE right' #-}
+
+instance Choice Tagged where
+  left' (Tagged b) = Tagged (Left b)
+  {-# INLINE left' #-}
+  right' (Tagged b) = Tagged (Right b)
+  {-# INLINE right' #-}
+
+instance ArrowChoice p => Choice (WrappedArrow p) where
+  left' (WrapArrow k) = WrapArrow (left k)
+  {-# INLINE left' #-}
+  right' (WrapArrow k) = WrapArrow (right k)
+  {-# INLINE right' #-}
+
+instance Monoid r => Choice (Forget r) where
+  left' (Forget k) = Forget (either k (const mempty))
+  {-# INLINE left' #-}
+  right' (Forget k) = Forget (either (const mempty) k)
+  {-# INLINE right' #-}
+
+instance Functor f => Choice (Joker f) where
+  left' (Joker fb) = Joker (fmap Left fb)
+  {-# INLINE left' #-}
+  right' (Joker fb) = Joker (fmap Right fb)
+  {-# INLINE right' #-}
+
+instance (Choice p, Choice q) => Choice (Product p q) where
+  left' (Pair p q) = Pair (left' p) (left' q)
+  {-# INLINE left' #-}
+  right' (Pair p q) = Pair (right' p) (right' q)
+  {-# INLINE right' #-}
+
+instance (Functor f, Choice p) => Choice (Tannen f p) where
+  left' (Tannen fp) = Tannen (fmap left' fp)
+  {-# INLINE left' #-}
+  right' (Tannen fp) = Tannen (fmap right' fp)
+  {-# INLINE right' #-}
+
+instance Choice p => Choice (Tambara p) where
+  left' (Tambara f) = Tambara $ dimap hither yon $ left' f where
+    hither :: (Either a b, c) -> Either (a, c) (b, c)
+    hither (Left y, s) = Left (y, s)
+    hither (Right z, s) = Right (z, s)
+
+    yon :: Either (a, c) (b, c) -> (Either a b, c)
+    yon (Left (y, s)) = (Left y, s)
+    yon (Right (z, s)) = (Right z, s)
+
 
 ----------------------------------------------------------------------------
 -- * TambaraChoice
@@ -135,74 +241,3 @@ instance Profunctor p => Choice (PastroChoice p) where
     l' (Right (Right z)) = Right (l (Right z))
     l' (Left y)          = Right (l (Left y))
 
-----------------------------------------------------------------------------
--- * CotambaraChoice
-----------------------------------------------------------------------------
-
--- | 'CotambaraChoice' cofreely constructs costrength with respect to 'Either' (aka 'Choice')
-data CotambaraChoice q a b where
-    CotambaraChoice :: Cochoice r => (r :-> q) -> r a b -> CotambaraChoice q a b
-
-instance Profunctor p => Profunctor (CotambaraChoice p) where
-  lmap f (CotambaraChoice n p) = CotambaraChoice n (lmap f p)
-  rmap g (CotambaraChoice n p) = CotambaraChoice n (rmap g p)
-  dimap f g (CotambaraChoice n p) = CotambaraChoice n (dimap f g p)
-
-instance ProfunctorFunctor CotambaraChoice where
-  promap f (CotambaraChoice n p) = CotambaraChoice (f . n) p
-
-instance ProfunctorComonad CotambaraChoice where
-  proextract (CotambaraChoice n p)  = n p
-  produplicate (CotambaraChoice n p) = CotambaraChoice id (CotambaraChoice n p)
-
-instance Profunctor p => Cochoice (CotambaraChoice p) where
-  unleft (CotambaraChoice n p) = CotambaraChoice n (unleft p)
-  unright (CotambaraChoice n p) = CotambaraChoice n (unright p)
-
-instance Profunctor p => Functor (CotambaraChoice p a) where
-  fmap = rmap
-
--- |
--- @
--- 'cotambaraChoice' '.' 'uncotambaraChoice' ≡ 'id'
--- 'uncotambaraChoice' '.' 'cotambaraChoice' ≡ 'id'
--- @
-cotambaraChoice :: Cochoice p => (p :-> q) -> p :-> CotambaraChoice q
-cotambaraChoice = CotambaraChoice
-
--- |
--- @
--- 'cotambaraChoice' '.' 'uncotambaraChoice' ≡ 'id'
--- 'uncotambaraChoice' '.' 'cotambaraChoice' ≡ 'id'
--- @
-uncotambaraChoice :: Profunctor q => (p :-> CotambaraChoice q) -> p :-> q
-uncotambaraChoice f p = proextract (f p)
-
-----------------------------------------------------------------------------
--- * Copastro
-----------------------------------------------------------------------------
-
--- | CopastroChoice -| CotambaraChoice
---
--- 'CopastroChoice' freely constructs costrength with respect to 'Either' (aka 'Choice')
-newtype CopastroChoice p a b = CopastroChoice { runCopastroChoice :: forall r. Cochoice r => (p :-> r) -> r a b }
-
-instance Profunctor p => Profunctor (CopastroChoice p) where
-  dimap f g (CopastroChoice h) = CopastroChoice $ \ n -> dimap f g (h n)
-  lmap f (CopastroChoice h) = CopastroChoice $ \ n -> lmap f (h n)
-  rmap g (CopastroChoice h) = CopastroChoice $ \ n -> rmap g (h n)
-
-instance ProfunctorAdjunction CopastroChoice CotambaraChoice where
- unit p = CotambaraChoice id (proreturn p)
- counit (CopastroChoice h) = proextract (h id)
-
-instance ProfunctorFunctor CopastroChoice where
-  promap f (CopastroChoice h) = CopastroChoice $ \n -> h (n . f)
-
-instance ProfunctorMonad CopastroChoice where
-  proreturn p = CopastroChoice $ \n -> n p
-  projoin p = CopastroChoice $ \c -> runCopastroChoice p (\x -> runCopastroChoice x c)
-
-instance Profunctor p => Cochoice (CopastroChoice p) where
-  unleft (CopastroChoice p) = CopastroChoice $ \n -> unleft (p n)
-  unright (CopastroChoice p) = CopastroChoice $ \n -> unright (p n)

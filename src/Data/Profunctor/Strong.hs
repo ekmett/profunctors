@@ -3,9 +3,11 @@
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-#if __GLASGOW_HASKELL__ >= 702 && __GLASGOW_HASKELL__ <= 708
+
+#if __GLASGOW_HASKELL__ >= 704 && __GLASGOW_HASKELL__ < 708
 {-# LANGUAGE Trustworthy #-}
 #endif
+
 -----------------------------------------------------------------------------
 -- |
 -- Copyright   :  (C) 2014 Edward Kmett
@@ -16,24 +18,108 @@
 -- Portability :  Rank2Types
 --
 ----------------------------------------------------------------------------
-module Data.Profunctor.Tambara
-  ( Tambara(..)
+module Data.Profunctor.Strong
+  ( Strong(..)
+  , uncurry'
+  , Tambara(..)
   , tambara, untambara
   , Pastro(..)
-  , Cotambara(..)
-  , cotambara, uncotambara
-  , Copastro(..)
   ) where
 
-import Control.Applicative
+import Control.Applicative hiding (WrappedArrow(..))
 import Control.Arrow
 import Control.Category
-import Data.Monoid
-import Data.Profunctor
+import Control.Comonad
+import Data.Bifunctor.Clown (Clown(..))
+import Data.Bifunctor.Product (Product(..))
+import Data.Bifunctor.Tannen (Tannen(..))
+import Data.Functor.Contravariant (Contravariant(..))
+import Data.Monoid hiding (Product)
 import Data.Profunctor.Adjunction
 import Data.Profunctor.Monad
+import Data.Profunctor.Types
 import Data.Profunctor.Unsafe
+import Data.Tuple
 import Prelude hiding (id,(.))
+
+------------------------------------------------------------------------------
+-- Strong
+------------------------------------------------------------------------------
+
+-- | Generalizing 'Star' of a strong 'Functor'
+--
+-- /Note:/ Every 'Functor' in Haskell is strong with respect to @(,)@.
+--
+-- This describes profunctor strength with respect to the product structure
+-- of Hask.
+--
+-- <http://www-kb.is.s.u-tokyo.ac.jp/~asada/papers/arrStrMnd.pdf>
+class Profunctor p => Strong p where
+  first' :: p a b  -> p (a, c) (b, c)
+  first' = dimap swap swap . second'
+
+  second' :: p a b -> p (c, a) (c, b)
+  second' = dimap swap swap . first'
+
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 708
+  {-# MINIMAL first' | second' #-}
+#endif
+
+uncurry' :: Strong p => p a (b -> c) -> p (a, b) c
+uncurry' = rmap (\(f,x) -> f x) . first'
+{-# INLINE uncurry' #-}
+
+instance Strong (->) where
+  first' ab ~(a, c) = (ab a, c)
+  {-# INLINE first' #-}
+  second' ab ~(c, a) = (c, ab a)
+
+instance Monad m => Strong (Kleisli m) where
+  first' (Kleisli f) = Kleisli $ \ ~(a, c) -> do
+     b <- f a
+     return (b, c)
+  {-# INLINE first' #-}
+  second' (Kleisli f) = Kleisli $ \ ~(c, a) -> do
+     b <- f a
+     return (c, b)
+  {-# INLINE second' #-}
+
+instance Functor m => Strong (Star m) where
+  first' (Star f) = Star $ \ ~(a, c) -> (\b' -> (b', c)) <$> f a
+  {-# INLINE first' #-}
+  second' (Star f) = Star $ \ ~(c, a) -> (,) c <$> f a
+  {-# INLINE second' #-}
+
+-- | 'Arrow' is 'Strong' 'Category'
+instance Arrow p => Strong (WrappedArrow p) where
+  first' (WrapArrow k) = WrapArrow (first k)
+  {-# INLINE first' #-}
+  second' (WrapArrow k) = WrapArrow (second k)
+  {-# INLINE second' #-}
+
+instance Strong (Forget r) where
+  first' (Forget k) = Forget (k . fst)
+  {-# INLINE first' #-}
+  second' (Forget k) = Forget (k . snd)
+  {-# INLINE second' #-}
+
+instance Contravariant f => Strong (Clown f) where
+  first' (Clown fa) = Clown (contramap fst fa)
+  {-# INLINE first' #-}
+  second' (Clown fa) = Clown (contramap snd fa)
+  {-# INLINE second' #-}
+
+instance (Strong p, Strong q) => Strong (Product p q) where
+  first' (Pair p q) = Pair (first' p) (first' q)
+  {-# INLINE first' #-}
+  second' (Pair p q) = Pair (second' p) (second' q)
+  {-# INLINE second' #-}
+
+instance (Functor f, Strong p) => Strong (Tannen f p) where
+  first' (Tannen fp) = Tannen (fmap first' fp)
+  {-# INLINE first' #-}
+  second' (Tannen fp) = Tannen (fmap second' fp)
+  {-# INLINE second' #-}
 
 ----------------------------------------------------------------------------
 -- * Tambara
@@ -61,16 +147,6 @@ instance ProfunctorComonad Tambara where
 instance Profunctor p => Strong (Tambara p) where
   first' = runTambara . produplicate
   {-# INLINE first' #-}
-
-instance Choice p => Choice (Tambara p) where
-  left' (Tambara f) = Tambara $ dimap hither yon $ left' f where
-    hither :: (Either a b, c) -> Either (a, c) (b, c)
-    hither (Left y, s) = Left (y, s)
-    hither (Right z, s) = Right (z, s)
-
-    yon :: Either (a, c) (b, c) -> (Either a b, c)
-    yon (Left (y, s)) = (Left y, s)
-    yon (Right (z, s)) = (Right z, s)
 
 instance Category p => Category (Tambara p) where
   id = Tambara id
@@ -183,73 +259,3 @@ instance Profunctor p => Strong (Pastro p) where
       (x,z) -> (x,(c,z))
     l' (y,(c,z)) = (c,l (y,z))
 
-----------------------------------------------------------------------------
--- * Cotambara
-----------------------------------------------------------------------------
-
--- | Cotambara cofreely constructs costrength
-data Cotambara q a b where
-    Cotambara :: Costrong r => (r :-> q) -> r a b -> Cotambara q a b
-
-instance Profunctor p => Profunctor (Cotambara p) where
-  lmap f (Cotambara n p) = Cotambara n (lmap f p)
-  rmap g (Cotambara n p) = Cotambara n (rmap g p)
-  dimap f g (Cotambara n p) = Cotambara n (dimap f g p)
-
-instance ProfunctorFunctor Cotambara where
-  promap f (Cotambara n p) = Cotambara (f . n) p
-
-instance ProfunctorComonad Cotambara where
-  proextract (Cotambara n p)  = n p
-  produplicate (Cotambara n p) = Cotambara id (Cotambara n p)
-
-instance Profunctor p => Costrong (Cotambara p) where
-  unfirst (Cotambara n p) = Cotambara n (unfirst p)
-
-instance Profunctor p => Functor (Cotambara p a) where
-  fmap = rmap
-
--- |
--- @
--- 'cotambara' '.' 'uncotambara' ≡ 'id'
--- 'uncotambara' '.' 'cotambara' ≡ 'id'
--- @
-cotambara :: Costrong p => (p :-> q) -> p :-> Cotambara q
-cotambara = Cotambara
-
--- |
--- @
--- 'cotambara' '.' 'uncotambara' ≡ 'id'
--- 'uncotambara' '.' 'cotambara' ≡ 'id'
--- @
-uncotambara :: Profunctor q => (p :-> Cotambara q) -> p :-> q
-uncotambara f p = proextract (f p)
-
-----------------------------------------------------------------------------
--- * Copastro
-----------------------------------------------------------------------------
-
--- | Copastro -| Cotambara
---
--- Copastro freely constructs costrength
-newtype Copastro p a b = Copastro { runCopastro :: forall r. Costrong r => (p :-> r) -> r a b }
-
-instance Profunctor p => Profunctor (Copastro p) where
-  dimap f g (Copastro h) = Copastro $ \ n -> dimap f g (h n)
-  lmap f (Copastro h) = Copastro $ \ n -> lmap f (h n)
-  rmap g (Copastro h) = Copastro $ \ n -> rmap g (h n)
-
-instance ProfunctorAdjunction Copastro Cotambara where
- unit p = Cotambara id (proreturn p)
- counit (Copastro h) = proextract (h id)
-
-instance ProfunctorFunctor Copastro where
-  promap f (Copastro h) = Copastro $ \n -> h (n . f)
-
-instance ProfunctorMonad Copastro where
-  proreturn p = Copastro $ \n -> n p
-  projoin p = Copastro $ \c -> runCopastro p (\x -> runCopastro x c)
-
-instance Profunctor p => Costrong (Copastro p) where
-  unfirst (Copastro p) = Copastro $ \n -> unfirst (p n)
-  unsecond (Copastro p) = Copastro $ \n -> unsecond (p n)

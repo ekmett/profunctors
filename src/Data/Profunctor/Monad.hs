@@ -5,7 +5,7 @@ module Data.Profunctor.Monad where
 
 import Control.Comonad
 import Data.Bifunctor.Tannen
-import Data.Profunctor
+import Data.Profunctor.Types
 
 class ProfunctorFunctor t where
   promap    :: Profunctor p => (p :-> q) -> t p :-> t q

@@ -41,7 +41,10 @@ library
     Data.Profunctor
     Data.Profunctor.Adjunction
     Data.Profunctor.Cayley
+    Data.Profunctor.Choice
     Data.Profunctor.Closed
+    Data.Profunctor.Cochoice
+    Data.Profunctor.Costrong
     Data.Profunctor.Codensity
     Data.Profunctor.Composition
     Data.Profunctor.Monad
@@ -49,9 +52,9 @@ library
     Data.Profunctor.Ran
     Data.Profunctor.Rep
     Data.Profunctor.Sieve
-    Data.Profunctor.Tambara
-    Data.Profunctor.Tambara.Choice
+    Data.Profunctor.Strong
     Data.Profunctor.Trace
+    Data.Profunctor.Types
     Data.Profunctor.Unsafe
 
   ghc-options:     -Wall -O2

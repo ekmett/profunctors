@@ -4,7 +4,7 @@
 {-# LANGUAGE RankNTypes #-}
 module Data.Profunctor.Adjunction where
 
-import Data.Profunctor
+import Data.Profunctor.Types
 import Data.Profunctor.Monad
 
 class (ProfunctorFunctor f, ProfunctorFunctor u) => ProfunctorAdjunction f u | f -> u, u -> f where
