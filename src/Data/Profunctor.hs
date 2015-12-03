@@ -28,6 +28,7 @@ module Data.Profunctor
     Profunctor(dimap,lmap,rmap)
   -- ** Profunctorial Strength
   , Strong(..)
+  , uncurry'
   , Choice(..)
   -- ** Profunctorial Costrength
   , Costrong(..)
@@ -262,10 +263,13 @@ class Profunctor p => Strong p where
   second' :: p a b -> p (c, a) (c, b)
   second' = dimap swap swap . first'
 
-
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 708
   {-# MINIMAL first' | second' #-}
 #endif
+
+uncurry' :: Strong p => p a (b -> c) -> p (a, b) c
+uncurry' = rmap (\(f,x) -> f x) . first'
+{-# INLINE uncurry' #-}
 
 instance Strong (->) where
   first' ab ~(a, c) = (ab a, c)

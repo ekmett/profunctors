@@ -13,6 +13,7 @@ module Data.Profunctor.Closed
   , close
   , unclose
   , Environment(..)
+  , curry'
   ) where
 
 import Control.Applicative
@@ -66,6 +67,9 @@ instance (Functor f, Closed p) => Closed (Tannen f p) where
 
 -- instance Monoid r => Closed (Forget r) where
 --  closed _ = Forget $ \_ -> mempty
+
+curry' :: Closed p => p (a, b) c -> p a (b -> c)
+curry' = lmap (,) . closed
 
 --------------------------------------------------------------------------------
 -- * Closure
