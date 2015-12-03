@@ -20,14 +20,14 @@ module Data.Profunctor.Choice
   (
   -- * Strength
     Choice(..)
-  , TambaraChoice(..)
-  , tambaraChoice, untambaraChoice
-  , PastroChoice(..)
+  , TambaraSum(..)
+  , tambaraSum, untambaraSum
+  , PastroSum(..)
   -- * Costrength
   , Cochoice(..)
-  , CotambaraChoice(..)
-  , cotambaraChoice, uncotambaraChoice
-  , CopastroChoice(..)
+  , CotambaraSum(..)
+  , cotambaraSum, uncotambaraSum
+  , CopastroSum(..)
   ) where
 
 import Control.Applicative hiding (WrappedArrow(..))
@@ -147,20 +147,20 @@ instance Choice p => Choice (Tambara p) where
 
 
 ----------------------------------------------------------------------------
--- * TambaraChoice
+-- * TambaraSum
 ----------------------------------------------------------------------------
 
--- | TambaraChoice is cofreely adjoins strength with respect to Either.
+-- | TambaraSum is cofreely adjoins strength with respect to Either.
 --
 -- Note: this is not dual to 'Data.Profunctor.Tambara.Tambara'. It is 'Data.Profunctor.Tambara.Tambara' with respect to a different tensor.
-newtype TambaraChoice p a b = TambaraChoice { runTambaraChoice :: forall c. p (Either a c) (Either b c) }
+newtype TambaraSum p a b = TambaraSum { runTambaraSum :: forall c. p (Either a c) (Either b c) }
 
-instance ProfunctorFunctor TambaraChoice where
-  promap f (TambaraChoice p) = TambaraChoice (f p)
+instance ProfunctorFunctor TambaraSum where
+  promap f (TambaraSum p) = TambaraSum (f p)
 
-instance ProfunctorComonad TambaraChoice where
-  proextract (TambaraChoice p)   = dimap Left (\(Left a) -> a) p
-  produplicate (TambaraChoice p) = TambaraChoice (TambaraChoice $ dimap hither yon p) where
+instance ProfunctorComonad TambaraSum where
+  proextract (TambaraSum p)   = dimap Left (\(Left a) -> a) p
+  produplicate (TambaraSum p) = TambaraSum (TambaraSum $ dimap hither yon p) where
     hither :: Either (Either a b) c -> Either a (Either b c)
     hither (Left (Left x))   = Left x
     hither (Left (Right y))  = Right (Left y)
@@ -171,64 +171,64 @@ instance ProfunctorComonad TambaraChoice where
     yon    (Right (Left y))  = Left (Right y)
     yon    (Right (Right z)) = Right z
 
-instance Profunctor p => Profunctor (TambaraChoice p) where
-  dimap f g (TambaraChoice p) = TambaraChoice $ dimap (left f) (left g) p
+instance Profunctor p => Profunctor (TambaraSum p) where
+  dimap f g (TambaraSum p) = TambaraSum $ dimap (left f) (left g) p
   {-# INLINE dimap #-}
 
-instance Profunctor p => Choice (TambaraChoice p) where
-  left' = runTambaraChoice . produplicate
+instance Profunctor p => Choice (TambaraSum p) where
+  left' = runTambaraSum . produplicate
   {-# INLINE left' #-}
 
-instance Category p => Category (TambaraChoice p) where
-  id = TambaraChoice id
-  TambaraChoice p . TambaraChoice q = TambaraChoice (p . q)
+instance Category p => Category (TambaraSum p) where
+  id = TambaraSum id
+  TambaraSum p . TambaraSum q = TambaraSum (p . q)
 
-instance Profunctor p => Functor (TambaraChoice p a) where
+instance Profunctor p => Functor (TambaraSum p a) where
   fmap = rmap
 
 -- |
 -- @
--- 'tambaraChoice' '.' 'untambaraChoice' ≡ 'id'
--- 'untambaraChoice' '.' 'tambaraChoice' ≡ 'id'
+-- 'tambaraSum' '.' 'untambaraSum' ≡ 'id'
+-- 'untambaraSum' '.' 'tambaraSum' ≡ 'id'
 -- @
-tambaraChoice :: Choice p => (p :-> q) -> p :-> TambaraChoice q
-tambaraChoice f p = TambaraChoice $ f $ left' p
+tambaraSum :: Choice p => (p :-> q) -> p :-> TambaraSum q
+tambaraSum f p = TambaraSum $ f $ left' p
 
 -- |
 -- @
--- 'tambaraChoice' '.' 'untambaraChoice' ≡ 'id'
--- 'untambaraChoice' '.' 'tambaraChoice' ≡ 'id'
+-- 'tambaraSum' '.' 'untambaraSum' ≡ 'id'
+-- 'untambaraSum' '.' 'tambaraSum' ≡ 'id'
 -- @
-untambaraChoice :: Profunctor q => (p :-> TambaraChoice q) -> p :-> q
-untambaraChoice f p = dimap Left (\(Left a) -> a) $ runTambaraChoice $ f p
+untambaraSum :: Profunctor q => (p :-> TambaraSum q) -> p :-> q
+untambaraSum f p = dimap Left (\(Left a) -> a) $ runTambaraSum $ f p
 
 ----------------------------------------------------------------------------
--- * PastroChoice
+-- * PastroSum
 ----------------------------------------------------------------------------
 
--- | PastroChoice -| TambaraChoice
+-- | PastroSum -| TambaraSum
 --
--- PastroChoice freely constructs strength with respect to Either.
-data PastroChoice p a b where
-  PastroChoice :: (Either y z -> b) -> p x y -> (a -> Either x z) -> PastroChoice p a b
+-- PastroSum freely constructs strength with respect to Either.
+data PastroSum p a b where
+  PastroSum :: (Either y z -> b) -> p x y -> (a -> Either x z) -> PastroSum p a b
 
-instance Profunctor p => Profunctor (PastroChoice p) where
-  dimap f g (PastroChoice l m r) = PastroChoice (g . l) m (r . f)
-  lmap f (PastroChoice l m r) = PastroChoice l m (r . f)
-  rmap g (PastroChoice l m r) = PastroChoice (g . l) m r
-  w #. PastroChoice l m r = PastroChoice (w #. l) m r
-  PastroChoice l m r .# w = PastroChoice l m (r .# w)
+instance Profunctor p => Profunctor (PastroSum p) where
+  dimap f g (PastroSum l m r) = PastroSum (g . l) m (r . f)
+  lmap f (PastroSum l m r) = PastroSum l m (r . f)
+  rmap g (PastroSum l m r) = PastroSum (g . l) m r
+  w #. PastroSum l m r = PastroSum (w #. l) m r
+  PastroSum l m r .# w = PastroSum l m (r .# w)
 
-instance ProfunctorAdjunction PastroChoice TambaraChoice where
-  counit (PastroChoice f (TambaraChoice g) h) = dimap h f g
-  unit p = TambaraChoice $ PastroChoice id p id
+instance ProfunctorAdjunction PastroSum TambaraSum where
+  counit (PastroSum f (TambaraSum g) h) = dimap h f g
+  unit p = TambaraSum $ PastroSum id p id
 
-instance ProfunctorFunctor PastroChoice where
-  promap f (PastroChoice l m r) = PastroChoice l (f m) r
+instance ProfunctorFunctor PastroSum where
+  promap f (PastroSum l m r) = PastroSum l (f m) r
 
-instance ProfunctorMonad PastroChoice where
-  proreturn p = PastroChoice (\(Left a)-> a) p Left
-  projoin (PastroChoice l (PastroChoice m n o) q) = PastroChoice lm n oq where
+instance ProfunctorMonad PastroSum where
+  proreturn p = PastroSum (\(Left a)-> a) p Left
+  projoin (PastroSum l (PastroSum m n o) q) = PastroSum lm n oq where
     oq a = case q a of
       Left b -> Left <$> o b
       Right z -> Right (Right z)
@@ -236,13 +236,13 @@ instance ProfunctorMonad PastroChoice where
     lm (Right (Left y)) = l $ Left $ m $ Right y
     lm (Right (Right z)) = l $ Right z
 
-instance Profunctor p => Choice (PastroChoice p) where
-  left' (PastroChoice l m r) = PastroChoice l' m r' where
+instance Profunctor p => Choice (PastroSum p) where
+  left' (PastroSum l m r) = PastroSum l' m r' where
     r' = either (fmap Left . r) (Right . Right)
     l' (Left y)          = Left (l (Left y))
     l' (Right (Left z))  = Left (l (Right z))
     l' (Right (Right c)) = Right c
-  right' (PastroChoice l m r) = PastroChoice l' m r' where
+  right' (PastroSum l m r) = PastroSum l' m r' where
     r' = either (Right . Left) (fmap Right . r)
     l' (Right (Left c))  = Left c
     l' (Right (Right z)) = Right (l (Right z))
@@ -287,73 +287,73 @@ instance (Cochoice p, Cochoice q) => Cochoice (Product p q) where
   unright (Pair p q) = Pair (unright p) (unright q)
 
 ----------------------------------------------------------------------------
--- * CotambaraChoice
+-- * CotambaraSum
 ----------------------------------------------------------------------------
 
--- | 'CotambaraChoice' cofreely constructs costrength with respect to 'Either' (aka 'Choice')
-data CotambaraChoice q a b where
-    CotambaraChoice :: Cochoice r => (r :-> q) -> r a b -> CotambaraChoice q a b
+-- | 'CotambaraSum' cofreely constructs costrength with respect to 'Either' (aka 'Choice')
+data CotambaraSum q a b where
+    CotambaraSum :: Cochoice r => (r :-> q) -> r a b -> CotambaraSum q a b
 
-instance Profunctor p => Profunctor (CotambaraChoice p) where
-  lmap f (CotambaraChoice n p) = CotambaraChoice n (lmap f p)
-  rmap g (CotambaraChoice n p) = CotambaraChoice n (rmap g p)
-  dimap f g (CotambaraChoice n p) = CotambaraChoice n (dimap f g p)
+instance Profunctor p => Profunctor (CotambaraSum p) where
+  lmap f (CotambaraSum n p) = CotambaraSum n (lmap f p)
+  rmap g (CotambaraSum n p) = CotambaraSum n (rmap g p)
+  dimap f g (CotambaraSum n p) = CotambaraSum n (dimap f g p)
 
-instance ProfunctorFunctor CotambaraChoice where
-  promap f (CotambaraChoice n p) = CotambaraChoice (f . n) p
+instance ProfunctorFunctor CotambaraSum where
+  promap f (CotambaraSum n p) = CotambaraSum (f . n) p
 
-instance ProfunctorComonad CotambaraChoice where
-  proextract (CotambaraChoice n p)  = n p
-  produplicate (CotambaraChoice n p) = CotambaraChoice id (CotambaraChoice n p)
+instance ProfunctorComonad CotambaraSum where
+  proextract (CotambaraSum n p)  = n p
+  produplicate (CotambaraSum n p) = CotambaraSum id (CotambaraSum n p)
 
-instance Profunctor p => Cochoice (CotambaraChoice p) where
-  unleft (CotambaraChoice n p) = CotambaraChoice n (unleft p)
-  unright (CotambaraChoice n p) = CotambaraChoice n (unright p)
+instance Profunctor p => Cochoice (CotambaraSum p) where
+  unleft (CotambaraSum n p) = CotambaraSum n (unleft p)
+  unright (CotambaraSum n p) = CotambaraSum n (unright p)
 
-instance Profunctor p => Functor (CotambaraChoice p a) where
+instance Profunctor p => Functor (CotambaraSum p a) where
   fmap = rmap
 
 -- |
 -- @
--- 'cotambaraChoice' '.' 'uncotambaraChoice' ≡ 'id'
--- 'uncotambaraChoice' '.' 'cotambaraChoice' ≡ 'id'
+-- 'cotambaraSum' '.' 'uncotambaraSum' ≡ 'id'
+-- 'uncotambaraSum' '.' 'cotambaraSum' ≡ 'id'
 -- @
-cotambaraChoice :: Cochoice p => (p :-> q) -> p :-> CotambaraChoice q
-cotambaraChoice = CotambaraChoice
+cotambaraSum :: Cochoice p => (p :-> q) -> p :-> CotambaraSum q
+cotambaraSum = CotambaraSum
 
 -- |
 -- @
--- 'cotambaraChoice' '.' 'uncotambaraChoice' ≡ 'id'
--- 'uncotambaraChoice' '.' 'cotambaraChoice' ≡ 'id'
+-- 'cotambaraSum' '.' 'uncotambaraSum' ≡ 'id'
+-- 'uncotambaraSum' '.' 'cotambaraSum' ≡ 'id'
 -- @
-uncotambaraChoice :: Profunctor q => (p :-> CotambaraChoice q) -> p :-> q
-uncotambaraChoice f p = proextract (f p)
+uncotambaraSum :: Profunctor q => (p :-> CotambaraSum q) -> p :-> q
+uncotambaraSum f p = proextract (f p)
 
 ----------------------------------------------------------------------------
 -- * Copastro
 ----------------------------------------------------------------------------
 
--- | CopastroChoice -| CotambaraChoice
+-- | CopastroSum -| CotambaraSum
 --
--- 'CopastroChoice' freely constructs costrength with respect to 'Either' (aka 'Choice')
-newtype CopastroChoice p a b = CopastroChoice { runCopastroChoice :: forall r. Cochoice r => (p :-> r) -> r a b }
+-- 'CopastroSum' freely constructs costrength with respect to 'Either' (aka 'Choice')
+newtype CopastroSum p a b = CopastroSum { runCopastroSum :: forall r. Cochoice r => (p :-> r) -> r a b }
 
-instance Profunctor p => Profunctor (CopastroChoice p) where
-  dimap f g (CopastroChoice h) = CopastroChoice $ \ n -> dimap f g (h n)
-  lmap f (CopastroChoice h) = CopastroChoice $ \ n -> lmap f (h n)
-  rmap g (CopastroChoice h) = CopastroChoice $ \ n -> rmap g (h n)
+instance Profunctor p => Profunctor (CopastroSum p) where
+  dimap f g (CopastroSum h) = CopastroSum $ \ n -> dimap f g (h n)
+  lmap f (CopastroSum h) = CopastroSum $ \ n -> lmap f (h n)
+  rmap g (CopastroSum h) = CopastroSum $ \ n -> rmap g (h n)
 
-instance ProfunctorAdjunction CopastroChoice CotambaraChoice where
- unit p = CotambaraChoice id (proreturn p)
- counit (CopastroChoice h) = proextract (h id)
+instance ProfunctorAdjunction CopastroSum CotambaraSum where
+ unit p = CotambaraSum id (proreturn p)
+ counit (CopastroSum h) = proextract (h id)
 
-instance ProfunctorFunctor CopastroChoice where
-  promap f (CopastroChoice h) = CopastroChoice $ \n -> h (n . f)
+instance ProfunctorFunctor CopastroSum where
+  promap f (CopastroSum h) = CopastroSum $ \n -> h (n . f)
 
-instance ProfunctorMonad CopastroChoice where
-  proreturn p = CopastroChoice $ \n -> n p
-  projoin p = CopastroChoice $ \c -> runCopastroChoice p (\x -> runCopastroChoice x c)
+instance ProfunctorMonad CopastroSum where
+  proreturn p = CopastroSum $ \n -> n p
+  projoin p = CopastroSum $ \c -> runCopastroSum p (\x -> runCopastroSum x c)
 
-instance Profunctor p => Cochoice (CopastroChoice p) where
-  unleft (CopastroChoice p) = CopastroChoice $ \n -> unleft (p n)
-  unright (CopastroChoice p) = CopastroChoice $ \n -> unright (p n)
+instance Profunctor p => Cochoice (CopastroSum p) where
+  unleft (CopastroSum p) = CopastroSum $ \n -> unleft (p n)
+  unright (CopastroSum p) = CopastroSum $ \n -> unright (p n)
