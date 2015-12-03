@@ -117,13 +117,23 @@ instance ProfunctorMonad PastroChoice where
   proreturn p = PastroChoice (\(Left a)-> a) p Left
   projoin (PastroChoice l (PastroChoice m n o) q) = PastroChoice lm n oq where
     oq a = case q a of
-      Left b -> case o b of
-        Left c -> Left c
-        Right z -> Right (Left z)
+      Left b -> Left <$> o b
       Right z -> Right (Right z)
     lm (Left x) = l $ Left $ m $ Left x
     lm (Right (Left y)) = l $ Left $ m $ Right y
     lm (Right (Right z)) = l $ Right z
+
+instance Profunctor p => Choice (PastroChoice p) where
+  left' (PastroChoice l m r) = PastroChoice l' m r' where
+    r' = either (fmap Left . r) (Right . Right)
+    l' (Left y)          = Left (l (Left y))
+    l' (Right (Left z))  = Left (l (Right z))
+    l' (Right (Right c)) = Right c
+  right' (PastroChoice l m r) = PastroChoice l' m r' where
+    r' = either (Right . Left) (fmap Right . r)
+    l' (Right (Left c))  = Left c
+    l' (Right (Right z)) = Right (l (Right z))
+    l' (Left y)          = Right (l (Left y))
 
 ----------------------------------------------------------------------------
 -- * CotambaraChoice
