@@ -203,7 +203,7 @@ instance (Profunctor p, ArrowPlus p) => Alternative (Tambara p a) where
   empty = zeroArrow
   f <|> g = f <+> g
 
-instance (Profunctor p, ArrowPlus p) => Monoid (Tambara p a b) where
+instance ArrowPlus p => Monoid (Tambara p a b) where
   mempty = zeroArrow
   mappend f g = f <+> g
 
@@ -237,7 +237,7 @@ untambara f p = dimap (\a -> (a,())) fst $ runTambara $ f p
 data Pastro p a b where
   Pastro :: ((y, z) -> b) -> p x y -> (a -> (x, z)) -> Pastro p a b
 
-instance Profunctor p => Profunctor (Pastro p) where
+instance Profunctor (Pastro p) where
   dimap f g (Pastro l m r) = Pastro (g . l) m (r . f)
   lmap f (Pastro l m r) = Pastro l m (r . f)
   rmap g (Pastro l m r) = Pastro (g . l) m r
@@ -259,7 +259,7 @@ instance ProfunctorAdjunction Pastro Tambara where
   counit (Pastro g (Tambara p) f) = dimap f g p
   unit p = Tambara (Pastro id p id)
 
-instance Profunctor p => Strong (Pastro p) where
+instance Strong (Pastro p) where
   first' (Pastro l m r) = Pastro l' m r' where
     r' (a,c) = case r a of
       (x,z) -> (x,(z,c))
@@ -326,7 +326,7 @@ instance (Costrong p, Costrong q) => Costrong (Product p q) where
 data Cotambara q a b where
     Cotambara :: Costrong r => (r :-> q) -> r a b -> Cotambara q a b
 
-instance Profunctor p => Profunctor (Cotambara p) where
+instance Profunctor (Cotambara p) where
   lmap f (Cotambara n p) = Cotambara n (lmap f p)
   rmap g (Cotambara n p) = Cotambara n (rmap g p)
   dimap f g (Cotambara n p) = Cotambara n (dimap f g p)
@@ -341,7 +341,7 @@ instance ProfunctorComonad Cotambara where
 instance Profunctor p => Costrong (Cotambara p) where
   unfirst (Cotambara n p) = Cotambara n (unfirst p)
 
-instance Profunctor p => Functor (Cotambara p a) where
+instance Functor (Cotambara p a) where
   fmap = rmap
 
 -- |
@@ -369,7 +369,7 @@ uncotambara f p = proextract (f p)
 -- Copastro freely constructs costrength
 newtype Copastro p a b = Copastro { runCopastro :: forall r. Costrong r => (forall x y. p x y -> r x y) -> r a b }
 
-instance Profunctor p => Profunctor (Copastro p) where
+instance Profunctor (Copastro p) where
   dimap f g (Copastro h) = Copastro $ \ n -> dimap f g (h n)
   lmap f (Copastro h) = Copastro $ \ n -> lmap f (h n)
   rmap g (Copastro h) = Copastro $ \ n -> rmap g (h n)
@@ -385,6 +385,6 @@ instance ProfunctorMonad Copastro where
   proreturn p = Copastro $ \n -> n p
   projoin p = Copastro $ \c -> runCopastro p (\x -> runCopastro x c)
 
-instance Profunctor p => Costrong (Copastro p) where
+instance Costrong (Copastro p) where
   unfirst (Copastro p) = Copastro $ \n -> unfirst (p n)
   unsecond (Copastro p) = Copastro $ \n -> unsecond (p n)

@@ -217,7 +217,7 @@ untambaraSum f p = dimap Left (\(Left a) -> a) $ runTambaraSum $ f p
 data PastroSum p a b where
   PastroSum :: (Either y z -> b) -> p x y -> (a -> Either x z) -> PastroSum p a b
 
-instance Profunctor p => Profunctor (PastroSum p) where
+instance Profunctor (PastroSum p) where
   dimap f g (PastroSum l m r) = PastroSum (g . l) m (r . f)
   lmap f (PastroSum l m r) = PastroSum l m (r . f)
   rmap g (PastroSum l m r) = PastroSum (g . l) m r
@@ -299,7 +299,7 @@ instance (Cochoice p, Cochoice q) => Cochoice (Product p q) where
 data CotambaraSum q a b where
     CotambaraSum :: Cochoice r => (r :-> q) -> r a b -> CotambaraSum q a b
 
-instance Profunctor p => Profunctor (CotambaraSum p) where
+instance Profunctor (CotambaraSum p) where
   lmap f (CotambaraSum n p) = CotambaraSum n (lmap f p)
   rmap g (CotambaraSum n p) = CotambaraSum n (rmap g p)
   dimap f g (CotambaraSum n p) = CotambaraSum n (dimap f g p)
@@ -311,11 +311,11 @@ instance ProfunctorComonad CotambaraSum where
   proextract (CotambaraSum n p)  = n p
   produplicate (CotambaraSum n p) = CotambaraSum id (CotambaraSum n p)
 
-instance Profunctor p => Cochoice (CotambaraSum p) where
+instance Cochoice (CotambaraSum p) where
   unleft (CotambaraSum n p) = CotambaraSum n (unleft p)
   unright (CotambaraSum n p) = CotambaraSum n (unright p)
 
-instance Profunctor p => Functor (CotambaraSum p a) where
+instance Functor (CotambaraSum p a) where
   fmap = rmap
 
 -- |
@@ -343,7 +343,7 @@ uncotambaraSum f p = proextract (f p)
 -- 'CopastroSum' freely constructs costrength with respect to 'Either' (aka 'Choice')
 newtype CopastroSum p a b = CopastroSum { runCopastroSum :: forall r. Cochoice r => (forall x y. p x y -> r x y) -> r a b }
 
-instance Profunctor p => Profunctor (CopastroSum p) where
+instance Profunctor (CopastroSum p) where
   dimap f g (CopastroSum h) = CopastroSum $ \ n -> dimap f g (h n)
   lmap f (CopastroSum h) = CopastroSum $ \ n -> lmap f (h n)
   rmap g (CopastroSum h) = CopastroSum $ \ n -> rmap g (h n)
@@ -359,6 +359,6 @@ instance ProfunctorMonad CopastroSum where
   proreturn p = CopastroSum $ \n -> n p
   projoin p = CopastroSum $ \c -> runCopastroSum p (\x -> runCopastroSum x c)
 
-instance Profunctor p => Cochoice (CopastroSum p) where
+instance Cochoice (CopastroSum p) where
   unleft (CopastroSum p) = CopastroSum $ \n -> unleft (p n)
   unright (CopastroSum p) = CopastroSum $ \n -> unright (p n)
