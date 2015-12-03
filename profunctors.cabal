@@ -43,10 +43,8 @@ library
     Data.Profunctor.Cayley
     Data.Profunctor.Choice
     Data.Profunctor.Closed
-    Data.Profunctor.Codensity
     Data.Profunctor.Composition
     Data.Profunctor.Monad
-    Data.Profunctor.Monoid
     Data.Profunctor.Ran
     Data.Profunctor.Rep
     Data.Profunctor.Sieve

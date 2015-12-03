@@ -21,6 +21,8 @@ module Data.Profunctor.Ran
   , precomposeRan
   , curryRan
   , uncurryRan
+  , Codensity(..)
+  , decomposeCodensity
   ) where
 
 import Control.Category
@@ -29,6 +31,10 @@ import Data.Profunctor.Composition
 import Data.Profunctor.Monad
 import Data.Profunctor.Unsafe
 import Prelude hiding (id,(.))
+
+--------------------------------------------------------------------------------
+-- * Ran
+--------------------------------------------------------------------------------
 
 -- | This represents the right Kan extension of a 'Profunctor' @q@ along a 'Profunctor' @p@ in a limited version of the 2-category of Profunctors where the only object is the category Hask, 1-morphisms are profunctors composed and compose with Profunctor composition, and 2-morphisms are just natural transformations.
 newtype Ran p q a b = Ran { runRan :: forall x. p x a -> q x b }
@@ -81,3 +87,36 @@ curryRan f p = Ran $ \q -> f (Procompose p q)
 uncurryRan :: (p :-> Ran q r) -> Procompose p q :-> r
 uncurryRan f (Procompose p q) = runRan (f p) q
 {-# INLINE uncurryRan #-}
+
+--------------------------------------------------------------------------------
+-- * Codensity
+--------------------------------------------------------------------------------
+
+-- | This represents the right Kan extension of a 'Profunctor' @p@ along itself. This provides a generalization of the \"difference list\" trick to profunctors.
+newtype Codensity p a b = Codensity { runCodensity :: forall x. p x a -> p x b }
+
+instance Profunctor p => Profunctor (Codensity p) where
+  dimap ca bd f = Codensity (rmap bd . runCodensity f . rmap ca)
+  {-# INLINE dimap #-}
+  lmap ca f = Codensity (runCodensity f . rmap ca)
+  {-# INLINE lmap #-}
+  rmap bd f = Codensity (rmap bd . runCodensity f)
+  {-# INLINE rmap #-}
+  bd #. f = Codensity (\p -> bd #. runCodensity f p)
+  {-# INLINE ( #. ) #-}
+  f .# ca = Codensity (\p -> runCodensity f (ca #. p))
+  {-# INLINE (.#) #-}
+
+instance Profunctor p => Functor (Codensity p a) where
+  fmap bd f = Codensity (rmap bd . runCodensity f)
+  {-# INLINE fmap #-}
+
+instance Category (Codensity p) where
+  id = Codensity id
+  {-# INLINE id #-}
+  Codensity f . Codensity g = Codensity (f . g)
+  {-# INLINE (.) #-}
+
+decomposeCodensity :: Procompose (Codensity p) p a b -> p a b
+decomposeCodensity (Procompose (Codensity pp) p) = pp p
+{-# INLINE decomposeCodensity #-}

@@ -28,6 +28,9 @@ module Data.Profunctor.Composition
   , idl
   , idr
   , assoc
+  -- * Categories as monoid objects
+  , eta
+  , mu
   -- * Generalized Composition
   , stars, kleislis
   , costars, cokleislis
@@ -226,6 +229,7 @@ cokleislis = dimap hither (fmap yon) where
 ----------------------------------------------------------------------------
 -- * Rift
 ----------------------------------------------------------------------------
+
 -- | This represents the right Kan lift of a 'Profunctor' @q@ along a 'Profunctor' @p@ in a limited version of the 2-category of Profunctors where the only object is the category Hask, 1-morphisms are profunctors composed and compose with Profunctor composition, and 2-morphisms are just natural transformations.
 newtype Rift p q a b = Rift { runRift :: forall x. p b x -> q a x }
 
@@ -271,3 +275,16 @@ instance ProfunctorAdjunction (Procompose p) (Rift p) where
   unit q = Rift $ \p -> Procompose p q
 
 --instance (ProfunctorAdjunction f g, ProfunctorAdjunction f' g') => ProfunctorAdjunction (ProfunctorCompose f' f) (ProfunctorCompose g g') where
+
+----------------------------------------------------------------------------
+-- * Monoids
+----------------------------------------------------------------------------
+
+
+-- | a 'Category' that is also a 'Profunctor' is a 'Monoid' in @Prof@
+
+eta :: (Profunctor p, Category p) => (->) :-> p
+eta f = rmap f id
+
+mu :: Category p => Procompose p p :-> p
+mu (Procompose f g) = f . g
