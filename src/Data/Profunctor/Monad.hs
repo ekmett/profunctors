@@ -1,6 +1,16 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeOperators #-}
+-----------------------------------------------------------------------------
+-- |
+-- Copyright   :  (C) 2014-2015 Edward Kmett
+-- License     :  BSD-style (see the file LICENSE)
+--
+-- Maintainer  :  Edward Kmett <ekmett@gmail.com>
+-- Stability   :  experimental
+-- Portability :  portable
+--
+----------------------------------------------------------------------------
 module Data.Profunctor.Monad where
 
 import Control.Comonad

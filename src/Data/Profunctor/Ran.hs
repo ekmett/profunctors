@@ -7,7 +7,7 @@
 #endif
 -----------------------------------------------------------------------------
 -- |
--- Copyright   :  (C) 2013-2014 Edward Kmett and Dan Doel
+-- Copyright   :  (C) 2013-2015 Edward Kmett and Dan Doel
 -- License     :  BSD-style (see the file LICENSE)
 --
 -- Maintainer  :  Edward Kmett <ekmett@gmail.com>
