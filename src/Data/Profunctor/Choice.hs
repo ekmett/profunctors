@@ -44,6 +44,9 @@ import Data.Profunctor.Strong
 import Data.Profunctor.Types
 import Data.Profunctor.Unsafe
 import Data.Tagged
+#if __GLASGOW_HASKELL__ < 710
+import Data.Traversable
+#endif
 import Prelude hiding (id,(.))
 
 ------------------------------------------------------------------------------
