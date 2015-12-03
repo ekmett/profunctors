@@ -80,3 +80,6 @@ instance (Applicative f, ArrowZero p) => ArrowZero (Cayley f p) where
 
 instance (Applicative f, ArrowPlus p) => ArrowPlus (Cayley f p) where
   Cayley f <+> Cayley g = Cayley (liftA2 (<+>) f g)
+
+-- instance Adjunction f g => ProfunctorAdjunction (Cayley f) (Cayley g) where
+  
