@@ -89,5 +89,8 @@
 <a name="line-80"></a>
 <a name="line-81"></a><a name="instance%20ArrowPlus%20(Cayley%20f%20p)"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>Applicative</span> <span class='hs-varid'>f</span><span class='hs-layout'>,</span> <span class='hs-conid'>ArrowPlus</span> <span class='hs-varid'>p</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ArrowPlus</span> <span class='hs-layout'>(</span><span class='hs-conid'>Cayley</span> <span class='hs-varid'>f</span> <span class='hs-varid'>p</span><span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
 <a name="line-82"></a>  <span class='hs-conid'>Cayley</span> <span class='hs-varid'>f</span> <span class='hs-varop'>&lt;+&gt;</span> <span class='hs-conid'>Cayley</span> <span class='hs-varid'>g</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Cayley</span> <span class='hs-layout'>(</span><span class='hs-varid'>liftA2</span> <span class='hs-layout'>(</span><span class='hs-varop'>&lt;+&gt;</span><span class='hs-layout'>)</span> <span class='hs-varid'>f</span> <span class='hs-varid'>g</span><span class='hs-layout'>)</span>
+<a name="line-83"></a>
+<a name="line-84"></a><span class='hs-comment'>-- instance Adjunction f g =&gt; ProfunctorAdjunction (Cayley f) (Cayley g) where</span>
+<a name="line-85"></a>  
 </pre></body>
 </html>
