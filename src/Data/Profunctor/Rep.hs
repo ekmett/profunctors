@@ -30,6 +30,7 @@ module Data.Profunctor.Rep
   , Corepresentable(..)
   , cotabulated
   , unfirstCorep, unsecondCorep
+  , closedCorep
   -- * Prep -| Star
   , Prep(..)
   , prepAdj
@@ -109,15 +110,19 @@ class (Cosieve p (Corep p), Costrong p) => Corepresentable p where
   type Corep p :: * -> *
   cotabulate :: (Corep p d -> c) -> p d c
 
--- | Default definition for 'unfirst' given that p is 'Corepresentable'.
+-- | Default definition for 'unfirst' given that @p@ is 'Corepresentable'.
 unfirstCorep :: Corepresentable p => p (a, d) (b, d) -> p a b
 unfirstCorep p = cotabulate f
   where f fa = b where (b, d) = cosieve p ((\a -> (a, d)) <$> fa)
 
--- | Default definition for 'unsecond' given that p is 'Corepresentable'.
+-- | Default definition for 'unsecond' given that @p@ is 'Corepresentable'.
 unsecondCorep :: Corepresentable p => p (d, a) (d, b) -> p a b
 unsecondCorep p = cotabulate f
   where f fa = b where (d, b) = cosieve p ((,) d <$> fa)
+
+-- | Default definition for 'closed' given that @p@ is 'Corepresentable'
+closedCorep :: Corepresentable p => p a b -> p (x -> a) (x -> b)
+closedCorep p = cotabulate $ \fs x -> cosieve p (fmap ($x) fs)
 
 instance Corepresentable (->) where
   type Corep (->) = Identity
