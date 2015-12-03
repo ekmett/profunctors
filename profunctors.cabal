@@ -43,8 +43,6 @@ library
     Data.Profunctor.Cayley
     Data.Profunctor.Choice
     Data.Profunctor.Closed
-    Data.Profunctor.Cochoice
-    Data.Profunctor.Costrong
     Data.Profunctor.Codensity
     Data.Profunctor.Composition
     Data.Profunctor.Monad

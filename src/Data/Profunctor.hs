@@ -48,7 +48,5 @@ module Data.Profunctor
 
 import Data.Profunctor.Choice
 import Data.Profunctor.Closed
-import Data.Profunctor.Cochoice
-import Data.Profunctor.Costrong
 import Data.Profunctor.Strong
 import Data.Profunctor.Types
