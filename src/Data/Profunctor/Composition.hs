@@ -43,7 +43,6 @@ import Control.Monad (liftM)
 import Data.Functor.Compose
 import Data.Profunctor
 import Data.Profunctor.Adjunction
-import Data.Profunctor.Closed
 import Data.Profunctor.Monad
 import Data.Profunctor.Rep
 import Data.Profunctor.Sieve

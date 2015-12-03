@@ -20,56 +20,12 @@ import Control.Applicative
 import Control.Arrow
 import Control.Category
 import Control.Comonad
-import Data.Bifunctor.Product as Bifunctor
-import Data.Bifunctor.Tannen
-import Data.Distributive
 import Data.Monoid
 import Data.Profunctor
 import Data.Profunctor.Adjunction
 import Data.Profunctor.Monad
 import Data.Profunctor.Unsafe
-import Data.Tagged
 import Prelude hiding ((.),id)
-
---------------------------------------------------------------------------------
--- * Closed
---------------------------------------------------------------------------------
-
--- | A strong profunctor allows the monoidal structure to pass through.
---
--- A closed profunctor allows the closed structure to pass through.
-class Profunctor p => Closed p where
-  closed :: p a b -> p (x -> a) (x -> b)
-
-instance Closed Tagged where
-  closed (Tagged b) = Tagged (const b)
-
-instance Closed (->) where
-  closed = (.)
-
-instance Functor f => Closed (Costar f) where
-  closed (Costar fab) = Costar $ \fxa x -> fab (fmap ($x) fxa)
-
-instance Functor f => Closed (Cokleisli f) where
-  closed (Cokleisli fab) = Cokleisli $ \fxa x -> fab (fmap ($x) fxa)
-
-instance Distributive f => Closed (Star f) where
-  closed (Star afb) = Star $ \xa -> distribute $ \x -> afb (xa x)
-
-instance (Distributive f, Monad f) => Closed (Kleisli f) where
-  closed (Kleisli afb) = Kleisli $ \xa -> distribute $ \x -> afb (xa x)
-
-instance (Closed p, Closed q) => Closed (Bifunctor.Product p q) where
-  closed (Pair p q) = Pair (closed p) (closed q)
-
-instance (Functor f, Closed p) => Closed (Tannen f p) where
-  closed (Tannen fp) = Tannen (fmap closed fp)
-
--- instance Monoid r => Closed (Forget r) where
---  closed _ = Forget $ \_ -> mempty
-
-curry' :: Closed p => p (a, b) c -> p a (b -> c)
-curry' = lmap (,) . closed
 
 --------------------------------------------------------------------------------
 -- * Closure
