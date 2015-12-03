@@ -367,7 +367,7 @@ uncotambara f p = proextract (f p)
 -- | Copastro -| Cotambara
 --
 -- Copastro freely constructs costrength
-newtype Copastro p a b = Copastro { runCopastro :: forall r. Costrong r => (p :-> r) -> r a b }
+newtype Copastro p a b = Copastro { runCopastro :: forall r. Costrong r => (forall x y. p x y -> r x y) -> r a b }
 
 instance Profunctor p => Profunctor (Copastro p) where
   dimap f g (Copastro h) = Copastro $ \ n -> dimap f g (h n)

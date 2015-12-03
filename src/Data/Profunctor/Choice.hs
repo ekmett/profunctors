@@ -339,7 +339,7 @@ uncotambaraSum f p = proextract (f p)
 -- | CopastroSum -| CotambaraSum
 --
 -- 'CopastroSum' freely constructs costrength with respect to 'Either' (aka 'Choice')
-newtype CopastroSum p a b = CopastroSum { runCopastroSum :: forall r. Cochoice r => (p :-> r) -> r a b }
+newtype CopastroSum p a b = CopastroSum { runCopastroSum :: forall r. Cochoice r => (forall x y. p x y -> r x y) -> r a b }
 
 instance Profunctor p => Profunctor (CopastroSum p) where
   dimap f g (CopastroSum h) = CopastroSum $ \ n -> dimap f g (h n)
