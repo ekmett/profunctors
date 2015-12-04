@@ -194,3 +194,8 @@ instance ProfunctorMonad Environment where
 instance ProfunctorAdjunction Environment Closure where
   counit (Environment g (Closure p) f) = dimap f g p
   unit p = Closure (Environment id p id)
+
+instance Closed (Environment p) where
+  closed (Environment l m r) = Environment l' m r' where
+    r' wa (z,w) = r (wa w) z
+    l' zx2y x = l (\z -> zx2y (z,x))
