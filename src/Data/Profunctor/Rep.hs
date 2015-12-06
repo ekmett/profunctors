@@ -90,6 +90,13 @@ instance Representable (Forget r) where
   tabulate = Forget . (getConst .)
   {-# INLINE tabulate #-}
 
+{- TODO: coproducts and products
+instance (Representable p, Representable q) => Representable (Bifunctor.Product p q)
+  type Rep (Bifunctor.Product p q) = Functor.Product p q
+
+instance (Corepresentable p, Corepresentable q) => Corepresentable (Bifunctor.Product p q) where
+  type Rep (Bifunctor.Product p q) = Functor.Sum p q
+-}
 
 type Iso s t a b = forall p f. (Profunctor p, Functor f) => p a (f b) -> p s (f t)
 
