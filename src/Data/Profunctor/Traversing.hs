@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE RankNTypes #-}
 module Data.Profunctor.Traversing
@@ -20,6 +21,9 @@ import Data.Profunctor.Monad
 import Data.Profunctor.Strong
 import Data.Profunctor.Types
 import Data.Profunctor.Unsafe
+#if __GLASGOW_HASKELL__ < 710
+import Data.Traversable
+#endif
 import Data.Tuple (swap)
 
 firstTraversing :: Traversing p => p a b -> p (a, c) (b, c)
