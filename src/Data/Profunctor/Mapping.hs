@@ -4,13 +4,8 @@ module Data.Profunctor.Mapping
   ( Mapping(..)
   , CofreeMapping(..)
   , FreeMapping(..)
-  -- * Strong in terms of Mapping
-  , firstMapping
-  , secondMapping
-  -- * Choice in terms of Mapping
-  , leftMapping
-  , rightMapping
   -- * Closed in terms of Mapping
+  , traverseMapping
   , closedMapping
   ) where
 
@@ -20,33 +15,21 @@ import Data.Profunctor.Choice
 import Data.Profunctor.Closed
 import Data.Profunctor.Monad
 import Data.Profunctor.Strong
+import Data.Profunctor.Traversing
 import Data.Profunctor.Types
 import Data.Profunctor.Unsafe
-import Data.Tuple (swap)
 
-firstMapping :: Mapping p => p a b -> p (a, c) (b, c)
-firstMapping = dimap swap swap . map'
-
-secondMapping :: Mapping p => p a b -> p (c, a) (c, b)
-secondMapping = map'
-
-swapE :: Either a b -> Either b a
-swapE = either Right Left
-
-leftMapping :: Mapping p => p a b -> p (Either a c) (Either b c)
-leftMapping = dimap swapE swapE . map'
-
-rightMapping :: Mapping p => p a b -> p (Either c a) (Either c b)
-rightMapping = map'
-
-closedMapping :: Mapping p => p a b -> p (x -> a) (x -> b)
-closedMapping = map'
-
-class (Choice p, Strong p, Closed p) => Mapping p where
+class (Traversing p, Closed p) => Mapping p where
   map' :: Functor f => p a b -> p (f a) (f b)
 
 instance Mapping (->) where
   map' = fmap
+
+traverseMapping :: (Mapping p, Functor f) => p a b -> p (f a) (f b)
+traverseMapping = map'
+
+closedMapping :: Mapping p => p a b -> p (x -> a) (x -> b)
+closedMapping = map'
 
 newtype CofreeMapping p a b = CofreeMapping { runCofreeMapping :: forall f. Functor f => p (f a) (f b) }
 
@@ -63,6 +46,9 @@ instance Profunctor p => Choice (CofreeMapping p) where
 
 instance Profunctor p => Closed (CofreeMapping p) where
   closed = map'
+
+instance Profunctor p => Traversing (CofreeMapping p) where
+  traverse' = map'
 
 instance Profunctor p => Mapping (CofreeMapping p) where
   -- !@(#*&() Compose isn't representational in its second arg or we could use #. and .#
@@ -94,6 +80,9 @@ instance Choice (FreeMapping p) where
 
 instance Closed (FreeMapping p) where
   closed = map'
+
+instance Traversing (FreeMapping p) where
+  traverse' = map'
 
 instance Mapping (FreeMapping p) where
   map' (FreeMapping l m r) = FreeMapping (fmap l .# getCompose) m (Compose #. fmap r)

@@ -50,6 +50,7 @@ library
     Data.Profunctor.Rep
     Data.Profunctor.Sieve
     Data.Profunctor.Strong
+    Data.Profunctor.Traversing
     Data.Profunctor.Types
     Data.Profunctor.Unsafe
 
