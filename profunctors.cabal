@@ -44,6 +44,7 @@ library
     Data.Profunctor.Choice
     Data.Profunctor.Closed
     Data.Profunctor.Composition
+    Data.Profunctor.Mapping
     Data.Profunctor.Monad
     Data.Profunctor.Ran
     Data.Profunctor.Rep

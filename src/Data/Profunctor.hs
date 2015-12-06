@@ -33,6 +33,7 @@ module Data.Profunctor
   -- ** Closed
   , Closed(..)
   , curry'
+  , Mapping(..)
   -- ** Profunctorial Costrength
   , Costrong(..)
   , Cochoice(..)
@@ -48,5 +49,6 @@ module Data.Profunctor
 
 import Data.Profunctor.Choice
 import Data.Profunctor.Closed
+import Data.Profunctor.Mapping
 import Data.Profunctor.Strong
 import Data.Profunctor.Types
