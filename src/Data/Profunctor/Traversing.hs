@@ -21,10 +21,13 @@ import Data.Profunctor.Monad
 import Data.Profunctor.Strong
 import Data.Profunctor.Types
 import Data.Profunctor.Unsafe
-#if __GLASGOW_HASKELL__ < 710
-import Data.Traversable
-#endif
 import Data.Tuple (swap)
+
+#if __GLASGOW_HASKELL__ < 710
+import Control.Applicative
+import Data.Traversable
+import Prelude hiding (mapM)
+#endif
 
 firstTraversing :: Traversing p => p a b -> p (a, c) (b, c)
 firstTraversing = dimap swap swap . traverse'
