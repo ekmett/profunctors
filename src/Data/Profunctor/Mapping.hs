@@ -9,6 +9,7 @@ module Data.Profunctor.Mapping
   , closedMapping
   ) where
 
+import Data.Distributive
 import Data.Functor.Compose
 import Data.Functor.Identity
 import Data.Profunctor.Choice
@@ -24,6 +25,10 @@ class (Traversing p, Closed p) => Mapping p where
 
 instance Mapping (->) where
   map' = fmap
+
+-- see <https://github.com/ekmett/distributive/issues/12>
+instance (Applicative m, Distributive m) => Mapping (Star m) where
+  map' (Star f) = Star (collect f)
 
 traverseMapping :: (Mapping p, Functor f) => p a b -> p (f a) (f b)
 traverseMapping = map'
