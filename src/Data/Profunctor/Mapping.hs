@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE RankNTypes #-}
 module Data.Profunctor.Mapping
@@ -20,6 +21,9 @@ import Data.Profunctor.Strong
 import Data.Profunctor.Traversing
 import Data.Profunctor.Types
 import Data.Profunctor.Unsafe
+#if __GLASGOW_HASKELL__ < 710
+import Control.Applicative
+#endif
 
 class (Traversing p, Closed p) => Mapping p where
   map' :: Functor f => p a b -> p (f a) (f b)
