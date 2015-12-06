@@ -9,6 +9,7 @@ module Data.Profunctor.Mapping
   , closedMapping
   ) where
 
+import Control.Arrow (Kleisli(..))
 import Data.Distributive
 import Data.Functor.Compose
 import Data.Functor.Identity
@@ -25,6 +26,9 @@ class (Traversing p, Closed p) => Mapping p where
 
 instance Mapping (->) where
   map' = fmap
+
+instance (Monad m, Distributive m) => Mapping (Kleisli m) where
+  map' (Kleisli f) = Kleisli (collect f)
 
 -- see <https://github.com/ekmett/distributive/issues/12>
 instance (Applicative m, Distributive m) => Mapping (Star m) where
