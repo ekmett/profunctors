@@ -28,6 +28,7 @@ import Data.Traversable
 import Data.Tuple (swap)
 
 #if __GLASGOW_HASKELL__ < 710
+import Data.Foldable
 import Prelude hiding (mapM)
 #endif
 
