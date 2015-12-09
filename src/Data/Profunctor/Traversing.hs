@@ -1,6 +1,7 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE DeriveFunctor #-}
 module Data.Profunctor.Traversing
   ( Traversing(..)
   , CofreeTraversing(..)
@@ -13,6 +14,7 @@ module Data.Profunctor.Traversing
   , rightTraversing
   ) where
 
+import Control.Applicative
 import Control.Arrow (Kleisli(..))
 import Data.Functor.Compose
 import Data.Functor.Identity
@@ -22,11 +24,10 @@ import Data.Profunctor.Monad
 import Data.Profunctor.Strong
 import Data.Profunctor.Types
 import Data.Profunctor.Unsafe
+import Data.Traversable
 import Data.Tuple (swap)
 
 #if __GLASGOW_HASKELL__ < 710
-import Control.Applicative
-import Data.Traversable
 import Prelude hiding (mapM)
 #endif
 
@@ -45,17 +46,63 @@ leftTraversing = dimap swapE swapE . traverse'
 rightTraversing :: Traversing p => p a b -> p (Either c a) (Either c b)
 rightTraversing = traverse'
 
+newtype Bazaar a b t = Bazaar { runBazaar :: forall f. Applicative f => (a -> f b) -> f t }
+  deriving Functor
+
+instance Applicative (Bazaar a b) where
+  pure a = Bazaar $ \_ -> pure a
+  mf <*> ma = Bazaar $ \k -> runBazaar mf k <*> runBazaar ma k
+
+instance Profunctor (Bazaar a) where
+  dimap f g m = Bazaar $ \k -> g <$> runBazaar m (fmap f . k)
+
+sell :: a -> Bazaar a b b
+sell a = Bazaar $ \k -> k a
+
+newtype Baz t b a = Baz { runBaz :: forall f. Applicative f => (a -> f b) -> f t }
+  deriving Functor
+
+bsell :: a -> Baz b b a
+bsell a = Baz $ \k -> k a
+
+aar :: Bazaar a b t -> Baz t b a
+aar (Bazaar f) = Baz f
+
+sold :: Baz t a a -> t
+sold m = runIdentity (runBaz m Identity)
+
+instance Foldable (Baz t b) where
+  foldMap = foldMapDefault
+
+instance Traversable (Baz t b) where
+  traverse f bz = fmap (\m -> Baz (runBazaar m)) . getCompose . runBaz bz $ \x -> Compose $ sell <$> f x
+
+instance Profunctor (Baz t) where
+  dimap f g m = Baz $ \k -> runBaz m (fmap f . k . g)
+
+-- | Note: Definitions in terms of 'wander' are much more efficient!
 class (Choice p, Strong p) => Traversing p where
   traverse' :: Traversable f => p a b -> p (f a) (f b)
+  traverse' = wander traverse
+
+  wander :: (forall f. Applicative f => (a -> f b) -> s -> f t) -> p a b -> p s t
+  wander f pab = dimap (\s -> Baz $ \afb -> f afb s) sold (traverse' pab)
+
+#if __GLASGOW_HASKELL__ >= 706
+  {-# MINIMAL wander | traverse' #-}
+#endif
 
 instance Traversing (->) where
   traverse' = fmap
+  wander f ab = runIdentity #. f (Identity #. ab)
 
 instance Monad m => Traversing (Kleisli m) where
   traverse' (Kleisli m) = Kleisli (mapM m)
+  wander f (Kleisli amb) = Kleisli $ unwrapMonad #. f (WrapMonad #. amb)
 
 instance Applicative m => Traversing (Star m) where
   traverse' (Star m) = Star (traverse m)
+  wander f (Star amb) = Star (f amb)
 
 newtype CofreeTraversing p a b = CofreeTraversing { runCofreeTraversing :: forall f. Traversable f => p (f a) (f b) }
 
