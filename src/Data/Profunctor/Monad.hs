@@ -15,6 +15,8 @@ module Data.Profunctor.Monad where
 
 import Control.Comonad
 import Data.Bifunctor.Tannen
+import Data.Bifunctor.Product
+import Data.Bifunctor.Sum
 import Data.Profunctor.Types
 
 class ProfunctorFunctor t where
@@ -22,6 +24,13 @@ class ProfunctorFunctor t where
 
 instance Functor f => ProfunctorFunctor (Tannen f) where
   promap f (Tannen g) = Tannen (fmap f g)
+
+instance Profunctor p => ProfunctorFunctor (Product p) where
+  promap f (Pair p q) = Pair p (f q)
+
+instance Profunctor p => ProfunctorFunctor (Sum p) where
+  promap _ (L2 p) = L2 p
+  promap f (R2 q) = R2 (f q)
 
 class ProfunctorFunctor t => ProfunctorMonad t where
   proreturn :: Profunctor p => p :-> t p
@@ -35,6 +44,11 @@ instance Monad f => ProfunctorMonad (Tannen f) where
   proreturn = Tannen . return
   projoin (Tannen m) = Tannen $ m >>= runTannen
 
+instance Profunctor p => ProfunctorMonad (Sum p) where
+  proreturn = R2
+  projoin (L2 p) = L2 p
+  projoin (R2 m) = m
+
 class ProfunctorFunctor t => ProfunctorComonad t where
   proextract :: Profunctor p => t p :-> p
   produplicate :: Profunctor p => t p :-> t (t p)
@@ -43,3 +57,6 @@ instance Comonad f => ProfunctorComonad (Tannen f) where
   proextract = extract . runTannen
   produplicate (Tannen w) = Tannen $ extend Tannen w
 
+instance Profunctor p => ProfunctorComonad (Product p) where
+  proextract (Pair _ q) = q
+  produplicate pq@(Pair p _) = Pair p pq
