@@ -63,11 +63,11 @@ sell a = Bazaar $ \k -> k a
 newtype Baz t b a = Baz { runBaz :: forall f. Applicative f => (a -> f b) -> f t }
   deriving Functor
 
-bsell :: a -> Baz b b a
-bsell a = Baz $ \k -> k a
+-- bsell :: a -> Baz b b a
+-- bsell a = Baz $ \k -> k a
 
-aar :: Bazaar a b t -> Baz t b a
-aar (Bazaar f) = Baz f
+-- aar :: Bazaar a b t -> Baz t b a
+-- aar (Bazaar f) = Baz f
 
 sold :: Baz t a a -> t
 sold m = runIdentity (runBaz m Identity)

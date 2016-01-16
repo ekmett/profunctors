@@ -241,7 +241,7 @@ instance ProfunctorMonad PastroSum where
     lm (Right (Left y)) = l $ Left $ m $ Right y
     lm (Right (Right z)) = l $ Right z
 
-instance Profunctor p => Choice (PastroSum p) where
+instance Choice (PastroSum p) where
   left' (PastroSum l m r) = PastroSum l' m r' where
     r' = either (fmap Left . r) (Right . Right)
     l' (Left y)          = Left (l (Left y))

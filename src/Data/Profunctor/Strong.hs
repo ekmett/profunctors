@@ -338,7 +338,7 @@ instance ProfunctorComonad Cotambara where
   proextract (Cotambara n p)  = n p
   produplicate (Cotambara n p) = Cotambara id (Cotambara n p)
 
-instance Profunctor p => Costrong (Cotambara p) where
+instance Costrong (Cotambara p) where
   unfirst (Cotambara n p) = Cotambara n (unfirst p)
 
 instance Functor (Cotambara p a) where

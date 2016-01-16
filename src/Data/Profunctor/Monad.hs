@@ -25,10 +25,10 @@ class ProfunctorFunctor t where
 instance Functor f => ProfunctorFunctor (Tannen f) where
   promap f (Tannen g) = Tannen (fmap f g)
 
-instance Profunctor p => ProfunctorFunctor (Product p) where
+instance ProfunctorFunctor (Product p) where
   promap f (Pair p q) = Pair p (f q)
 
-instance Profunctor p => ProfunctorFunctor (Sum p) where
+instance ProfunctorFunctor (Sum p) where
   promap _ (L2 p) = L2 p
   promap f (R2 q) = R2 (f q)
 
@@ -44,7 +44,7 @@ instance Monad f => ProfunctorMonad (Tannen f) where
   proreturn = Tannen . return
   projoin (Tannen m) = Tannen $ m >>= runTannen
 
-instance Profunctor p => ProfunctorMonad (Sum p) where
+instance ProfunctorMonad (Sum p) where
   proreturn = R2
   projoin (L2 p) = L2 p
   projoin (R2 m) = m
@@ -57,6 +57,6 @@ instance Comonad f => ProfunctorComonad (Tannen f) where
   proextract = extract . runTannen
   produplicate (Tannen w) = Tannen $ extend Tannen w
 
-instance Profunctor p => ProfunctorComonad (Product p) where
+instance ProfunctorComonad (Product p) where
   proextract (Pair _ q) = q
   produplicate pq@(Pair p _) = Pair p pq
