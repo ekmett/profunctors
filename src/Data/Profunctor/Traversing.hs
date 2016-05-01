@@ -28,6 +28,7 @@ import Data.Traversable
 import Data.Tuple (swap)
 
 #if __GLASGOW_HASKELL__ < 710
+import Data.Monoid (Monoid)
 import Data.Foldable
 import Prelude hiding (mapM)
 #endif
@@ -96,6 +97,10 @@ class (Choice p, Strong p) => Traversing p where
 instance Traversing (->) where
   traverse' = fmap
   wander f ab = runIdentity #. f (Identity #. ab)
+
+instance Monoid m => Traversing (Forget m) where
+  traverse' (Forget h) = Forget (foldMap h)
+  wander f (Forget h) = Forget (getConst . f (Const . h))
 
 instance Monad m => Traversing (Kleisli m) where
   traverse' (Kleisli m) = Kleisli (mapM m)
