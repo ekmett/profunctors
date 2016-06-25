@@ -40,6 +40,7 @@ import Control.Arrow
 import Control.Category
 import Control.Comonad
 import Control.Monad (MonadPlus(..))
+import Control.Monad.Fix
 import Data.Distributive
 import Data.Foldable
 import Data.Monoid hiding (Product)
@@ -177,6 +178,10 @@ instance ArrowZero p => ArrowZero (WrappedArrow p) where
   zeroArrow = WrapArrow zeroArrow
   {-# INLINE zeroArrow #-}
 
+instance ArrowPlus p => ArrowPlus (WrappedArrow p) where
+  WrapArrow a <+> WrapArrow b = WrapArrow (a <+> b)
+  {-# INLINE (<+>) #-}
+
 instance ArrowChoice p => ArrowChoice (WrappedArrow p) where
   left = WrapArrow . left . unwrapArrow
   {-# INLINE left #-}
@@ -194,6 +199,51 @@ instance ArrowApply p => ArrowApply (WrappedArrow p) where
 instance ArrowLoop p => ArrowLoop (WrappedArrow p) where
   loop = WrapArrow . loop . unwrapArrow
   {-# INLINE loop #-}
+
+instance Arrow p => Functor (WrappedArrow p r) where
+  fmap = rmap
+  {-# INLINE fmap #-}
+
+instance Arrow p => Applicative (WrappedArrow p r) where
+  pure = arr . const
+  {-# INLINE pure #-}
+
+  WrapArrow af <*> WrapArrow aa = WrapArrow $ arr (uncurry id) . (af &&& aa)
+  {-# INLINE (<*>) #-}
+
+  WrapArrow aa *> WrapArrow ab = WrapArrow $ arr snd . (aa &&& ab)
+  {-# INLINE (*>) #-}
+
+  WrapArrow aa <* WrapArrow ab = WrapArrow $ arr fst . (aa &&& ab)
+  {-# INLINE (<*) #-}
+
+instance ArrowPlus p => Alternative (WrappedArrow p r) where
+  empty = zeroArrow
+  {-# INLINE empty #-}
+
+  (<|>) = (<+>)
+  {-# INLINE (<|>) #-}
+
+instance ArrowApply p => Monad (WrappedArrow p r) where
+  return = pure
+  {-# INLINE return #-}
+
+  (>>) = (*>)
+  {-# INLINE (>>) #-}
+
+  WrapArrow p >>= f = WrapArrow $ app . (arr (unwrapArrow . f) . p &&& id)
+  {-# INLINE (>>=) #-}
+
+instance (ArrowApply p, ArrowPlus p) => MonadPlus (WrappedArrow p r) where
+  mzero = zeroArrow
+  {-# INLINE mzero #-}
+
+  mplus = (<+>)
+  {-# INLINE mplus #-}
+
+instance (ArrowApply p, ArrowLoop p) => MonadFix (WrappedArrow p r) where
+  mfix f = WrapArrow $ loop $ arr (\a -> (a, a)) . app . arr (\p -> (unwrapArrow (f $ snd p), fst p))
+  {-# INLINE mfix #-}
 
 instance Arrow p => Profunctor (WrappedArrow p) where
   lmap = (^>>)
