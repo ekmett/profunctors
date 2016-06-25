@@ -18,7 +18,7 @@ module Data.Profunctor.Traversing
   , traverseA
   ) where
 
-import Prelude hiding (id, (.))
+import Prelude hiding (mapM, id, (.))
 import Control.Category
 import Control.Applicative hiding (WrappedArrow(..))
 import Control.Arrow
@@ -35,7 +35,6 @@ import Data.Traversable
 #if __GLASGOW_HASKELL__ < 710
 import Data.Monoid (Monoid)
 import Data.Foldable
-import Prelude hiding (mapM)
 #endif
 
 firstTraversing :: Traversing p => p a b -> p (a, c) (b, c)
