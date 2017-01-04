@@ -83,6 +83,7 @@ instance Strong (->) where
   first' ab ~(a, c) = (ab a, c)
   {-# INLINE first' #-}
   second' ab ~(c, a) = (c, ab a)
+  {-# INLINE second' #-}
 
 instance Monad m => Strong (Kleisli m) where
   first' (Kleisli f) = Kleisli $ \ ~(a, c) -> do
