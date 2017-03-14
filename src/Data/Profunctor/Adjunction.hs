@@ -17,6 +17,12 @@ module Data.Profunctor.Adjunction where
 import Data.Profunctor.Types
 import Data.Profunctor.Monad
 
+-- | Laws:
+--
+-- @
+-- 'unit' '.' 'counit' ≡ 'id'
+-- 'couint' '.' 'unit' ≡ 'id'
+-- @
 class (ProfunctorFunctor f, ProfunctorFunctor u) => ProfunctorAdjunction f u | f -> u, u -> f where
   unit   :: Profunctor p => p :-> u (f p)
   counit :: Profunctor p => f (u p) :-> p

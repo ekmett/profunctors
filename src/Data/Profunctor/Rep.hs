@@ -60,6 +60,12 @@ import Data.Tagged
 -- @p d c@ is isomorphic to @d -> f c@.
 class (Sieve p (Rep p), Strong p) => Representable p where
   type Rep p :: * -> *
+  -- | Laws:
+  --
+  -- @
+  -- 'tabulate' '.' 'sieve' ≡ 'id'
+  -- 'sieve' '.' 'tabulate' ≡ 'id'
+  -- @
   tabulate :: (d -> Rep p c) -> p d c
 
 -- | Default definition for 'first'' given that p is 'Representable'.
@@ -115,6 +121,12 @@ tabulated = dimap tabulate (fmap sieve)
 -- @p d c@ is isomorphic to @f d -> c@.
 class (Cosieve p (Corep p), Costrong p) => Corepresentable p where
   type Corep p :: * -> *
+  -- | Laws:
+  --
+  -- @
+  -- 'cotabulate' '.' 'cosieve' ≡ 'id'
+  -- 'cosieve' '.' 'cotabulate' ≡ 'id'
+  -- @
   cotabulate :: (Corep p d -> c) -> p d c
 
 -- | Default definition for 'unfirst' given that @p@ is 'Corepresentable'.
