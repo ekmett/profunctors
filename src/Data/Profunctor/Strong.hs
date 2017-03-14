@@ -64,14 +64,35 @@ import Prelude hiding (id,(.))
 -- of Hask.
 --
 -- <http://www-kb.is.s.u-tokyo.ac.jp/~asada/papers/arrStrMnd.pdf>
+--
 class Profunctor p => Strong p where
+  -- | Laws:
+  --
+  -- @
+  -- 'first' = 'dimap' 'swap' 'swap' '.' 'second''
+  -- 'lmap' 'fst' = 'rmap' 'fst' '.' 'first''
+  -- 'lmap' ('second' f) '.' 'first'' = 'rmap' ('second' f) '.' 'first'
+  -- 'first'' '.' 'first'' = 'dimap' assoc unassoc '.' 'first'' where
+  --   assoc ((a,b),c) = (a,(b,c))
+  --   unassoc (a,(b,c)) = ((a,b),c)
+  -- @
   first' :: p a b  -> p (a, c) (b, c)
   first' = dimap swap swap . second'
 
+  -- | Laws:
+  --
+  -- @
+  -- second' = 'dimap' 'swap' 'swap' . 'first''
+  -- 'lmap' 'snd' = 'rmap' 'snd' '.' 'second''
+  -- 'lmap' ('first' f) '.' 'second'' = 'rmap' ('first' f) '.' 'second''
+  -- 'second'' '.' 'second'' = 'dimap' unassoc assoc '.' 'second'' where
+  --   assoc ((a,b),c) = (a,(b,c))
+  --   unassoc (a,(b,c)) = ((a,b),c)
+  -- @
   second' :: p a b -> p (c, a) (c, b)
   second' = dimap swap swap . first'
 
-#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 708
+#if __GLASGOW_HASKELL__ >= 708
   {-# MINIMAL first' | second' #-}
 #endif
 
