@@ -52,6 +52,13 @@ import Prelude hiding ((.),id)
 --
 -- A closed profunctor allows the closed structure to pass through.
 class Profunctor p => Closed p where
+  -- | Laws:
+  --
+  -- @
+  -- 'lmap' ('.' f) '.' 'closed' ≡ 'rmap' ('.' f) . 'closed'
+  -- 'closed' '.' 'closed' ≡ 'dimap' 'uncurry' 'curry' '.' 'closed'
+  -- 'dimap' 'const' ('$'()) '.' 'closed' ≡ 'id'
+  -- @
   closed :: p a b -> p (x -> a) (x -> b)
 
 instance Closed Tagged where
