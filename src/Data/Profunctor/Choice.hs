@@ -61,9 +61,41 @@ import Prelude hiding (id,(.))
 -- Note: This is also a notion of strength, except with regards to another monoidal
 -- structure that we can choose to equip Hask with: the cocartesian coproduct.
 class Profunctor p => Choice p where
+  -- | Laws:
+  --
+  -- @
+  -- 'left'' ≡ 'dimap' ('either' 'Right' 'Left') ('either' 'Right' 'Left') '.' 'right''
+  -- 'rmap' 'Left' ≡ 'lmap' 'Left' '.' 'left''
+  -- 'lmap' ('right' f) '.' 'left'' ≡ 'rmap' ('right' f) '.' 'left''
+  -- 'left'' '.' 'left'' ≡ 'dimap' assoc unassoc '.' 'left'' where
+  --   assoc :: 'Either' ('Either' a b) c -> 'Either' a ('Either' b c)
+  --   assoc ('Left' ('Left' a)) = 'Left' a
+  --   assoc ('Left' ('Right' b)) = 'Right' ('Left' b)
+  --   assoc ('Right' c) = 'Right' ('Right' c)
+  --   unassoc :: 'Either' a ('Either' b c) -> 'Either' ('Either' a b) c
+  --   unassoc ('Left' a) = 'Left' ('Left' a)
+  --   unassoc ('Right' ('Left' b) = 'Left' ('Right' b)
+  --   unassoc ('Right' ('Right' c)) = 'Right' c)
+  -- @
   left'  :: p a b -> p (Either a c) (Either b c)
   left' =  dimap (either Right Left) (either Right Left) . right'
 
+  -- | Laws:
+  --
+  -- @
+  -- 'right'' ≡ 'dimap' ('either' 'Right' 'Left') ('either' 'Right' 'Left') '.' 'left''
+  -- 'rmap' 'Right' ≡ 'lmap' 'Right' '.' 'right''
+  -- 'lmap' ('left' f) '.' 'right'' ≡ 'rmap' ('left' f) '.' 'right''
+  -- 'right'' '.' 'right'' ≡ 'dimap' unassoc assoc '.' 'right'' where
+  --   assoc :: 'Either' ('Either' a b) c -> 'Either' a ('Either' b c)
+  --   assoc ('Left' ('Left' a)) = 'Left' a
+  --   assoc ('Left' ('Right' b)) = 'Right' ('Left' b)
+  --   assoc ('Right' c) = 'Right' ('Right' c)
+  --   unassoc :: 'Either' a ('Either' b c) -> 'Either' ('Either' a b) c
+  --   unassoc ('Left' a) = 'Left' ('Left' a)
+  --   unassoc ('Right' ('Left' b) = 'Left' ('Right' b)
+  --   unassoc ('Right' ('Right' c)) = 'Right' c)
+  -- @
   right' :: p a b -> p (Either c a) (Either c b)
   right' =  dimap (either Right Left) (either Right Left) . left'
 
