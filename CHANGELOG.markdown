@@ -1,3 +1,7 @@
+HEAD
+---
+* Added `pastro` and `unpastro`.
+
 5.2
 ---
 * Renamed `Cotambara` to `TambaraChoice` and `Pastro` to `PastroChoice`.
