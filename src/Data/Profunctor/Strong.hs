@@ -70,10 +70,10 @@ class Profunctor p => Strong p where
   -- | Laws:
   --
   -- @
-  -- 'first' = 'dimap' 'swap' 'swap' '.' 'second''
-  -- 'lmap' 'fst' = 'rmap' 'fst' '.' 'first''
-  -- 'lmap' ('second' f) '.' 'first'' = 'rmap' ('second' f) '.' 'first'
-  -- 'first'' '.' 'first'' = 'dimap' assoc unassoc '.' 'first'' where
+  -- 'first' ≡ 'dimap' 'swap' 'swap' '.' 'second''
+  -- 'lmap' 'fst' ≡ 'rmap' 'fst' '.' 'first''
+  -- 'lmap' ('second' f) '.' 'first'' ≡ 'rmap' ('second' f) '.' 'first'
+  -- 'first'' '.' 'first'' ≡ 'dimap' assoc unassoc '.' 'first'' where
   --   assoc ((a,b),c) = (a,(b,c))
   --   unassoc (a,(b,c)) = ((a,b),c)
   -- @
@@ -83,10 +83,10 @@ class Profunctor p => Strong p where
   -- | Laws:
   --
   -- @
-  -- second' = 'dimap' 'swap' 'swap' . 'first''
-  -- 'lmap' 'snd' = 'rmap' 'snd' '.' 'second''
-  -- 'lmap' ('first' f) '.' 'second'' = 'rmap' ('first' f) '.' 'second''
-  -- 'second'' '.' 'second'' = 'dimap' unassoc assoc '.' 'second'' where
+  -- second' ≡ 'dimap' 'swap' 'swap' . 'first''
+  -- 'lmap' 'snd' ≡ 'rmap' 'snd' '.' 'second''
+  -- 'lmap' ('first' f) '.' 'second'' ≡ 'rmap' ('first' f) '.' 'second''
+  -- 'second'' '.' 'second'' ≡ 'dimap' unassoc assoc '.' 'second'' where
   --   assoc ((a,b),c) = (a,(b,c))
   --   unassoc (a,(b,c)) = ((a,b),c)
   -- @
