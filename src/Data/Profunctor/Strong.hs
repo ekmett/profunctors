@@ -26,6 +26,7 @@ module Data.Profunctor.Strong
   , Tambara(..)
   , tambara, untambara
   , Pastro(..)
+  , pastro, unpastro
   -- * Costrength
   , Costrong(..)
   , Cotambara(..)
@@ -269,6 +270,23 @@ instance Strong (Pastro p) where
     r' (c,a) = case r a of
       (x,z) -> (x,(c,z))
     l' (y,(c,z)) = (c,l (y,z))
+
+-- |
+-- @
+-- 'pastro' '.' 'unpastro' ≡ 'id'
+-- 'unpastro' '.' 'pastro' ≡ 'id'
+-- @
+pastro :: Strong q => (p :-> q) -> Pastro p :-> q
+pastro f (Pastro r g l) = dimap l r (first' (f g))
+
+-- |
+-- @
+-- 'pastro' '.' 'unpastro' ≡ 'id'
+-- 'unpastro' '.' 'pastro' ≡ 'id'
+-- @
+unpastro :: (Pastro p :-> q) -> p :-> q
+unpastro f p = f (Pastro (\(b,_) -> b) p (\a -> (a, ())))
+
 
 --------------------------------------------------------------------------------
 -- * Costrength for (,)
