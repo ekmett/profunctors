@@ -20,6 +20,12 @@ import Data.Bifunctor.Sum
 import Data.Profunctor.Types
 
 class ProfunctorFunctor t where
+  -- | Laws:
+  --
+  -- @
+  -- 'promap' f . 'promap' g ≡ 'promap' (f '.' g)
+  -- 'promap' 'id' ≡ 'id'
+  -- @
   promap    :: Profunctor p => (p :-> q) -> t p :-> t q
 
 instance Functor f => ProfunctorFunctor (Tannen f) where
@@ -32,6 +38,14 @@ instance ProfunctorFunctor (Sum p) where
   promap _ (L2 p) = L2 p
   promap f (R2 q) = R2 (f q)
 
+-- | Laws:
+--
+-- @
+-- 'promap' f '.' 'proreturn' ≡ 'proreturn' '.' f
+-- 'projoin' '.' 'proreturn' ≡ 'id'
+-- 'projoin' '.' 'promap' 'proreturn' ≡ 'id'
+-- 'projoin' '.' 'projoin' ≡ 'projoin' '.' 'promap' 'projoin'
+-- @
 class ProfunctorFunctor t => ProfunctorMonad t where
   proreturn :: Profunctor p => p :-> t p
   projoin   :: Profunctor p => t (t p) :-> t p
@@ -49,6 +63,14 @@ instance ProfunctorMonad (Sum p) where
   projoin (L2 p) = L2 p
   projoin (R2 m) = m
 
+-- | Laws:
+--
+-- @
+-- 'proextract' '.' 'promap' f ≡ f '.' 'proextract'
+-- 'proextract' '.' 'produplicate' ≡ 'id'
+-- 'promap' 'proextract' . 'produplicate' ≡ 'id'
+-- 'produplicate' '.' 'produplicate' ≡ 'promap' 'produplicate' '.' 'produplicate'
+-- @
 class ProfunctorFunctor t => ProfunctorComonad t where
   proextract :: Profunctor p => t p :-> p
   produplicate :: Profunctor p => t p :-> t (t p)
