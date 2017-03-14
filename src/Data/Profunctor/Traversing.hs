@@ -84,9 +84,18 @@ instance Profunctor (Baz t) where
 
 -- | Note: Definitions in terms of 'wander' are much more efficient!
 class (Choice p, Strong p) => Traversing p where
+  -- | Laws:
+  --
+  -- @
+  -- 'traverse'' ≡ 'wander' 'traverse'
+  -- 'traverse'' '.' 'rmap' f ≡ 'rmap' ('fmap' f) . 'traverse''
+  -- 'traverse'' '.' 'traverse'' ≡ 'dimap' 'Compose' 'getCompose' '.' 'traverse''
+  -- 'dimap' 'Identity' 'runIdentity' '.' 'traverse'' ≡ 'id'
+  -- @
   traverse' :: Traversable f => p a b -> p (f a) (f b)
   traverse' = wander traverse
 
+  -- | This combinator is mutually defined in terms of 'traverse''
   wander :: (forall f. Applicative f => (a -> f b) -> s -> f t) -> p a b -> p s t
   wander f pab = dimap (\s -> Baz $ \afb -> f afb s) sold (traverse' pab)
 
