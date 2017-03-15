@@ -232,16 +232,16 @@ instance ArrowPlus p => Monoid (Tambara p a b) where
 
 -- |
 -- @
--- 'tambara' '.' 'untambara' ≡ 'id'
--- 'untambara' '.' 'tambara' ≡ 'id'
+-- 'tambara' ('untambara' f) ≡ f
+-- 'untambara' ('tambara' f) ≡ f
 -- @
 tambara :: Strong p => (p :-> q) -> p :-> Tambara q
 tambara f p = Tambara $ f $ first' p
 
 -- |
 -- @
--- 'tambara' '.' 'untambara' ≡ 'id'
--- 'untambara' '.' 'tambara' ≡ 'id'
+-- 'tambara' ('untambara' f) ≡ f
+-- 'untambara' ('tambara' f) ≡ f
 -- @
 untambara :: Profunctor q => (p :-> Tambara q) -> p :-> q
 untambara f p = dimap (\a -> (a,())) fst $ runTambara $ f p
@@ -294,20 +294,19 @@ instance Strong (Pastro p) where
 
 -- |
 -- @
--- 'pastro' '.' 'unpastro' ≡ 'id'
--- 'unpastro' '.' 'pastro' ≡ 'id'
+-- 'pastro' ('unpastro' f) ≡ f
+-- 'unpastro' ('pastro' f) ≡ f
 -- @
 pastro :: Strong q => (p :-> q) -> Pastro p :-> q
 pastro f (Pastro r g l) = dimap l r (first' (f g))
 
 -- |
 -- @
--- 'pastro' '.' 'unpastro' ≡ 'id'
--- 'unpastro' '.' 'pastro' ≡ 'id'
+-- 'pastro' ('unpastro' f) ≡ f
+-- 'unpastro' ('pastro' f) ≡ f
 -- @
 unpastro :: (Pastro p :-> q) -> p :-> q
-unpastro f p = f (Pastro (\(b,_) -> b) p (\a -> (a, ())))
-
+unpastro f p = f (Pastro fst p (\a -> (a, ())))
 
 --------------------------------------------------------------------------------
 -- * Costrength for (,)
