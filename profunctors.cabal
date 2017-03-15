@@ -54,6 +54,7 @@ library
     Data.Profunctor.Traversing
     Data.Profunctor.Types
     Data.Profunctor.Unsafe
+    Data.Profunctor.Yoneda
 
   ghc-options:     -Wall -O2
   hs-source-dirs:  src
