@@ -1,6 +1,7 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE Rank2Types #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 #if __GLASGOW_HASKELL__ >= 702 && __GLASGOW_HASKELL__ <= 708
@@ -70,7 +71,7 @@ instance Profunctor (Yoneda p) where
 #if __GLASGOW_HASKELL__ >= 708
   ( .# ) p _ = coerce p
   {-# INLINE ( .# ) #-}
-  ( #. ) _ = coerce
+  ( #. ) _ = coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
   {-# INLINE ( #. ) #-}
 #else
   ( .# ) p _ = unsafeCoerce p
@@ -180,7 +181,7 @@ instance Profunctor (Coyoneda p) where
 #if __GLASGOW_HASKELL__ >= 708
   ( .# ) p _ = coerce p
   {-# INLINE ( .# ) #-}
-  ( #. ) _ = coerce
+  ( #. ) _ = coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
   {-# INLINE ( #. ) #-}
 #else
   ( .# ) p _ = unsafeCoerce p
