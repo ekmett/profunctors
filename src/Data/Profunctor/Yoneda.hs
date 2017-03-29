@@ -75,7 +75,7 @@ instance Profunctor (Yoneda p) where
 #else
   p .# _ = unsafeCoerce p
   {-# INLINE (.#) #-}
-  (#.) _ = unsafecoerce
+  (#.) _ = unsafeCoerce
   {-# INLINE (#.) #-}
 #endif
 
