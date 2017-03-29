@@ -42,7 +42,7 @@ import Unsafe.Coerce
 newtype Yoneda p a b = Yoneda { runYoneda :: forall x y. (x -> a) -> (b -> y) -> p x y }
 
 -- Yoneda is a comonad on |*| -> Nat(|*|,*), we don't need the profunctor constraint to extract or duplicate
--- | 
+-- |
 -- @
 -- 'projoin' '.' 'extractYoneda' ≡ 'id'
 -- 'extractYoneda' '.' 'projoin' ≡ 'id'
@@ -51,7 +51,7 @@ newtype Yoneda p a b = Yoneda { runYoneda :: forall x y. (x -> a) -> (b -> y) ->
 extractYoneda :: Yoneda p a b -> p a b
 extractYoneda p = runYoneda p id id
 
--- | 
+-- |
 -- @
 -- 'projoin' '.' 'duplicateYoneda' ≡ 'id'
 -- 'duplicateYoneda' '.' 'projoin' ≡ 'id'
@@ -68,15 +68,15 @@ instance Profunctor (Yoneda p) where
   rmap r p = Yoneda $ \l r' -> runYoneda p l (r' . r)
   {-# INLINE rmap #-}
 #if __GLASGOW_HASKELL__ >= 708
-  p .# _ = coerce p
-  {-# INLINE (.#) #-}
-  _ #. p = coerce p
-  {-# INLINE (#.) #-}
+  ( .# ) p _ = coerce p
+  {-# INLINE ( .# ) #-}
+  ( #. ) _ = coerce
+  {-# INLINE ( #. ) #-}
 #else
-  p .# _ = unsafeCoerce p
-  {-# INLINE (.#) #-}
-  _ #. p = unsafeCoerce p
-  {-# INLINE (#.) #-}
+  ( .# ) p _ = unsafeCoerce p
+  {-# INLINE ( .# ) #-}
+  ( #. ) _ = unsafeCoerce
+  {-# INLINE ( #. ) #-}
 #endif
 
 instance Functor (Yoneda p a) where
@@ -144,7 +144,7 @@ instance Traversing p => Traversing (Yoneda p) where
   {-# INLINE wander #-}
 
 --------------------------------------------------------------------------------
--- * Coyoneda 
+-- * Coyoneda
 --------------------------------------------------------------------------------
 
 data Coyoneda p a b where
@@ -152,7 +152,7 @@ data Coyoneda p a b where
 
 -- Coyoneda is a Monad on |*| -> Nat(|*|,*), we don't need the profunctor constraint to extract or duplicate
 
--- | 
+-- |
 -- @
 -- 'returnCoyoneda' '.' 'proextract' ≡ 'id'
 -- 'proextract' '.' 'returnCoyoneda' ≡ 'id'
@@ -161,7 +161,7 @@ data Coyoneda p a b where
 returnCoyoneda :: p a b -> Coyoneda p a b
 returnCoyoneda = Coyoneda id id
 
--- | 
+-- |
 -- @
 -- 'joinCoyoneda' '.' 'produplicate' ≡ 'id'
 -- 'produplicate' '.' 'joinCoyoneda' ≡ 'id'
@@ -178,15 +178,15 @@ instance Profunctor (Coyoneda p) where
   rmap r (Coyoneda l r' p) = Coyoneda l (r . r') p
   {-# INLINE rmap #-}
 #if __GLASGOW_HASKELL__ >= 708
-  p .# _ = coerce p
-  {-# INLINE (.#) #-}
-  _ #. p = coerce p
-  {-# INLINE (#.) #-}
+  ( .# ) p _ = coerce p
+  {-# INLINE ( .# ) #-}
+  ( #. ) _ = coerce
+  {-# INLINE ( #. ) #-}
 #else
-  p .# _ = unsafeCoerce p
-  {-# INLINE (.#) #-}
-  _ #. p = unsafeCoerce p
-  {-# INLINE (#.) #-}
+  ( .# ) p _ = unsafeCoerce p
+  {-# INLINE ( .# ) #-}
+  ( #. ) _ = unsafeCoerce
+  {-# INLINE ( #. ) #-}
 #endif
 
 instance ProfunctorFunctor Coyoneda where
