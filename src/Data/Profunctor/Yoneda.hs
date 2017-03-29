@@ -185,7 +185,7 @@ instance Profunctor (Coyoneda p) where
 #else
   p .# _ = unsafeCoerce p
   {-# INLINE (.#) #-}
-  (#.) _ = unsafecoerce
+  (#.) _ = unsafeCoerce
   {-# INLINE (#.) #-}
 #endif
 
