@@ -23,7 +23,7 @@ class ProfunctorFunctor t where
   -- | Laws:
   --
   -- @
-  -- 'promap' f . 'promap' g ≡ 'promap' (f '.' g)
+  -- 'promap' f '.' 'promap' g ≡ 'promap' (f '.' g)
   -- 'promap' 'id' ≡ 'id'
   -- @
   promap    :: Profunctor p => (p :-> q) -> t p :-> t q
@@ -68,7 +68,7 @@ instance ProfunctorMonad (Sum p) where
 -- @
 -- 'proextract' '.' 'promap' f ≡ f '.' 'proextract'
 -- 'proextract' '.' 'produplicate' ≡ 'id'
--- 'promap' 'proextract' . 'produplicate' ≡ 'id'
+-- 'promap' 'proextract' '.' 'produplicate' ≡ 'id'
 -- 'produplicate' '.' 'produplicate' ≡ 'promap' 'produplicate' '.' 'produplicate'
 -- @
 class ProfunctorFunctor t => ProfunctorComonad t where

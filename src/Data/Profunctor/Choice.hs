@@ -64,18 +64,20 @@ class Profunctor p => Choice p where
   -- | Laws:
   --
   -- @
-  -- 'left'' ≡ 'dimap' ('either' 'Right' 'Left') ('either' 'Right' 'Left') '.' 'right''
+  -- 'left'' ≡ 'dimap' swapE swapE '.' 'right'' where
+  --   swapE :: 'Either' a b -> 'Either' b a
+  --   swapE = 'either' 'Right' 'Left'
   -- 'rmap' 'Left' ≡ 'lmap' 'Left' '.' 'left''
   -- 'lmap' ('right' f) '.' 'left'' ≡ 'rmap' ('right' f) '.' 'left''
-  -- 'left'' '.' 'left'' ≡ 'dimap' assoc unassoc '.' 'left'' where
-  --   assoc :: 'Either' ('Either' a b) c -> 'Either' a ('Either' b c)
-  --   assoc ('Left' ('Left' a)) = 'Left' a
-  --   assoc ('Left' ('Right' b)) = 'Right' ('Left' b)
-  --   assoc ('Right' c) = 'Right' ('Right' c)
-  --   unassoc :: 'Either' a ('Either' b c) -> 'Either' ('Either' a b) c
-  --   unassoc ('Left' a) = 'Left' ('Left' a)
-  --   unassoc ('Right' ('Left' b) = 'Left' ('Right' b)
-  --   unassoc ('Right' ('Right' c)) = 'Right' c)
+  -- 'left'' '.' 'left'' ≡ 'dimap' assocE unassocE '.' 'left'' where
+  --   assocE :: 'Either' ('Either' a b) c -> 'Either' a ('Either' b c)
+  --   assocE ('Left' ('Left' a)) = 'Left' a
+  --   assocE ('Left' ('Right' b)) = 'Right' ('Left' b)
+  --   assocE ('Right' c) = 'Right' ('Right' c)
+  --   unassocE :: 'Either' a ('Either' b c) -> 'Either' ('Either' a b) c
+  --   unassocE ('Left' a) = 'Left' ('Left' a)
+  --   unassocE ('Right' ('Left' b) = 'Left' ('Right' b)
+  --   unassocE ('Right' ('Right' c)) = 'Right' c)
   -- @
   left'  :: p a b -> p (Either a c) (Either b c)
   left' =  dimap (either Right Left) (either Right Left) . right'
@@ -83,18 +85,20 @@ class Profunctor p => Choice p where
   -- | Laws:
   --
   -- @
-  -- 'right'' ≡ 'dimap' ('either' 'Right' 'Left') ('either' 'Right' 'Left') '.' 'left''
+  -- 'right'' ≡ 'dimap' swapE swapE '.' 'left'' where
+  --   swapE :: 'Either' a b -> 'Either' b a
+  --   swapE = 'either' 'Right' 'Left'
   -- 'rmap' 'Right' ≡ 'lmap' 'Right' '.' 'right''
   -- 'lmap' ('left' f) '.' 'right'' ≡ 'rmap' ('left' f) '.' 'right''
-  -- 'right'' '.' 'right'' ≡ 'dimap' unassoc assoc '.' 'right'' where
-  --   assoc :: 'Either' ('Either' a b) c -> 'Either' a ('Either' b c)
-  --   assoc ('Left' ('Left' a)) = 'Left' a
-  --   assoc ('Left' ('Right' b)) = 'Right' ('Left' b)
-  --   assoc ('Right' c) = 'Right' ('Right' c)
-  --   unassoc :: 'Either' a ('Either' b c) -> 'Either' ('Either' a b) c
-  --   unassoc ('Left' a) = 'Left' ('Left' a)
-  --   unassoc ('Right' ('Left' b) = 'Left' ('Right' b)
-  --   unassoc ('Right' ('Right' c)) = 'Right' c)
+  -- 'right'' '.' 'right'' ≡ 'dimap' unassocE assocE '.' 'right'' where
+  --   assocE :: 'Either' ('Either' a b) c -> 'Either' a ('Either' b c)
+  --   assocE ('Left' ('Left' a)) = 'Left' a
+  --   assocE ('Left' ('Right' b)) = 'Right' ('Left' b)
+  --   assocE ('Right' c) = 'Right' ('Right' c)
+  --   unassocE :: 'Either' a ('Either' b c) -> 'Either' ('Either' a b) c
+  --   unassocE ('Left' a) = 'Left' ('Left' a)
+  --   unassocE ('Right' ('Left' b) = 'Left' ('Right' b)
+  --   unassocE ('Right' ('Right' c)) = 'Right' c)
   -- @
   right' :: p a b -> p (Either c a) (Either c b)
   right' =  dimap (either Right Left) (either Right Left) . left'
@@ -293,18 +297,20 @@ class Profunctor p => Cochoice p where
   -- | Laws:
   --
   -- @
-  -- 'unleft' ≡ 'unright' '.' 'dimap' ('either' 'Right' 'Left') ('either' 'Right' 'Left')
-  -- 'rmap' ('either' 'id' 'absurd') ≡ 'unleft' . 'lmap' ('either' 'id' 'absurd')
-  -- 'unfirst' . 'rmap' ('second' f) ≡ 'unfirst' . 'lmap' ('second' f)
-  -- 'unleft' '.' 'unleft' ≡ 'unleft' . 'dimap' assoc unassoc where
-  --   assoc :: 'Either' ('Either' a b) c -> 'Either' a ('Either' b c)
-  --   assoc ('Left' ('Left' a)) = 'Left' a
-  --   assoc ('Left' ('Right' b)) = 'Right' ('Left' b)
-  --   assoc ('Right' c) = 'Right' ('Right' c)
-  --   unassoc :: 'Either' a ('Either' b c) -> 'Either' ('Either' a b) c
-  --   unassoc ('Left' a) = 'Left' ('Left' a)
-  --   unassoc ('Right' ('Left' b) = 'Left' ('Right' b)
-  --   unassoc ('Right' ('Right' c)) = 'Right' c)
+  -- 'unleft' ≡ 'unright' '.' 'dimap' swapE swapE where
+  --   swapE :: 'Either' a b -> 'Either' b a
+  --   swapE = 'either' 'Right' 'Left'
+  -- 'rmap' ('either' 'id' 'absurd') ≡ 'unleft' '.' 'lmap' ('either' 'id' 'absurd')
+  -- 'unfirst' '.' 'rmap' ('second' f) ≡ 'unfirst' '.' 'lmap' ('second' f)
+  -- 'unleft' '.' 'unleft' ≡ 'unleft' '.' 'dimap' assocE unassocE where
+  --   assocE :: 'Either' ('Either' a b) c -> 'Either' a ('Either' b c)
+  --   assocE ('Left' ('Left' a)) = 'Left' a
+  --   assocE ('Left' ('Right' b)) = 'Right' ('Left' b)
+  --   assocE ('Right' c) = 'Right' ('Right' c)
+  --   unassocE :: 'Either' a ('Either' b c) -> 'Either' ('Either' a b) c
+  --   unassocE ('Left' a) = 'Left' ('Left' a)
+  --   unassocE ('Right' ('Left' b) = 'Left' ('Right' b)
+  --   unassocE ('Right' ('Right' c)) = 'Right' c)
   -- @
   unleft  :: p (Either a d) (Either b d) -> p a b
   unleft = unright . dimap (either Right Left) (either Right Left)
@@ -312,18 +318,20 @@ class Profunctor p => Cochoice p where
   -- | Laws:
   --
   -- @
-  -- 'unright' ≡ 'unleft' '.' 'dimap' ('either' 'Right' 'Left') ('either' 'Right' 'Left')
-  -- 'rmap' ('either' 'absurd' 'id') ≡ 'unright' . 'lmap' ('either' 'absurd' 'id')
-  -- 'unsecond' . 'rmap' ('first' f) ≡ 'unsecond' . 'lmap' ('first' f)
-  -- 'unright' '.' 'unright' ≡ 'unright' . 'dimap' unassoc assoc where
-  --   assoc :: 'Either' ('Either' a b) c -> 'Either' a ('Either' b c)
-  --   assoc ('Left' ('Left' a)) = 'Left' a
-  --   assoc ('Left' ('Right' b)) = 'Right' ('Left' b)
-  --   assoc ('Right' c) = 'Right' ('Right' c)
-  --   unassoc :: 'Either' a ('Either' b c) -> 'Either' ('Either' a b) c
-  --   unassoc ('Left' a) = 'Left' ('Left' a)
-  --   unassoc ('Right' ('Left' b) = 'Left' ('Right' b)
-  --   unassoc ('Right' ('Right' c)) = 'Right' c)
+  -- 'unright' ≡ 'unleft' '.' 'dimap' swapE swapE where
+  --   swapE :: 'Either' a b -> 'Either' b a
+  --   swapE = 'either' 'Right' 'Left'
+  -- 'rmap' ('either' 'absurd' 'id') ≡ 'unright' '.' 'lmap' ('either' 'absurd' 'id')
+  -- 'unsecond' '.' 'rmap' ('first' f) ≡ 'unsecond' '.' 'lmap' ('first' f)
+  -- 'unright' '.' 'unright' ≡ 'unright' '.' 'dimap' unassocE assocE where
+  --   assocE :: 'Either' ('Either' a b) c -> 'Either' a ('Either' b c)
+  --   assocE ('Left' ('Left' a)) = 'Left' a
+  --   assocE ('Left' ('Right' b)) = 'Right' ('Left' b)
+  --   assocE ('Right' c) = 'Right' ('Right' c)
+  --   unassocE :: 'Either' a ('Either' b c) -> 'Either' ('Either' a b) c
+  --   unassocE ('Left' a) = 'Left' ('Left' a)
+  --   unassocE ('Right' ('Left' b) = 'Left' ('Right' b)
+  --   unassocE ('Right' ('Right' c)) = 'Right' c)
   -- @
   unright :: p (Either d a) (Either d b) -> p a b
   unright = unleft . dimap (either Right Left) (either Right Left)

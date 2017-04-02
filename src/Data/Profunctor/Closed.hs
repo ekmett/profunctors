@@ -55,7 +55,7 @@ class Profunctor p => Closed p where
   -- | Laws:
   --
   -- @
-  -- 'lmap' ('.' f) '.' 'closed' ≡ 'rmap' ('.' f) . 'closed'
+  -- 'lmap' ('.' f) '.' 'closed' ≡ 'rmap' ('.' f) '.' 'closed'
   -- 'closed' '.' 'closed' ≡ 'dimap' 'uncurry' 'curry' '.' 'closed'
   -- 'dimap' 'const' ('$'()) '.' 'closed' ≡ 'id'
   -- @

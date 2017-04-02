@@ -70,7 +70,7 @@ class Profunctor p => Strong p where
   -- | Laws:
   --
   -- @
-  -- 'first' ≡ 'dimap' 'swap' 'swap' '.' 'second''
+  -- 'first'' ≡ 'dimap' 'swap' 'swap' '.' 'second''
   -- 'lmap' 'fst' ≡ 'rmap' 'fst' '.' 'first''
   -- 'lmap' ('second' f) '.' 'first'' ≡ 'rmap' ('second' f) '.' 'first'
   -- 'first'' '.' 'first'' ≡ 'dimap' assoc unassoc '.' 'first'' where
@@ -83,7 +83,7 @@ class Profunctor p => Strong p where
   -- | Laws:
   --
   -- @
-  -- second' ≡ 'dimap' 'swap' 'swap' . 'first''
+  -- 'second'' ≡ 'dimap' 'swap' 'swap' '.' 'first''
   -- 'lmap' 'snd' ≡ 'rmap' 'snd' '.' 'second''
   -- 'lmap' ('first' f) '.' 'second'' ≡ 'rmap' ('first' f) '.' 'second''
   -- 'second'' '.' 'second'' ≡ 'dimap' unassoc assoc '.' 'second'' where
@@ -320,7 +320,7 @@ class Profunctor p => Costrong p where
   -- 'unfirst' ≡ 'unsecond' '.' 'dimap' 'swap' 'swap'
   -- 'lmap' (,()) ≡ 'unfirst' '.' 'rmap' (,())
   -- 'unfirst' '.' 'lmap' ('second' f) ≡ 'unfirst' '.' 'rmap' ('second' f)
-  -- 'unfirst' '.' 'unfirst' = 'unfirst' . 'dimap' assoc unassoc where
+  -- 'unfirst' '.' 'unfirst' = 'unfirst' '.' 'dimap' assoc unassoc where
   --   assoc ((a,b),c) = (a,(b,c))
   --   unassoc (a,(b,c)) = ((a,b),c)
   -- @
@@ -333,7 +333,7 @@ class Profunctor p => Costrong p where
   -- 'unsecond' ≡ 'unfirst' '.' 'dimap' 'swap' 'swap'
   -- 'lmap' ((),) ≡ 'unsecond' '.' 'rmap' ((),)
   -- 'unsecond' '.' 'lmap' ('first' f) ≡ 'unsecond' '.' 'rmap' ('first' f)
-  -- 'unsecond' '.' 'unsecond' = 'unsecond' . 'dimap' unassoc assoc where
+  -- 'unsecond' '.' 'unsecond' = 'unsecond' '.' 'dimap' unassoc assoc where
   --   assoc ((a,b),c) = (a,(b,c))
   --   unassoc (a,(b,c)) = ((a,b),c)
   -- @

@@ -88,7 +88,7 @@ class (Choice p, Strong p) => Traversing p where
   --
   -- @
   -- 'traverse'' ≡ 'wander' 'traverse'
-  -- 'traverse'' '.' 'rmap' f ≡ 'rmap' ('fmap' f) . 'traverse''
+  -- 'traverse'' '.' 'rmap' f ≡ 'rmap' ('fmap' f) '.' 'traverse''
   -- 'traverse'' '.' 'traverse'' ≡ 'dimap' 'Compose' 'getCompose' '.' 'traverse''
   -- 'dimap' 'Identity' 'runIdentity' '.' 'traverse'' ≡ 'id'
   -- @

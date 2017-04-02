@@ -29,7 +29,7 @@ class (Traversing p, Closed p) => Mapping p where
   -- | Laws:
   --
   -- @
-  -- 'map'' '.' 'rmap' f ≡ 'rmap' ('fmap' f) . 'map''
+  -- 'map'' '.' 'rmap' f ≡ 'rmap' ('fmap' f) '.' 'map''
   -- 'map'' '.' 'map'' ≡ 'dimap' 'Data.Functor.Compose.Compose' 'Data.Functor.Compose.getCompose' '.' 'map''
   -- 'dimap' 'Data.Functor.Identity.Identity' 'Data.Functor.Identity.runIdentity' '.' 'map'' ≡ 'id'
   -- @
