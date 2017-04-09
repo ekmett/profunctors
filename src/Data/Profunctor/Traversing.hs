@@ -117,7 +117,7 @@ class (Choice p, Strong p) => Traversing p where
   wander :: (forall f. Applicative f => (a -> f b) -> s -> f t) -> p a b -> p s t
   wander f pab = dimap (\s -> Baz $ \afb -> f afb s) sold (traverse' pab)
 
-#if __GLASGOW_HASKELL__ >= 706
+#if __GLASGOW_HASKELL__ >= 708
   {-# MINIMAL wander | traverse' #-}
 #endif
 
