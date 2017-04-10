@@ -1,8 +1,10 @@
 HEAD
 ---
-* Added `pastro` and `unpastro`.
+* Allow `base-orphans-0.6`.
+* Add `pastro` and `unpastro` to `Data.Profunctor.Strong`.
+* Add `dimapTraversing`, `lmapTraversing`, and `rmapTraversing` to `Data.Profunctor.Traversing`
 * Add documentation stating the laws for various profunctors.
-* Add `Data.Profunctor.Yoneda`.
+* Introduce the `Data.Profunctor.Yoneda` module.
 
 5.2
 ---
