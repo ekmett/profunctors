@@ -46,9 +46,11 @@ import Control.Monad (liftM)
 import Data.Functor.Compose
 import Data.Profunctor
 import Data.Profunctor.Adjunction
+import Data.Profunctor.Mapping
 import Data.Profunctor.Monad
 import Data.Profunctor.Rep
 import Data.Profunctor.Sieve
+import Data.Profunctor.Traversing
 import Data.Profunctor.Unsafe
 import Prelude hiding ((.),id)
 
@@ -129,9 +131,19 @@ instance (Closed p, Closed q) => Closed (Procompose p q) where
   closed (Procompose x y) = Procompose (closed x) (closed y)
   {-# INLINE closed #-}
 
+instance (Traversing p, Traversing q) => Traversing (Procompose p q) where
+  traverse' (Procompose p q) = Procompose (traverse' p) (traverse' q)
+  {-# INLINE traverse' #-}
+
+instance (Mapping p, Mapping q) => Mapping (Procompose p q) where
+  map' (Procompose p q) = Procompose (map' p) (map' q)
+  {-# INLINE map' #-}
+
 instance (Corepresentable p, Corepresentable q) => Costrong (Procompose p q) where
   unfirst = unfirstCorep
+  {-# INLINE unfirst #-}
   unsecond = unsecondCorep
+  {-# INLINE unsecond #-}
 
 -- * Lax identity
 
