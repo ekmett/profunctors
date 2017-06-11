@@ -5,6 +5,7 @@ HEAD
 * Add `dimapTraversing`, `lmapTraversing`, and `rmapTraversing` to `Data.Profunctor.Traversing`
 * Add documentation stating the laws for various profunctors.
 * Introduce the `Data.Profunctor.Yoneda` module.
+* Mark `Data.Profunctor.Types` trustworthy. Note that the module effectively reexports`Data.Coerce.coerce`, overriding its unsafe status in `base`.
 
 5.2
 ---
