@@ -1,4 +1,5 @@
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE RankNTypes #-}
 #if __GLASGOW_HASKELL__ >= 702 && __GLASGOW_HASKELL__ <= 708
 {-# LANGUAGE Trustworthy #-}
 #endif
@@ -81,5 +82,42 @@ instance (Applicative f, ArrowZero p) => ArrowZero (Cayley f p) where
 instance (Applicative f, ArrowPlus p) => ArrowPlus (Cayley f p) where
   Cayley f <+> Cayley g = Cayley (liftA2 (<+>) f g)
 
+mapCayley :: (forall a. f a -> g a) -> Cayley f p x y -> Cayley g p x y
+mapCayley f (Cayley g) = Cayley (f g)
+
 -- instance Adjunction f g => ProfunctorAdjunction (Cayley f) (Cayley g) where
   
+{-
+newtype Uncayley p a = Uncayley (p () a)
+
+instance Profunctor p => Functor (Uncayley p) where
+  fmap f (Uncayley p) = Uncayley (rmap f p)
+
+smash :: Strong p => Cayley (Uncayley p) (->) a b -> p a b
+smash (Cayley (Uncayley pab)) = dimap ((,)()) (uncurry id) (first' pab)
+
+unsmash :: Closed p => p a b -> Cayley (Uncayley p) (->) a b
+unsmash = Cayley . Uncayley . curry' . lmap snd
+
+type Iso s t a b = forall p f. (Profunctor p, Functor f) => p a (f b) -> p s (f t)
+
+-- pastro and street's strong tambara module
+class (Strong p, Closed p) => Stronger p
+
+-- only a true iso for Stronger p and q, no?
+_Smash :: (Strong p, Closed q) => Iso
+  (Cayley (Uncayley p) (->) a b)
+  (Cayley (Uncayley q) (->) c d) 
+  (p a b)
+  (q c d)
+_Smash = dimap hither (fmap yon) where
+  hither (Cayley (Uncayley pab)) = dimap ((,)()) (uncurry id) (first' pab)
+  yon = Cayley . Uncayley . curry' . lmap snd
+
+fsmash :: (forall x y. p x y -> q x y) -> Cayley (Uncayley p) (->) a b -> Cayley (Uncayley q) (->) a b
+fsmash f (Cayley (Uncayley puab)) = Cayley (Uncayley (f puab))
+
+-- | proposition 4.3 from pastro and street is that fsmash and funsmash form an equivalence of categories
+funsmash :: (Closed p, Strong q) => (forall x y. Cayley (Uncayley p) (->) x y -> Cayley (Uncayley q) (->) x y) -> p a b -> q a b
+funsmash k = smash . k . unsmash
+-}
