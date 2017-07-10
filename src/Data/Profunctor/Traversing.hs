@@ -7,9 +7,9 @@ module Data.Profunctor.Traversing
   , CofreeTraversing(..)
   , FreeTraversing(..)
   -- * Profunctor in terms of Traversing
-  , dimapTraversing
-  , lmapTraversing
-  , rmapTraversing
+  , dimapWandering
+  , lmapWandering
+  , rmapWandering
   -- * Strong in terms of Traversing
   , firstTraversing
   , secondTraversing
@@ -46,19 +46,20 @@ secondTraversing = traverse'
 swapE :: Either a b -> Either b a
 swapE = either Right Left
 
--- | A definition of 'dimap' in terms of 'wander'.
-dimapTraversing :: Traversing p => (a' -> a) -> (b -> b') -> p a b -> p a' b'
-dimapTraversing f g = wander (\afb a' -> g <$> afb (f a'))
+-- | A definition of 'dimap' for 'Traversing' instances that define
+-- an explicit 'wander'.
+dimapWandering :: Traversing p => (a' -> a) -> (b -> b') -> p a b -> p a' b'
+dimapWandering f g = wander (\afb a' -> g <$> afb (f a'))
 
--- | 'lmapTraversing' may be a more efficient implementation
--- of 'lmap' than the default produced from 'dimapTraversing'.
-lmapTraversing :: Traversing p => (a -> b) -> p b c -> p a c
-lmapTraversing f = wander (\afb a' -> afb (f a'))
+-- | 'lmapWandering' may be a more efficient implementation
+-- of 'lmap' than the default produced from 'dimapWandering'.
+lmapWandering :: Traversing p => (a -> b) -> p b c -> p a c
+lmapWandering f = wander (\afb a' -> afb (f a'))
 
--- | 'rmapTraversing' is the same as the default produced from
--- 'dimapTraversing'.
-rmapTraversing :: Traversing p => (b -> c) -> p a b -> p a c
-rmapTraversing g = wander (\afb a' -> g <$> afb a')
+-- | 'rmapWandering' is the same as the default produced from
+-- 'dimapWandering'.
+rmapWandering :: Traversing p => (b -> c) -> p a b -> p a c
+rmapWandering g = wander (\afb a' -> g <$> afb a')
 
 leftTraversing :: Traversing p => p a b -> p (Either a c) (Either b c)
 leftTraversing = dimap swapE swapE . traverse'
