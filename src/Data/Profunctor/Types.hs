@@ -107,6 +107,10 @@ instance MonadPlus f => MonadPlus (Star f a) where
 instance Distributive f => Distributive (Star f a) where
   distribute fs = Star $ \a -> collect (($ a) .# runStar) fs
 
+instance Monad f => Category (Star f) where
+  id = Star return
+  Star f . Star g = Star $ \a -> g a >>= f
+
 ------------------------------------------------------------------------------
 -- Costar
 ------------------------------------------------------------------------------
