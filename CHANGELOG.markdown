@@ -1,5 +1,5 @@
-HEAD
----
+5.2.1
+-----
 * Allow `base-orphans-0.6`.
 * Add `Traversing` instance for `Forget`
 * Add `Traversing` and `Mapping` instances for `Procompose`
