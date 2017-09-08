@@ -1,3 +1,7 @@
+next
+----
+* Add `Semigroup` instances for `Closure` and `Tambara`
+
 5.2.1
 -----
 * Allow `base-orphans-0.6`.
