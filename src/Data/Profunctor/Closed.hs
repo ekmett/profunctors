@@ -34,12 +34,12 @@ import Control.Comonad
 import Data.Bifunctor.Product (Product(..))
 import Data.Bifunctor.Tannen (Tannen(..))
 import Data.Distributive
-import Data.Monoid hiding (Product)
 import Data.Profunctor.Adjunction
 import Data.Profunctor.Monad
 import Data.Profunctor.Strong
 import Data.Profunctor.Types
 import Data.Profunctor.Unsafe
+import Data.Semigroup hiding (Product)
 import Data.Tagged
 import Data.Tuple
 import Prelude hiding ((.),id)
@@ -155,9 +155,14 @@ instance (Profunctor p, ArrowPlus p) => Alternative (Closure p a) where
   empty = zeroArrow
   f <|> g = f <+> g
 
-instance (Profunctor p, Arrow p, Monoid b) => Monoid (Closure p a b) where
+instance (Profunctor p, Arrow p, Semigroup b) => Semigroup (Closure p a b) where
+  (<>) = liftA2 (<>)
+
+instance (Profunctor p, Arrow p, Semigroup b, Monoid b) => Monoid (Closure p a b) where
   mempty = pure mempty
-  mappend = liftA2 mappend
+#if !(MIN_VERSION_base(4,11,0))
+  mappend = (<>)
+#endif
 
 -- |
 -- @

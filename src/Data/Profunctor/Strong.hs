@@ -44,11 +44,11 @@ import Data.Bifunctor.Clown (Clown(..))
 import Data.Bifunctor.Product (Product(..))
 import Data.Bifunctor.Tannen (Tannen(..))
 import Data.Functor.Contravariant (Contravariant(..))
-import Data.Monoid hiding (Product)
 import Data.Profunctor.Adjunction
 import Data.Profunctor.Monad
 import Data.Profunctor.Types
 import Data.Profunctor.Unsafe
+import Data.Semigroup hiding (Product)
 import Data.Tagged
 import Data.Tuple
 import Prelude hiding (id,(.))
@@ -226,9 +226,14 @@ instance (Profunctor p, ArrowPlus p) => Alternative (Tambara p a) where
   empty = zeroArrow
   f <|> g = f <+> g
 
+instance ArrowPlus p => Semigroup (Tambara p a b) where
+  f <> g = f <+> g
+
 instance ArrowPlus p => Monoid (Tambara p a b) where
   mempty = zeroArrow
-  mappend f g = f <+> g
+#if !(MIN_VERSION_base(4,11,0))
+  mappend = (<>)
+#endif
 
 -- |
 -- @
