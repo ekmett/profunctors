@@ -56,8 +56,10 @@ import Data.Coerce
 import Unsafe.Coerce
 #endif
 
+#ifdef HLINT
 {-# ANN module "Hlint: ignore Redundant lambda" #-}
 {-# ANN module "Hlint: ignore Collapse lambdas" #-}
+#endif
 
 infixr 9 #.
 infixl 8 .#

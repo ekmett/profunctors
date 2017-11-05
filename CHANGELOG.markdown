@@ -1,8 +1,16 @@
-HEAD
----
+next
+----
+* Add `Semigroup` instances for `Closure` and `Tambara`
+
+5.2.1
+-----
 * Allow `base-orphans-0.6`.
+* Add `Traversing` instance for `Forget`
+* Add `Traversing` and `Mapping` instances for `Procompose`
+* Add `Category` instance for `Star`
+* Add `mapCayley` to `Data.Profunctor.Cayley`
 * Add `pastro` and `unpastro` to `Data.Profunctor.Strong`.
-* Add `dimapTraversing`, `lmapTraversing`, and `rmapTraversing` to `Data.Profunctor.Traversing`
+* Add `dimapWandering`, `lmapWandering`, and `rmapWandering` to `Data.Profunctor.Traversing`
 * Add documentation stating the laws for various profunctors.
 * Introduce the `Data.Profunctor.Yoneda` module.
 
