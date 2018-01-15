@@ -148,5 +148,8 @@ script:
   - rm -rf ./dist-newstyle
   - if $HADDOCK; then cabal new-haddock -w ${HC} ${TEST} ${BENCH} all; else echo "Skipping haddock generation";fi
 
+  # hlint
+  - (cd profunctors-* && hlint src --cpp-define=HLINT)
+
 # REGENDATA ["-o",".travis.yml","--irc-channel=irc.freenode.org#haskell-lens","--no-no-tests-no-bench","--no-installed","cabal.project"]
 # EOF
