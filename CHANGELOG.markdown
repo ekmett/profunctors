@@ -1,5 +1,5 @@
-next
-----
+5.2.2 [2018.01.18]
+------------------
 * Add `Semigroup` instances for `Closure` and `Tambara`
 
 5.2.1
