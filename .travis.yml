@@ -134,6 +134,7 @@ script:
   - if $HADDOCK; then cabal new-haddock -w ${HC} ${TEST} ${BENCH} all; else echo "Skipping haddock generation";fi
 
   # hlint
+  - hlint --version
   - (cd profunctors-* && hlint src)
 
 # REGENDATA ["-o",".travis.yml","--irc-channel=irc.freenode.org#haskell-lens","--no-no-tests-no-bench","--no-installed","cabal.project"]
