@@ -131,9 +131,9 @@ class Profunctor p where
   -- The semantics of this function with respect to bottoms
   -- should match the default definition:
   --
-  -- @('Profuctor.Unsafe.#.') ≡ \\_ -> \\p -> p \`seq\` 'rmap' coerce p@
-  ( #. ) :: Coercible c b => q b c -> p a b -> p a c
-  ( #. ) = \_ -> \p -> p `seq` rmap coerce p
+  -- @('Profuctor.Unsafe.#.') ≡ \\_ -> \\p -> p \`seq\` 'rmap' 'coerce' p@
+  ( #. ) :: forall a b c q. Coercible c b => q b c -> p a b -> p a c
+  ( #. ) = \_ -> \p -> p `seq` rmap (coerce (id :: c -> c) :: b -> c) p
   {-# INLINE ( #. ) #-}
 
   -- | Strictly map the first argument argument
@@ -157,9 +157,9 @@ class Profunctor p where
   -- will only call this with a second argument that is
   -- operationally identity.
   --
-  -- @('.#') ≡ \\p -> p \`seq\` \\f -> 'lmap' f p@
-  ( .# ) :: Coercible b a => p b c -> q a b -> p a c
-  ( .# ) = \p -> p `seq` \_ -> lmap coerce p
+  -- @('.#') ≡ \\p -> p \`seq\` \\f -> 'lmap' 'coerce' p@
+  ( .# ) :: forall a b c q. Coercible b a => p b c -> q a b -> p a c
+  ( .# ) = \p -> p `seq` \_ -> lmap (coerce (id :: b -> b) :: a -> b) p
   {-# INLINE ( .# ) #-}
 
   {-# MINIMAL dimap | (lmap, rmap) #-}
