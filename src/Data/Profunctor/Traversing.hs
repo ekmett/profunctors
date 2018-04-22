@@ -37,10 +37,6 @@ import Data.Foldable
 import Prelude hiding (mapM)
 #endif
 
-#ifdef HLINT
-{-# ANN module "HLint: ignore Avoid lambda" #-}
-#endif
-
 firstTraversing :: Traversing p => p a b -> p (a, c) (b, c)
 firstTraversing = dimap swap swap . traverse'
 

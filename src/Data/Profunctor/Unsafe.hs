@@ -47,12 +47,6 @@ import Data.Functor.Contravariant (Contravariant(..))
 import Data.Tagged
 import Prelude hiding (id,(.))
 
-#ifdef HLINT
-{-# ANN module "Hlint: ignore Redundant lambda" #-}
-{-# ANN module "Hlint: ignore Collapse lambdas" #-}
-{-# ANN module "HLint: ignore Use fmap" #-}
-#endif
-
 infixr 9 #.
 infixl 8 .#
 

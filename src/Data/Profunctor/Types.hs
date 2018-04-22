@@ -28,9 +28,7 @@ module Data.Profunctor.Types
   , Costar(..)
   , WrappedArrow(..)
   , Forget(..)
-#ifndef HLINT
   , (:->)
-#endif
   ) where
 
 import Control.Applicative hiding (WrappedArrow(..))
@@ -45,10 +43,6 @@ import Data.Monoid hiding (Product)
 import Data.Profunctor.Unsafe
 import Data.Traversable
 import Prelude hiding (id,(.))
-
-#ifdef HLINT
-{-# ANN module "HLint: ignore Use const" #-}
-#endif
 
 infixr 0 :->
 type p :-> q = forall a b. p a b -> q a b

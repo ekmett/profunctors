@@ -45,6 +45,7 @@ module Data.Profunctor.Rep
 import Control.Applicative
 import Control.Arrow
 import Control.Comonad
+import Control.Monad ((>=>))
 import Data.Functor.Identity
 import Data.Profunctor
 import Data.Profunctor.Sieve
@@ -190,7 +191,7 @@ instance (Applicative (Rep p), Representable p) => Applicative (Prep p) where
 
 instance (Monad (Rep p), Representable p) => Monad (Prep p) where
   return a = Prep () $ tabulate $ const $ return a
-  Prep xa pa >>= f = Prep xa $ tabulate $ \xa' -> sieve pa xa' >>= \a -> case f a of
+  Prep xa pa >>= f = Prep xa $ tabulate $ sieve pa >=> \a -> case f a of
     Prep xb pb -> sieve pb xb
 
 prepAdj :: (forall a. Prep p a -> g a) -> p :-> Star g

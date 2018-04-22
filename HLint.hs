@@ -1,1 +1,0 @@
-ignore "use const"

@@ -49,11 +49,6 @@ import Data.Tagged
 import Data.Tuple
 import Prelude hiding (id,(.))
 
-#ifdef HLINT
-{-# ANN module "HLint: ignore Avoid lambda" #-}
-#endif
-
-
 ------------------------------------------------------------------------------
 -- Strong
 ------------------------------------------------------------------------------
