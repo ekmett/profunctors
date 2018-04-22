@@ -2,9 +2,6 @@
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
-#if __GLASGOW_HASKELL__ >= 702 && __GLASGOW_HASKELL__ <= 708
-{-# LANGUAGE Trustworthy #-}
-#endif
 -----------------------------------------------------------------------------
 -- |
 -- Copyright   :  (C) 2013-2015 Edward Kmett and Dan Doel

@@ -1,8 +1,5 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE RankNTypes #-}
-#if __GLASGOW_HASKELL__ >= 702 && __GLASGOW_HASKELL__ <= 708
-{-# LANGUAGE Trustworthy #-}
-#endif
 -----------------------------------------------------------------------------
 -- |
 -- Copyright   :  (C) 2014-2015 Edward Kmett

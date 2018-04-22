@@ -1,3 +1,8 @@
+5.3
+---
+* Generalized the type of `(#.)` and `(.#)`.
+* Dropped support for GHC < 7.8.
+
 5.2.2 [2018.01.18]
 ------------------
 * Add `Semigroup` instances for `Closure` and `Tambara`

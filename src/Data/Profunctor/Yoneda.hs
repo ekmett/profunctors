@@ -4,9 +4,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
-#if __GLASGOW_HASKELL__ >= 702 && __GLASGOW_HASKELL__ <= 708
-{-# LANGUAGE Trustworthy #-}
-#endif
 -----------------------------------------------------------------------------
 -- |
 -- Copyright   :  (C) 2017 Edward Kmett
@@ -23,17 +20,12 @@ module Data.Profunctor.Yoneda
   ) where
 
 import Control.Category
+import Data.Coerce (Coercible, coerce)
 import Data.Profunctor
 import Data.Profunctor.Monad
 import Data.Profunctor.Traversing
 import Data.Profunctor.Unsafe
 import Prelude hiding (id,(.))
-
-#if __GLASGOW_HASKELL__ >= 708
-import Data.Coerce
-#else
-import Unsafe.Coerce
-#endif
 
 --------------------------------------------------------------------------------
 -- * Yoneda
@@ -68,17 +60,10 @@ instance Profunctor (Yoneda p) where
   {-# INLINE lmap #-}
   rmap r p = Yoneda $ \l r' -> runYoneda p l (r' . r)
   {-# INLINE rmap #-}
-#if __GLASGOW_HASKELL__ >= 708
   ( .# ) p _ = coerce p
   {-# INLINE ( .# ) #-}
   ( #. ) _ = coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
   {-# INLINE ( #. ) #-}
-#else
-  ( .# ) p _ = unsafeCoerce p
-  {-# INLINE ( .# ) #-}
-  ( #. ) _ = unsafeCoerce
-  {-# INLINE ( #. ) #-}
-#endif
 
 instance Functor (Yoneda p a) where
   fmap f p = Yoneda $ \l r -> runYoneda p l (r . f)
@@ -178,17 +163,10 @@ instance Profunctor (Coyoneda p) where
   {-# INLINE lmap #-}
   rmap r (Coyoneda l r' p) = Coyoneda l (r . r') p
   {-# INLINE rmap #-}
-#if __GLASGOW_HASKELL__ >= 708
   ( .# ) p _ = coerce p
   {-# INLINE ( .# ) #-}
   ( #. ) _ = coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
   {-# INLINE ( #. ) #-}
-#else
-  ( .# ) p _ = unsafeCoerce p
-  {-# INLINE ( .# ) #-}
-  ( #. ) _ = unsafeCoerce
-  {-# INLINE ( #. ) #-}
-#endif
 
 instance ProfunctorFunctor Coyoneda where
   promap f (Coyoneda l r p) = Coyoneda l r (f p)

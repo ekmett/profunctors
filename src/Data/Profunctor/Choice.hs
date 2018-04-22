@@ -3,9 +3,6 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-#if __GLASGOW_HASKELL__ >= 702 && __GLASGOW_HASKELL__ <= 708
-{-# LANGUAGE Trustworthy #-}
-#endif
 -----------------------------------------------------------------------------
 -- |
 -- Copyright   :  (C) 2014-2015 Edward Kmett
@@ -103,9 +100,7 @@ class Profunctor p => Choice p where
   right' :: p a b -> p (Either c a) (Either c b)
   right' =  dimap (either Right Left) (either Right Left) . left'
 
-#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 708
   {-# MINIMAL left' | right' #-}
-#endif
 
 instance Choice (->) where
   left' ab (Left a) = Left (ab a)
@@ -336,9 +331,7 @@ class Profunctor p => Cochoice p where
   unright :: p (Either d a) (Either d b) -> p a b
   unright = unleft . dimap (either Right Left) (either Right Left)
 
-#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 708
   {-# MINIMAL unleft | unright #-}
-#endif
 
 instance Cochoice (->) where
   unleft f = go . Left where go = either id (go . Right) . f

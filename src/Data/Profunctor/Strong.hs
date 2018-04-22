@@ -4,10 +4,6 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
-#if __GLASGOW_HASKELL__ >= 704 && __GLASGOW_HASKELL__ < 708
-{-# LANGUAGE Trustworthy #-}
-#endif
-
 -----------------------------------------------------------------------------
 -- |
 -- Copyright   :  (C) 2014-2015 Edward Kmett
@@ -53,6 +49,11 @@ import Data.Tagged
 import Data.Tuple
 import Prelude hiding (id,(.))
 
+#ifdef HLINT
+{-# ANN module "HLint: ignore Avoid lambda" #-}
+#endif
+
+
 ------------------------------------------------------------------------------
 -- Strong
 ------------------------------------------------------------------------------
@@ -93,9 +94,7 @@ class Profunctor p => Strong p where
   second' :: p a b -> p (c, a) (c, b)
   second' = dimap swap swap . first'
 
-#if __GLASGOW_HASKELL__ >= 708
   {-# MINIMAL first' | second' #-}
-#endif
 
 uncurry' :: Strong p => p a (b -> c) -> p (a, b) c
 uncurry' = rmap (\(f,x) -> f x) . first'
@@ -345,9 +344,7 @@ class Profunctor p => Costrong p where
   unsecond :: p (d, a) (d, b) -> p a b
   unsecond = unfirst . dimap swap swap
 
-#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 708
   {-# MINIMAL unfirst | unsecond #-}
-#endif
 
 instance Costrong (->) where
   unfirst f a = b where (b, d) = f (a, d)

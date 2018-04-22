@@ -37,6 +37,10 @@ import Data.Foldable
 import Prelude hiding (mapM)
 #endif
 
+#ifdef HLINT
+{-# ANN module "HLint: ignore Avoid lambda" #-}
+#endif
+
 firstTraversing :: Traversing p => p a b -> p (a, c) (b, c)
 firstTraversing = dimap swap swap . traverse'
 
@@ -118,9 +122,7 @@ class (Choice p, Strong p) => Traversing p where
   wander :: (forall f. Applicative f => (a -> f b) -> s -> f t) -> p a b -> p s t
   wander f pab = dimap (\s -> Baz $ \afb -> f afb s) sold (traverse' pab)
 
-#if __GLASGOW_HASKELL__ >= 708
   {-# MINIMAL wander | traverse' #-}
-#endif
 
 instance Traversing (->) where
   traverse' = fmap

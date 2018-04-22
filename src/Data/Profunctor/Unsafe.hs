@@ -1,13 +1,9 @@
 {-# LANGUAGE CPP #-}
-#if __GLASGOW_HASKELL__ >= 708
 {-# LANGUAGE Trustworthy #-}
-#elif __GLASGOW_HASKELL >= 704
-{-# LANGUAGE Unsafe #-}
-#endif
 {-# LANGUAGE ScopedTypeVariables #-}
 -----------------------------------------------------------------------------
 -- |
--- Copyright   :  (C) 2011-2015 Edward Kmett
+-- Copyright   :  (C) 2011-2018 Edward Kmett
 -- License     :  BSD-style (see the file LICENSE)
 --
 -- Maintainer  :  Edward Kmett <ekmett@gmail.com>
@@ -43,22 +39,18 @@ import Data.Bifunctor.Clown (Clown(..))
 import Data.Bifunctor.Joker (Joker(..))
 import Data.Bifunctor.Product (Product(..))
 import Data.Bifunctor.Tannen (Tannen(..))
+import Data.Coerce (Coercible, coerce)
 #if __GLASGOW_HASKELL__ < 710
 import Data.Functor
 #endif
 import Data.Functor.Contravariant (Contravariant(..))
 import Data.Tagged
-import Prelude hiding (id,(.),sequence)
-
-#if __GLASGOW_HASKELL__ >= 708
-import Data.Coerce
-#else
-import Unsafe.Coerce
-#endif
+import Prelude hiding (id,(.))
 
 #ifdef HLINT
 {-# ANN module "Hlint: ignore Redundant lambda" #-}
 {-# ANN module "Hlint: ignore Collapse lambdas" #-}
+{-# ANN module "HLint: ignore Use fmap" #-}
 #endif
 
 infixr 9 #.
@@ -145,13 +137,9 @@ class Profunctor p where
   -- The semantics of this function with respect to bottoms
   -- should match the default definition:
   --
-  -- @('Profuctor.Unsafe.#.') ≡ \\f -> \\p -> p \`seq\` 'rmap' f p@
-#if __GLASGOW_HASKELL__ >= 708
-  ( #. ) :: Coercible c b => (b -> c) -> p a b -> p a c
-#else
-  ( #. ) :: (b -> c) -> p a b -> p a c
-#endif
-  ( #. ) = \f -> \p -> p `seq` rmap f p
+  -- @('Profuctor.Unsafe.#.') ≡ \\_ -> \\p -> p \`seq\` 'rmap' coerce p@
+  ( #. ) :: Coercible c b => q b c -> p a b -> p a c
+  ( #. ) = \_ -> \p -> p `seq` rmap coerce p
   {-# INLINE ( #. ) #-}
 
   -- | Strictly map the first argument argument
@@ -176,17 +164,11 @@ class Profunctor p where
   -- operationally identity.
   --
   -- @('.#') ≡ \\p -> p \`seq\` \\f -> 'lmap' f p@
-#if __GLASGOW_HASKELL__ >= 708
-  ( .# ) :: Coercible b a => p b c -> (a -> b) -> p a c
-#else
-  ( .# ) :: p b c -> (a -> b) -> p a c
-#endif
-  ( .# ) = \p -> p `seq` \f -> lmap f p
+  ( .# ) :: Coercible b a => p b c -> q a b -> p a c
+  ( .# ) = \p -> p `seq` \_ -> lmap coerce p
   {-# INLINE ( .# ) #-}
 
-#if __GLASGOW_HASKELL__ >= 708
   {-# MINIMAL dimap | (lmap, rmap) #-}
-#endif
 
 instance Profunctor (->) where
   dimap ab cd bc = cd . bc . ab
@@ -195,13 +177,8 @@ instance Profunctor (->) where
   {-# INLINE lmap #-}
   rmap = (.)
   {-# INLINE rmap #-}
-#if __GLASGOW_HASKELL__ >= 708
   ( #. ) _ = coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
   ( .# ) pbc _ = coerce pbc
-#else
-  ( #. ) _ = unsafeCoerce
-  ( .# ) pbc _ = unsafeCoerce pbc
-#endif
   {-# INLINE ( #. ) #-}
   {-# INLINE ( .# ) #-}
 
@@ -212,11 +189,7 @@ instance Profunctor Tagged where
   {-# INLINE lmap #-}
   rmap = fmap
   {-# INLINE rmap #-}
-#if __GLASGOW_HASKELL__ >= 708
   ( #. ) _ = coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
-#else
-  ( #. ) _ = unsafeCoerce
-#endif
   {-# INLINE ( #. ) #-}
   Tagged s .# _ = Tagged s
   {-# INLINE ( .# ) #-}
@@ -229,11 +202,7 @@ instance Monad m => Profunctor (Kleisli m) where
   rmap k (Kleisli f) = Kleisli (liftM k . f)
   {-# INLINE rmap #-}
   -- We cannot safely overload (#.) because we didn't provide the 'Monad'.
-#if __GLASGOW_HASKELL__ >= 708
   ( .# ) pbc _ = coerce pbc
-#else
-  ( .# ) pbc _ = unsafeCoerce pbc
-#endif
   {-# INLINE ( .# ) #-}
 
 instance Functor w => Profunctor (Cokleisli w) where
@@ -244,11 +213,7 @@ instance Functor w => Profunctor (Cokleisli w) where
   rmap k (Cokleisli f) = Cokleisli (k . f)
   {-# INLINE rmap #-}
   -- We cannot safely overload (.#) because we didn't provide the 'Functor'.
-#if __GLASGOW_HASKELL__ >= 708
   ( #. ) _ = coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
-#else
-  ( #. ) _ = unsafeCoerce
-#endif
   {-# INLINE ( #. ) #-}
 
 instance Contravariant f => Profunctor (Clown f) where

@@ -3,9 +3,7 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-#if __GLASGOW_HASKELL__ >= 702
 {-# LANGUAGE Trustworthy #-}
-#endif
 
 -----------------------------------------------------------------------------
 -- |
@@ -39,18 +37,17 @@ import Control.Applicative hiding (WrappedArrow(..))
 import Control.Arrow
 import Control.Category
 import Control.Comonad
-import Control.Monad (MonadPlus(..))
+import Control.Monad (MonadPlus(..), (>=>))
+import Data.Coerce (Coercible, coerce)
 import Data.Distributive
 import Data.Foldable
 import Data.Monoid hiding (Product)
 import Data.Profunctor.Unsafe
 import Data.Traversable
-import Prelude hiding (id,(.),sequence)
+import Prelude hiding (id,(.))
 
-#if __GLASGOW_HASKELL__ >= 708
-import Data.Coerce
-#else
-import Unsafe.Coerce
+#ifdef HLINT
+{-# ANN module "HLint: ignore Use const" #-}
 #endif
 
 infixr 0 :->
@@ -71,11 +68,7 @@ instance Functor f => Profunctor (Star f) where
   rmap k (Star f) = Star (fmap k . f)
   {-# INLINE rmap #-}
   -- We cannot safely overload ( #. ) because we didn't write the 'Functor'.
-#if __GLASGOW_HASKELL__ >= 708
   p .# _ = coerce p
-#else
-  p .# _ = unsafeCoerce p
-#endif
   {-# INLINE ( .# ) #-}
 
 instance Functor f => Functor (Star f a) where
@@ -109,7 +102,7 @@ instance Distributive f => Distributive (Star f a) where
 
 instance Monad f => Category (Star f) where
   id = Star return
-  Star f . Star g = Star $ \a -> g a >>= f
+  Star f . Star g = Star $ g >=> f
 
 ------------------------------------------------------------------------------
 -- Costar
@@ -125,11 +118,7 @@ instance Functor f => Profunctor (Costar f) where
   {-# INLINE lmap #-}
   rmap k (Costar f) = Costar (k . f)
   {-# INLINE rmap #-}
-#if __GLASGOW_HASKELL__ >= 708
   ( #. ) _ = coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
-#else
-  ( #. ) _ = unsafeCoerce
-#endif
   {-# INLINE ( #. ) #-}
   -- We cannot overload ( .# ) because we didn't write the 'Functor'.
 
