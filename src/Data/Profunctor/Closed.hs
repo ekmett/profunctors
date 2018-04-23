@@ -1,8 +1,10 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE Trustworthy #-}
 -----------------------------------------------------------------------------
 -- |
@@ -29,7 +31,7 @@ import Control.Category
 import Control.Comonad
 import Data.Bifunctor.Product (Product(..))
 import Data.Bifunctor.Tannen (Tannen(..))
-import Data.Coerce (coerce)
+import Data.Coerce (Coercible, coerce)
 import Data.Distributive
 import Data.Profunctor.Adjunction
 import Data.Profunctor.Monad
@@ -102,8 +104,12 @@ instance Profunctor p => Profunctor (Closure p) where
   dimap f g (Closure p) = Closure $ dimap (fmap f) (fmap g) p
   lmap f (Closure p) = Closure $ lmap (fmap f) p
   rmap f (Closure p) = Closure $ rmap (fmap f) p
-  _ #. Closure p = Closure $ fmap coerce #. p
-  Closure p .# _ = Closure $ p .# fmap coerce
+
+  (#.) :: forall a b c q. Coercible c b => q b c -> Closure p a b -> Closure p a c
+  _ #. Closure p = Closure $ fmap (coerce (id :: c -> c) :: b -> c) #. p
+
+  (.#) :: forall a b c q. Coercible b a => Closure p b c -> q a b -> Closure p a c
+  Closure p .# _ = Closure $ p .# fmap (coerce (id :: b -> b) :: a -> b)
 
 instance ProfunctorFunctor Closure where
   promap f (Closure p) = Closure (f p)

@@ -7,9 +7,10 @@
     - FlexibleInstances
     - FunctionalDependencies
     - GADTs
+    - InstanceSigs
     - MultiParamTypeClasses
     - RankNTypes
-    - ScopedTypeVariables 
+    - ScopedTypeVariables
     - Trustworthy
     - TypeOperators
     - TypeFamilies
@@ -18,25 +19,25 @@
 - functions:
   - {name: unsafeCoerce, within: []} # banned
 
-- ignore: 
+- ignore:
     name: Use const
     within:
     - Data.Profunctor.Types
 
-- ignore: 
+- ignore:
     name: Avoid lambda
     within:
     - Data.Profunctor.Choice
     - Data.Profunctor.Traversing
 
-- ignore: 
+- ignore:
     name: Use fmap
     within:
     - Data.Profunctor.Composition
     - Data.Profunctor.Strong
     - Data.Profunctor.Unsafe
 
-- ignore: 
+- ignore:
     name: Avoid lambda
     within: Data.Profunctor.Strong
 
