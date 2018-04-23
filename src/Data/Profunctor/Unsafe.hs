@@ -132,9 +132,9 @@ class Profunctor p where
   -- should match the default definition:
   --
   -- @('Profuctor.Unsafe.#.') ≡ \\_ -> \\p -> p \`seq\` 'rmap' 'coerce' p@
-  ( #. ) :: forall a b c q. Coercible c b => q b c -> p a b -> p a c
-  ( #. ) = \_ -> \p -> p `seq` rmap (coerce (id :: c -> c) :: b -> c) p
-  {-# INLINE ( #. ) #-}
+  (#.) :: forall a b c q. Coercible c b => q b c -> p a b -> p a c
+  (#.) = \_ -> \p -> p `seq` rmap (coerce (id :: c -> c) :: b -> c) p
+  {-# INLINE (#.) #-}
 
   -- | Strictly map the first argument argument
   -- contravariantly with a function that is assumed
@@ -158,9 +158,9 @@ class Profunctor p where
   -- operationally identity.
   --
   -- @('.#') ≡ \\p -> p \`seq\` \\f -> 'lmap' 'coerce' p@
-  ( .# ) :: forall a b c q. Coercible b a => p b c -> q a b -> p a c
-  ( .# ) = \p -> p `seq` \_ -> lmap (coerce (id :: b -> b) :: a -> b) p
-  {-# INLINE ( .# ) #-}
+  (.#) :: forall a b c q. Coercible b a => p b c -> q a b -> p a c
+  (.#) = \p -> p `seq` \_ -> lmap (coerce (id :: b -> b) :: a -> b) p
+  {-# INLINE (.#) #-}
 
   {-# MINIMAL dimap | (lmap, rmap) #-}
 
@@ -171,10 +171,10 @@ instance Profunctor (->) where
   {-# INLINE lmap #-}
   rmap = (.)
   {-# INLINE rmap #-}
-  ( #. ) _ = coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
-  ( .# ) pbc _ = coerce pbc
-  {-# INLINE ( #. ) #-}
-  {-# INLINE ( .# ) #-}
+  (#.) _ = coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
+  (.#) pbc _ = coerce pbc
+  {-# INLINE (#.) #-}
+  {-# INLINE (.#) #-}
 
 instance Profunctor Tagged where
   dimap _ f (Tagged s) = Tagged (f s)
@@ -183,10 +183,10 @@ instance Profunctor Tagged where
   {-# INLINE lmap #-}
   rmap = fmap
   {-# INLINE rmap #-}
-  ( #. ) _ = coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
-  {-# INLINE ( #. ) #-}
+  (#.) _ = coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
+  {-# INLINE (#.) #-}
   Tagged s .# _ = Tagged s
-  {-# INLINE ( .# ) #-}
+  {-# INLINE (.#) #-}
 
 instance Monad m => Profunctor (Kleisli m) where
   dimap f g (Kleisli h) = Kleisli (liftM g . h . f)
@@ -196,8 +196,8 @@ instance Monad m => Profunctor (Kleisli m) where
   rmap k (Kleisli f) = Kleisli (liftM k . f)
   {-# INLINE rmap #-}
   -- We cannot safely overload (#.) because we didn't provide the 'Monad'.
-  ( .# ) pbc _ = coerce pbc
-  {-# INLINE ( .# ) #-}
+  (.#) pbc _ = coerce pbc
+  {-# INLINE (.#) #-}
 
 instance Functor w => Profunctor (Cokleisli w) where
   dimap f g (Cokleisli h) = Cokleisli (g . h . fmap f)
@@ -207,8 +207,8 @@ instance Functor w => Profunctor (Cokleisli w) where
   rmap k (Cokleisli f) = Cokleisli (k . f)
   {-# INLINE rmap #-}
   -- We cannot safely overload (.#) because we didn't provide the 'Functor'.
-  ( #. ) _ = coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
-  {-# INLINE ( #. ) #-}
+  (#.) _ = coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
+  {-# INLINE (#.) #-}
 
 instance Contravariant f => Profunctor (Clown f) where
   lmap f (Clown fa) = Clown (contramap f fa)
@@ -238,10 +238,10 @@ instance (Profunctor p, Profunctor q) => Profunctor (Product p q) where
   {-# INLINE rmap #-}
   dimap f g (Pair p q) = Pair (dimap f g p) (dimap f g q)
   {-# INLINE dimap #-}
-  ( #. ) f (Pair p q) = Pair (f #. p) (f #. q)
-  {-# INLINE ( #. ) #-}
-  ( .# ) (Pair p q) f = Pair (p .# f) (q .# f)
-  {-# INLINE ( .# ) #-}
+  (#.) f (Pair p q) = Pair (f #. p) (f #. q)
+  {-# INLINE (#.) #-}
+  (.#) (Pair p q) f = Pair (p .# f) (q .# f)
+  {-# INLINE (.#) #-}
 
 instance (Functor f, Profunctor p) => Profunctor (Tannen f p) where
   lmap f (Tannen h) = Tannen (lmap f <$> h)
@@ -250,7 +250,7 @@ instance (Functor f, Profunctor p) => Profunctor (Tannen f p) where
   {-# INLINE rmap #-}
   dimap f g (Tannen h) = Tannen (dimap f g <$> h)
   {-# INLINE dimap #-}
-  ( #. ) f (Tannen h) = Tannen ((f #.) <$> h)
-  {-# INLINE ( #. ) #-}
-  ( .# ) (Tannen h) f = Tannen ((.# f) <$> h)
-  {-# INLINE ( .# ) #-}
+  (#.) f (Tannen h) = Tannen ((f #.) <$> h)
+  {-# INLINE (#.) #-}
+  (.#) (Tannen h) f = Tannen ((.# f) <$> h)
+  {-# INLINE (.#) #-}

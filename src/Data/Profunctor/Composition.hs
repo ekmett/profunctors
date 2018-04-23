@@ -83,9 +83,9 @@ instance (Profunctor p, Profunctor q) => Profunctor (Procompose p q) where
   rmap k (Procompose f g) = Procompose (rmap k f) g
   {-# INLINE lmap #-}
   k #. Procompose f g     = Procompose (k #. f) g
-  {-# INLINE ( #. ) #-}
+  {-# INLINE (#.) #-}
   Procompose f g .# k     = Procompose f (g .# k)
-  {-# INLINE ( .# ) #-}
+  {-# INLINE (.#) #-}
 
 instance Profunctor p => Functor (Procompose p q a) where
   fmap k (Procompose f g) = Procompose (rmap k f) g
@@ -256,7 +256,7 @@ instance (Profunctor p, Profunctor q) => Profunctor (Rift p q) where
   rmap bd f = Rift (runRift f . lmap bd)
   {-# INLINE rmap #-}
   bd #. f = Rift (\p -> runRift f (p .# bd))
-  {-# INLINE ( #. ) #-}
+  {-# INLINE (#.) #-}
   f .# ca = Rift (\p -> runRift f p .# ca)
   {-# INLINE (.#) #-}
 

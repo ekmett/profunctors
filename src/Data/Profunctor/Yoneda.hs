@@ -61,10 +61,10 @@ instance Profunctor (Yoneda p) where
   {-# INLINE lmap #-}
   rmap r p = Yoneda $ \l r' -> runYoneda p l (r' . r)
   {-# INLINE rmap #-}
-  ( .# ) p _ = coerce p
-  {-# INLINE ( .# ) #-}
-  ( #. ) _ = coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
-  {-# INLINE ( #. ) #-}
+  (.#) p _ = coerce p
+  {-# INLINE (.#) #-}
+  (#.) _ = coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
+  {-# INLINE (#.) #-}
 
 instance Functor (Yoneda p a) where
   fmap f p = Yoneda $ \l r -> runYoneda p l (r . f)
@@ -164,10 +164,10 @@ instance Profunctor (Coyoneda p) where
   {-# INLINE lmap #-}
   rmap r (Coyoneda l r' p) = Coyoneda l (r . r') p
   {-# INLINE rmap #-}
-  ( .# ) p _ = coerce p
-  {-# INLINE ( .# ) #-}
-  ( #. ) _ = coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
-  {-# INLINE ( #. ) #-}
+  (.#) p _ = coerce p
+  {-# INLINE (.#) #-}
+  (#.) _ = coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
+  {-# INLINE (#.) #-}
 
 instance ProfunctorFunctor Coyoneda where
   promap f (Coyoneda l r p) = Coyoneda l r (f p)

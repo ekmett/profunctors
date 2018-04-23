@@ -61,9 +61,9 @@ instance Functor f => Profunctor (Star f) where
   {-# INLINE lmap #-}
   rmap k (Star f) = Star (fmap k . f)
   {-# INLINE rmap #-}
-  -- We cannot safely overload ( #. ) because we didn't write the 'Functor'.
+  -- We cannot safely overload (#.) because we didn't write the 'Functor'.
   p .# _ = coerce p
-  {-# INLINE ( .# ) #-}
+  {-# INLINE (.#) #-}
 
 instance Functor f => Functor (Star f a) where
   fmap = rmap
@@ -112,9 +112,9 @@ instance Functor f => Profunctor (Costar f) where
   {-# INLINE lmap #-}
   rmap k (Costar f) = Costar (k . f)
   {-# INLINE rmap #-}
-  ( #. ) _ = coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
-  {-# INLINE ( #. ) #-}
-  -- We cannot overload ( .# ) because we didn't write the 'Functor'.
+  (#.) _ = coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
+  {-# INLINE (#.) #-}
+  -- We cannot overload (.#) because we didn't write the 'Functor'.
 
 instance Distributive (Costar f d) where
   distribute fs = Costar $ \gd -> fmap (($ gd) .# runCostar) fs
@@ -187,7 +187,7 @@ instance Arrow p => Profunctor (WrappedArrow p) where
   {-# INLINE lmap #-}
   rmap = (^<<)
   {-# INLINE rmap #-}
-  -- We cannot safely overload ( #. ) or ( .# ) because we didn't write the 'Arrow'.
+  -- We cannot safely overload (#.) or (.#) because we didn't write the 'Arrow'.
 
 ------------------------------------------------------------------------------
 -- Forget

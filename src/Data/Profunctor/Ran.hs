@@ -51,7 +51,7 @@ instance (Profunctor p, Profunctor q) => Profunctor (Ran p q) where
   rmap bd f = Ran (rmap bd . runRan f)
   {-# INLINE rmap #-}
   bd #. f = Ran (\p -> bd #. runRan f p)
-  {-# INLINE ( #. ) #-}
+  {-# INLINE (#.) #-}
   f .# ca = Ran (\p -> runRan f (ca #. p))
   {-# INLINE (.#) #-}
 
@@ -100,7 +100,7 @@ instance Profunctor p => Profunctor (Codensity p) where
   rmap bd f = Codensity (rmap bd . runCodensity f)
   {-# INLINE rmap #-}
   bd #. f = Codensity (\p -> bd #. runCodensity f p)
-  {-# INLINE ( #. ) #-}
+  {-# INLINE (#.) #-}
   f .# ca = Codensity (\p -> runCodensity f (ca #. p))
   {-# INLINE (.#) #-}
 
