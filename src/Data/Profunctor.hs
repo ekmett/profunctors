@@ -39,9 +39,7 @@ module Data.Profunctor
   , Costar(..)
   , WrappedArrow(..)
   , Forget(..)
-#ifndef HLINT
   , (:->)
-#endif
   ) where
 
 import Data.Profunctor.Choice
