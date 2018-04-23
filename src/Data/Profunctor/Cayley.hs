@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE Trustworthy #-}
 -----------------------------------------------------------------------------
@@ -70,7 +69,7 @@ instance (Applicative f, ArrowChoice p) => ArrowChoice (Cayley f p) where
   right = Cayley . fmap right . runCayley
   Cayley ab +++ Cayley cd = Cayley $ liftA2 (+++) ab cd
   Cayley ac ||| Cayley bc = Cayley $ liftA2 (|||) ac bc
-  
+
 instance (Applicative f, ArrowLoop p) => ArrowLoop (Cayley f p) where
   loop = Cayley . fmap loop . runCayley
 
@@ -84,7 +83,7 @@ mapCayley :: (forall a. f a -> g a) -> Cayley f p x y -> Cayley g p x y
 mapCayley f (Cayley g) = Cayley (f g)
 
 -- instance Adjunction f g => ProfunctorAdjunction (Cayley f) (Cayley g) where
-  
+
 {-
 newtype Uncayley p a = Uncayley (p () a)
 
@@ -105,7 +104,7 @@ class (Strong p, Closed p) => Stronger p
 -- only a true iso for Stronger p and q, no?
 _Smash :: (Strong p, Closed q) => Iso
   (Cayley (Uncayley p) (->) a b)
-  (Cayley (Uncayley q) (->) c d) 
+  (Cayley (Uncayley q) (->) c d)
   (p a b)
   (q c d)
 _Smash = dimap hither (fmap yon) where
