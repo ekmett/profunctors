@@ -2,6 +2,7 @@
 ---
 * Generalized the type of `(#.)` and `(.#)`.
 * Dropped support for GHC < 7.8.
+* Add a `Profunctor` instance for `Data.Bifunctor.Sum`.
 
 5.2.2 [2018.01.18]
 ------------------
