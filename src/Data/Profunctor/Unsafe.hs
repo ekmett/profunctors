@@ -38,6 +38,7 @@ import Data.Bifunctor.Biff (Biff(..))
 import Data.Bifunctor.Clown (Clown(..))
 import Data.Bifunctor.Joker (Joker(..))
 import Data.Bifunctor.Product (Product(..))
+import Data.Bifunctor.Sum (Sum(..))
 import Data.Bifunctor.Tannen (Tannen(..))
 import Data.Coerce (Coercible, coerce)
 #if __GLASGOW_HASKELL__ < 710
@@ -241,6 +242,23 @@ instance (Profunctor p, Profunctor q) => Profunctor (Product p q) where
   (#.) f (Pair p q) = Pair (f #. p) (f #. q)
   {-# INLINE (#.) #-}
   (.#) (Pair p q) f = Pair (p .# f) (q .# f)
+  {-# INLINE (.#) #-}
+
+instance (Profunctor p, Profunctor q) => Profunctor (Sum p q) where
+  lmap f (L2 x) = L2 (lmap f x)
+  lmap f (R2 y) = R2 (lmap f y)
+  {-# INLINE lmap #-}
+  rmap g (L2 x) = L2 (rmap g x)
+  rmap g (R2 y) = R2 (rmap g y)
+  {-# INLINE rmap #-}
+  dimap f g (L2 x) = L2 (dimap f g x)
+  dimap f g (R2 y) = R2 (dimap f g y)
+  {-# INLINE dimap #-}
+  f #. L2 x = L2 (f #. x)
+  f #. R2 y = R2 (f #. y)
+  {-# INLINE (#.) #-}
+  L2 x .# f = L2 (x .# f)
+  R2 y .# f = R2 (y .# f)
   {-# INLINE (.#) #-}
 
 instance (Functor f, Profunctor p) => Profunctor (Tannen f p) where
