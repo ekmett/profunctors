@@ -1,7 +1,19 @@
-5.3 [????.??.??]
+5.3 [2018.07.02]
 ----------------
-* Generalized the type of `(#.)` and `(.#)`.
-* Dropped support for GHC < 7.8.
+* Generalize the types of `(#.)` and `(.#)`. Before, they were:
+
+  ```haskell
+  (#.) :: (Profunctor p, Coercible c b) => (b -> c) -> p a b    -> p a c
+  (.#) :: (Profunctor p, Coercible b a) => p b c    -> (a -> b) -> p a c
+  ```
+
+  Now, they are:
+
+  ```haskell
+  (#.) :: (Profunctor p, Coercible c b) => q b c    -> p a b    -> p a c
+  (.#) :: (Profunctor p, Coercible b a) => p b c    -> q a b    -> p a c
+  ```
+* Drop support for GHC < 7.8.
 * Add a `Profunctor` instance for `Data.Bifunctor.Sum`.
 
 5.2.2 [2018.01.18]
