@@ -96,8 +96,8 @@ uncurry' :: Strong p => p a (b -> c) -> p (a, b) c
 uncurry' = rmap (\(f,x) -> f x) . first'
 {-# INLINE uncurry' #-}
 
-strongMap :: Strong p => (a -> (b -> c)) -> p a b -> p a c
-strongMap f x = dimap (\a -> (a, a)) (\(b, a) -> f a b) (first' x)
+strong :: Strong p => (a -> b -> c) -> p a b -> p a c
+strong f x = dimap (\a -> (a, a)) (\(b, a) -> f a b) (first' x)
 
 instance Strong (->) where
   first' ab ~(a, c) = (ab a, c)
