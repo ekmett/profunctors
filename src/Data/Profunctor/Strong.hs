@@ -19,7 +19,7 @@ module Data.Profunctor.Strong
   -- * Strength
     Strong(..)
   , uncurry'
-  , strongMap
+  , strong
   , Tambara(..)
   , tambara, untambara
   , Pastro(..)

@@ -2,6 +2,7 @@
 ---
 * Add `wander`-like combinator `roam` to `Mapping`.
 * Remove illegal `instance Choice (Costar w)`.
+* Add `strong` combinator #62.
 
 5.3 [2018.07.02]
 ----------------
