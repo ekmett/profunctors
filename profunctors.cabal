@@ -1,6 +1,6 @@
 name:          profunctors
 category:      Control, Categories
-version:       5.3
+version:       5.4
 license:       BSD3
 cabal-version: >= 1.10
 license-file:  LICENSE

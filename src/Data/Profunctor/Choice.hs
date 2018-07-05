@@ -128,13 +128,6 @@ instance Comonad w => Choice (Cokleisli w) where
   right' = right
   {-# INLINE right' #-}
 
--- NB: This instance is highly questionable
-instance Traversable w => Choice (Costar w) where
-  left' (Costar wab) = Costar (either Right Left . fmap wab . traverse (either Right Left))
-  {-# INLINE left' #-}
-  right' (Costar wab) = Costar (fmap wab . sequence)
-  {-# INLINE right' #-}
-
 instance Choice Tagged where
   left' (Tagged b) = Tagged (Left b)
   {-# INLINE left' #-}

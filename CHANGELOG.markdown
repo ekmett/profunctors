@@ -1,3 +1,8 @@
+5.4
+---
+* Add `wander`-like combinator `roam` to `Mapping`.
+* Remove illegal `instance Choice (Costar w)`.
+
 5.3 [2018.07.02]
 ----------------
 * Generalize the types of `(#.)` and `(.#)`. Before, they were:
