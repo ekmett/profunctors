@@ -49,6 +49,10 @@
     name: Collapse lambdas
     within: Data.Profunctor.Unsafe
 
+- ignore:
+    name: Eta reduce
+    within: Data.Profunctor.Mapping
+
 - fixity: "infixr 9 #."
 - fixity: "infixl 8 .#"
 - fixity: "infixr 0 :->"
