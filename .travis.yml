@@ -65,7 +65,7 @@ before_install:
   - HC=${CC}
   - HCPKG=${HC/ghc/ghc-pkg}
   - unset CC
-  - export HLINTVER=2.1.3
+  - export HLINTVER=2.0.9
   - mkdir ~/.hlint
   - curl -L https://github.com/ndmitchell/hlint/releases/download/v$HLINTVER/hlint-$HLINTVER-x86_64-linux.tar.gz | tar -xz --strip-components=1 -C ~/.hlint
   - ROOTDIR=$(pwd)
@@ -142,8 +142,7 @@ script:
   - if $HADDOCK; then cabal new-haddock -w ${HC} ${TEST} ${BENCH} all; else echo "Skipping haddock generation";fi
 
   # hlint
-  - hlint --version
-  - (cd profunctors-* && hlint src)
+  - (cd profunctors-* && hlint src --cpp-ansi --cpp-define=HLINT)
 
 # REGENDATA ["-o",".travis.yml","--ghc-head","--irc-channel=irc.freenode.org#haskell-lens","--no-no-tests-no-bench","--no-unconstrained","cabal.project"]
 # EOF
