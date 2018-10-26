@@ -61,7 +61,7 @@ import Prelude hiding (id,(.))
 -- This describes profunctor strength with respect to the product structure
 -- of Hask.
 --
--- <http://www-kb.is.s.u-tokyo.ac.jp/~asada/papers/arrStrMnd.pdf>
+-- <http://www.riec.tohoku.ac.jp/~asada/papers/arrStrMnd.pdf>
 --
 class Profunctor p => Strong p where
   -- | Laws:
