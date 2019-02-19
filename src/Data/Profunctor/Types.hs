@@ -39,6 +39,7 @@ import Control.Monad (MonadPlus(..), (>=>))
 import Data.Coerce (Coercible, coerce)
 import Data.Distributive
 import Data.Foldable
+import Data.Functor.Contravariant
 import Data.Monoid hiding (Product)
 import Data.Profunctor.Unsafe
 import Data.Traversable
@@ -97,6 +98,10 @@ instance Distributive f => Distributive (Star f a) where
 instance Monad f => Category (Star f) where
   id = Star return
   Star f . Star g = Star $ g >=> f
+
+instance Contravariant f => Contravariant (Star f a) where
+  contramap f (Star g) = Star (contramap f . g)
+  {-# INLINE contramap #-}
 
 ------------------------------------------------------------------------------
 -- Costar
@@ -214,3 +219,7 @@ instance Foldable (Forget r a) where
 instance Traversable (Forget r a) where
   traverse _ (Forget k) = pure (Forget k)
   {-# INLINE traverse #-}
+
+instance Contravariant (Forget r a) where
+  contramap _ (Forget k) = Forget k
+  {-# INLINE contramap #-}
