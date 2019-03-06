@@ -139,7 +139,7 @@ unsecondCorep p = cotabulate f
 
 -- | Default definition for 'closed' given that @p@ is 'Corepresentable'
 closedCorep :: Corepresentable p => p a b -> p (x -> a) (x -> b)
-closedCorep p = cotabulate $ \fs x -> cosieve p (fmap ($x) fs)
+closedCorep p = cotabulate $ \fs x -> cosieve p (fmap ($ x) fs)
 
 instance Corepresentable (->) where
   type Corep (->) = Identity

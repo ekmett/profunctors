@@ -53,6 +53,12 @@
     name: Eta reduce
     within: Data.Profunctor.Mapping
 
+- ignore:
+    name: "Use tuple-section"
+
+- ignore:
+    name: "Avoid lambda using `infix`"
+
 - fixity: "infixr 9 #."
 - fixity: "infixl 8 .#"
 - fixity: "infixr 0 :->"

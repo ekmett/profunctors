@@ -67,10 +67,10 @@ instance Closed (->) where
   closed = (.)
 
 instance Functor f => Closed (Costar f) where
-  closed (Costar fab) = Costar $ \fxa x -> fab (fmap ($x) fxa)
+  closed (Costar fab) = Costar $ \fxa x -> fab (fmap ($ x) fxa)
 
 instance Functor f => Closed (Cokleisli f) where
-  closed (Cokleisli fab) = Cokleisli $ \fxa x -> fab (fmap ($x) fxa)
+  closed (Cokleisli fab) = Cokleisli $ \fxa x -> fab (fmap ($ x) fxa)
 
 instance Distributive f => Closed (Star f) where
   closed (Star afb) = Star $ \xa -> distribute $ \x -> afb (xa x)
