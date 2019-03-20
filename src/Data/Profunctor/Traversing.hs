@@ -2,6 +2,12 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE DeriveFunctor #-}
+
+#if __GLASGOW_HASKELL__ >= 806
+{-# LANGUAGE QuantifiedConstraints #-}
+{-# LANGUAGE UndecidableInstances #-}
+#endif
+
 module Data.Profunctor.Traversing
   ( Traversing(..)
   , CofreeTraversing(..)
@@ -20,6 +26,7 @@ module Data.Profunctor.Traversing
 
 import Control.Applicative
 import Control.Arrow (Kleisli(..))
+import Data.Bifunctor (Bifunctor)
 import Data.Bifunctor.Tannen
 import Data.Functor.Compose
 import Data.Functor.Identity
@@ -137,10 +144,15 @@ instance Applicative m => Traversing (Star m) where
   traverse' (Star m) = Star (traverse m)
   wander f (Star amb) = Star (f amb)
 
-instance (Functor f, Traversing p) => Traversing (Tannen f p) where
+instance (Functor f, Bifunctor p, Traversing p) => Traversing (Tannen f p) where
   traverse' = Tannen . fmap traverse' . runTannen
 
 newtype CofreeTraversing p a b = CofreeTraversing { runCofreeTraversing :: forall f. Traversable f => p (f a) (f b) }
+
+#if __GLASGOW_HASKELL__ >= 806
+instance (forall f . Functor (p (f a))) => Functor (CofreeTraversing p a) where
+  fmap f (CofreeTraversing p) = CofreeTraversing (fmap (fmap f) p)
+#endif
 
 instance Profunctor p => Profunctor (CofreeTraversing p) where
   lmap f (CofreeTraversing p) = CofreeTraversing (lmap (fmap f) p)
@@ -167,6 +179,9 @@ instance ProfunctorComonad CofreeTraversing where
 -- | @FreeTraversing -| CofreeTraversing@
 data FreeTraversing p a b where
   FreeTraversing :: Traversable f => (f y -> b) -> p x y -> (a -> f x) -> FreeTraversing p a b
+
+instance Functor (FreeTraversing p a) where
+  fmap f (FreeTraversing l m r) = FreeTraversing (f . l) m r
 
 instance Profunctor (FreeTraversing p) where
   lmap f (FreeTraversing l m r) = FreeTraversing l m (r . f)

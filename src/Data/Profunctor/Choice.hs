@@ -3,6 +3,12 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+
+#if __GLASGOW_HASKELL__ >= 806
+{-# LANGUAGE QuantifiedConstraints #-}
+{-# LANGUAGE UndecidableInstances #-}
+#endif
+
 -----------------------------------------------------------------------------
 -- |
 -- Copyright   :  (C) 2014-2015 Edward Kmett
@@ -31,6 +37,7 @@ import Control.Applicative hiding (WrappedArrow(..))
 import Control.Arrow
 import Control.Category
 import Control.Comonad
+import Data.Bifunctor (Bifunctor)
 import Data.Bifunctor.Joker (Joker(..))
 import Data.Bifunctor.Product (Product(..))
 import Data.Bifunctor.Sum (Sum(..))
@@ -135,7 +142,11 @@ instance Choice Tagged where
   right' (Tagged b) = Tagged (Right b)
   {-# INLINE right' #-}
 
+#if __GLASGOW_HASKELL__ >= 806
+instance (ArrowChoice p, forall a . Functor (p a)) => Choice (WrappedArrow p) where
+#else
 instance ArrowChoice p => Choice (WrappedArrow p) where
+#endif
   left' (WrapArrow k) = WrapArrow (left k)
   {-# INLINE left' #-}
   right' (WrapArrow k) = WrapArrow (right k)
@@ -167,7 +178,7 @@ instance (Choice p, Choice q) => Choice (Sum p q) where
   right' (R2 q) = R2 (right' q)
   {-# INLINE right' #-}
 
-instance (Functor f, Choice p) => Choice (Tannen f p) where
+instance (Functor f, Bifunctor p, Choice p) => Choice (Tannen f p) where
   left' (Tannen fp) = Tannen (fmap left' fp)
   {-# INLINE left' #-}
   right' (Tannen fp) = Tannen (fmap right' fp)
@@ -249,6 +260,9 @@ untambaraSum f p = dimap Left (\(Left a) -> a) $ runTambaraSum $ f p
 -- PastroSum freely constructs strength with respect to Either.
 data PastroSum p a b where
   PastroSum :: (Either y z -> b) -> p x y -> (a -> Either x z) -> PastroSum p a b
+
+instance Functor (PastroSum p a) where
+  fmap f (PastroSum l m r) = PastroSum (f . l) m r
 
 instance Profunctor (PastroSum p) where
   dimap f g (PastroSum l m r) = PastroSum (g . l) m (r . f)
@@ -348,7 +362,7 @@ instance Traversable f => Cochoice (Star f) where
   unright (Star f) = Star (go . Right)
     where go = either (go . Left) id . sequence . f
 
-instance (Functor f, Cochoice p) => Cochoice (Tannen f p) where
+instance (Functor f, Bifunctor p, Cochoice p) => Cochoice (Tannen f p) where
   unleft (Tannen fp) = Tannen (fmap unleft fp)
   {-# INLINE unleft #-}
   unright (Tannen fp) = Tannen (fmap unright fp)
@@ -419,6 +433,9 @@ uncotambaraSum f p = proextract (f p)
 --
 -- 'CopastroSum' freely constructs costrength with respect to 'Either' (aka 'Choice')
 newtype CopastroSum p a b = CopastroSum { runCopastroSum :: forall r. Cochoice r => (forall x y. p x y -> r x y) -> r a b }
+
+instance Functor (CopastroSum p a) where
+  fmap f (CopastroSum h) = CopastroSum $ \ n -> rmap f (h n)
 
 instance Profunctor (CopastroSum p) where
   dimap f g (CopastroSum h) = CopastroSum $ \ n -> dimap f g (h n)

@@ -1,6 +1,11 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE Trustworthy #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+
+#if __GLASGOW_HASKELL__ >= 806
+{-# LANGUAGE QuantifiedConstraints #-}
+#endif
+
 -----------------------------------------------------------------------------
 -- |
 -- Copyright   :  (C) 2011-2018 Edward Kmett
@@ -34,6 +39,7 @@ import Control.Arrow
 import Control.Category
 import Control.Comonad (Cokleisli(..))
 import Control.Monad (liftM)
+import Data.Bifunctor (Bifunctor)
 import Data.Bifunctor.Biff (Biff(..))
 import Data.Bifunctor.Clown (Clown(..))
 import Data.Bifunctor.Joker (Joker(..))
@@ -86,7 +92,11 @@ infixl 8 .#
 -- 'lmap' (f '.' g) ≡ 'lmap' g '.' 'lmap' f
 -- 'rmap' (f '.' g) ≡ 'rmap' f '.' 'rmap' g
 -- @
+#if __GLASGOW_HASKELL__ >= 806
+class (forall a . Functor (p a)) => Profunctor p where
+#else
 class Profunctor p where
+#endif
   -- | Map over both arguments at the same time.
   --
   -- @'dimap' f g ≡ 'lmap' f '.' 'rmap' g@
@@ -189,6 +199,13 @@ instance Profunctor Tagged where
   Tagged s .# _ = Tagged s
   {-# INLINE (.#) #-}
 
+
+#if __GLASGOW_HASKELL__ < 810
+-- This instance was added in base-4.14
+instance Functor m => Functor (Kleisli m a) where
+  fmap f (Kleisli h) = Kleisli (fmap f . h)
+#endif
+
 instance Monad m => Profunctor (Kleisli m) where
   dimap f g (Kleisli h) = Kleisli (liftM g . h . f)
   {-# INLINE dimap #-}
@@ -227,10 +244,14 @@ instance Functor f => Profunctor (Joker f) where
   dimap _ g (Joker fb) = Joker (fmap g fb)
   {-# INLINE dimap #-}
 
-instance (Profunctor p, Functor f, Functor g) => Profunctor (Biff p f g) where
+instance (Profunctor p, Functor f, Functor g, Bifunctor p) => Profunctor (Biff p f g) where
   lmap f (Biff p) = Biff (lmap (fmap f) p)
   rmap g (Biff p) = Biff (rmap (fmap g) p)
   dimap f g (Biff p) = Biff (dimap (fmap f) (fmap g) p)
+
+-- TODO: orphan instance
+instance (Functor (p a), Functor (q a)) => Functor (Product p q a) where
+  fmap f (Pair p q) = Pair (fmap f p) (fmap f q)
 
 instance (Profunctor p, Profunctor q) => Profunctor (Product p q) where
   lmap  f   (Pair p q) = Pair (lmap f p) (lmap f q)
@@ -243,6 +264,11 @@ instance (Profunctor p, Profunctor q) => Profunctor (Product p q) where
   {-# INLINE (#.) #-}
   (.#) (Pair p q) f = Pair (p .# f) (q .# f)
   {-# INLINE (.#) #-}
+
+-- TODO: orphan instance
+instance (Functor (p a), Functor (q a)) => Functor (Sum p q a) where
+  fmap f (L2 p) = L2 (fmap f p)
+  fmap f (R2 q) = R2 (fmap f q)
 
 instance (Profunctor p, Profunctor q) => Profunctor (Sum p q) where
   lmap f (L2 x) = L2 (lmap f x)
@@ -261,7 +287,7 @@ instance (Profunctor p, Profunctor q) => Profunctor (Sum p q) where
   R2 y .# f = R2 (y .# f)
   {-# INLINE (.#) #-}
 
-instance (Functor f, Profunctor p) => Profunctor (Tannen f p) where
+instance (Functor f, Bifunctor p, Profunctor p) => Profunctor (Tannen f p) where
   lmap f (Tannen h) = Tannen (lmap f <$> h)
   {-# INLINE lmap #-}
   rmap g (Tannen h) = Tannen (rmap g <$> h)

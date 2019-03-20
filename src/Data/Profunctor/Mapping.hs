@@ -2,6 +2,12 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE DeriveFunctor #-}
+
+#if __GLASGOW_HASKELL__ >= 806
+{-# LANGUAGE QuantifiedConstraints #-}
+{-# LANGUAGE UndecidableInstances #-}
+#endif
+
 -----------------------------------------------------------------------------
 -- |
 -- Copyright   :  (C) 2015-2018 Edward Kmett
@@ -24,6 +30,7 @@ module Data.Profunctor.Mapping
   ) where
 
 import Control.Arrow (Kleisli(..))
+import Data.Bifunctor
 import Data.Bifunctor.Tannen
 import Data.Distributive
 import Data.Functor.Compose
@@ -91,7 +98,7 @@ instance (Applicative m, Distributive m) => Mapping (Star m) where
   map' (Star f) = Star (collect f)
   roam f = Star #. genMap f .# runStar
 
-instance (Functor f, Mapping p) => Mapping (Tannen f p) where
+instance (Functor f, Bifunctor p, Mapping p) => Mapping (Tannen f p) where
   map' = Tannen . fmap map' . runTannen
 
 wanderMapping :: Mapping p => (forall f. Applicative f => (a -> f b) -> s -> f t) -> p a b -> p s t
@@ -104,6 +111,11 @@ closedMapping :: Mapping p => p a b -> p (x -> a) (x -> b)
 closedMapping = map'
 
 newtype CofreeMapping p a b = CofreeMapping { runCofreeMapping :: forall f. Functor f => p (f a) (f b) }
+
+#if __GLASGOW_HASKELL__ >= 806
+instance (forall f . Functor (p (f a))) => Functor (CofreeMapping p a) where
+  fmap f (CofreeMapping p) = CofreeMapping (fmap (fmap f) p)
+#endif
 
 instance Profunctor p => Profunctor (CofreeMapping p) where
   lmap f (CofreeMapping p) = CofreeMapping (lmap (fmap f) p)
@@ -140,6 +152,9 @@ instance ProfunctorComonad CofreeMapping where
 -- | @FreeMapping -| CofreeMapping@
 data FreeMapping p a b where
   FreeMapping :: Functor f => (f y -> b) -> p x y -> (a -> f x) -> FreeMapping p a b
+
+instance Functor (FreeMapping p a) where
+  fmap f (FreeMapping l m r) = FreeMapping (f . l) m r
 
 instance Profunctor (FreeMapping p) where
   lmap f (FreeMapping l m r) = FreeMapping l m (r . f)

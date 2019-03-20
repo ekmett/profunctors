@@ -4,6 +4,11 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
+#if __GLASGOW_HASKELL__ >= 806
+{-# LANGUAGE QuantifiedConstraints #-}
+{-# LANGUAGE UndecidableInstances #-}
+#endif
+
 -----------------------------------------------------------------------------
 -- |
 -- Copyright   :  (C) 2014-2015 Edward Kmett
@@ -37,6 +42,7 @@ import Control.Category
 import Control.Comonad
 import Control.Monad (liftM)
 import Control.Monad.Fix
+import Data.Bifunctor (Bifunctor)
 import Data.Bifunctor.Clown (Clown(..))
 import Data.Bifunctor.Product (Product(..))
 import Data.Bifunctor.Sum (Sum(..))
@@ -123,7 +129,11 @@ instance Functor m => Strong (Star m) where
   {-# INLINE second' #-}
 
 -- | 'Arrow' is 'Strong' 'Category'
+#if __GLASGOW_HASKELL__ >= 806
+instance (Arrow p, forall a . Functor (p a)) => Strong (WrappedArrow p) where
+#else
 instance Arrow p => Strong (WrappedArrow p) where
+#endif
   first' (WrapArrow k) = WrapArrow (first k)
   {-# INLINE first' #-}
   second' (WrapArrow k) = WrapArrow (second k)
@@ -155,7 +165,7 @@ instance (Strong p, Strong q) => Strong (Sum p q) where
   second' (R2 q) = R2 (second' q)
   {-# INLINE second' #-}
 
-instance (Functor f, Strong p) => Strong (Tannen f p) where
+instance (Functor f, Bifunctor p, Strong p) => Strong (Tannen f p) where
   first' (Tannen fp) = Tannen (fmap first' fp)
   {-# INLINE first' #-}
   second' (Tannen fp) = Tannen (fmap second' fp)
@@ -272,6 +282,9 @@ untambara f p = dimap (\a -> (a,())) fst $ runTambara $ f p
 data Pastro p a b where
   Pastro :: ((y, z) -> b) -> p x y -> (a -> (x, z)) -> Pastro p a b
 
+instance Functor (Pastro p a) where
+  fmap f (Pastro l m r) = Pastro (f . l) m r
+
 instance Profunctor (Pastro p) where
   dimap f g (Pastro l m r) = Pastro (g . l) m (r . f)
   lmap f (Pastro l m r) = Pastro l m (r . f)
@@ -368,7 +381,11 @@ instance Costrong Tagged where
   unfirst (Tagged bd) = Tagged (fst bd)
   unsecond (Tagged db) = Tagged (snd db)
 
+#if __GLASGOW_HASKELL__ >= 806
+instance (ArrowLoop p, forall a . Functor (p a)) => Costrong (WrappedArrow p) where
+#else
 instance ArrowLoop p => Costrong (WrappedArrow p) where
+#endif
   unfirst (WrapArrow k) = WrapArrow (loop k)
 
 instance MonadFix m => Costrong (Kleisli m) where
@@ -379,7 +396,7 @@ instance Functor f => Costrong (Cokleisli f) where
   unfirst (Cokleisli f) = Cokleisli f'
     where f' fa = b where (b, d) = f ((\a -> (a, d)) <$> fa)
 
-instance (Functor f, Costrong p) => Costrong (Tannen f p) where
+instance (Functor f, Bifunctor p, Costrong p) => Costrong (Tannen f p) where
   unfirst (Tannen fp) = Tannen (fmap unfirst fp)
   unsecond (Tannen fp) = Tannen (fmap unsecond fp)
 
@@ -443,6 +460,9 @@ uncotambara f p = proextract (f p)
 --
 -- Copastro freely constructs costrength
 newtype Copastro p a b = Copastro { runCopastro :: forall r. Costrong r => (forall x y. p x y -> r x y) -> r a b }
+
+instance Functor (Copastro p a) where
+  fmap f (Copastro h) = Copastro $ \ n -> rmap f (h n)
 
 instance Profunctor (Copastro p) where
   dimap f g (Copastro h) = Copastro $ \ n -> dimap f g (h n)

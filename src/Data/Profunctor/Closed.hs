@@ -29,6 +29,7 @@ import Control.Applicative
 import Control.Arrow
 import Control.Category
 import Control.Comonad
+import Data.Bifunctor (Bifunctor)
 import Data.Bifunctor.Product (Product(..))
 import Data.Bifunctor.Sum (Sum(..))
 import Data.Bifunctor.Tannen (Tannen(..))
@@ -86,7 +87,7 @@ instance (Closed p, Closed q) => Closed (Sum p q) where
   closed (L2 p) = L2 (closed p)
   closed (R2 q) = R2 (closed q)
 
-instance (Functor f, Closed p) => Closed (Tannen f p) where
+instance (Functor f, Bifunctor p, Closed p) => Closed (Tannen f p) where
   closed (Tannen fp) = Tannen (fmap closed fp)
 
 -- instance Monoid r => Closed (Forget r) where
@@ -194,6 +195,9 @@ unclose f p = dimap const ($ ()) $ runClosure $ f p
 
 data Environment p a b where
   Environment :: ((z -> y) -> b) -> p x y -> (a -> z -> x) -> Environment p a b
+
+instance Functor (Environment p a) where
+  fmap f (Environment l m r) = Environment (f . l) m r
 
 instance Profunctor (Environment p) where
   dimap f g (Environment l m r) = Environment (g . l) m (r . f)

@@ -5,6 +5,11 @@
 
 {-# LANGUAGE Trustworthy #-}
 
+#if __GLASGOW_HASKELL__ >= 806
+{-# LANGUAGE QuantifiedConstraints #-}
+{-# LANGUAGE UndecidableInstances #-}
+#endif
+
 -----------------------------------------------------------------------------
 -- |
 -- Copyright   :  (C) 2011-2015 Edward Kmett,
@@ -147,6 +152,9 @@ instance Monad (Costar f a) where
 -- | Wrap an arrow for use as a 'Profunctor'.
 newtype WrappedArrow p a b = WrapArrow { unwrapArrow :: p a b }
 
+instance Functor (p a) => Functor (WrappedArrow p a) where
+  fmap f (WrapArrow h) = WrapArrow (fmap f h)
+
 instance Category p => Category (WrappedArrow p) where
   WrapArrow f . WrapArrow g = WrapArrow (f . g)
   {-# INLINE (.) #-}
@@ -187,7 +195,11 @@ instance ArrowLoop p => ArrowLoop (WrappedArrow p) where
   loop = WrapArrow . loop . unwrapArrow
   {-# INLINE loop #-}
 
+#if __GLASGOW_HASKELL__ >= 806
+instance (Arrow p, forall a . Functor (p a)) => Profunctor (WrappedArrow p) where
+#else
 instance Arrow p => Profunctor (WrappedArrow p) where
+#endif
   lmap = (^>>)
   {-# INLINE lmap #-}
   rmap = (^<<)

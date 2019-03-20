@@ -26,6 +26,9 @@ import Prelude hiding ((.), id)
 -- static arrows
 newtype Cayley f p a b = Cayley { runCayley :: f (p a b) }
 
+instance (Functor f, Functor (p a)) => Functor (Cayley f p a) where
+  fmap f = Cayley . fmap (fmap f) . runCayley
+
 instance Functor f => ProfunctorFunctor (Cayley f) where
   promap f (Cayley p) = Cayley (fmap f p)
 
