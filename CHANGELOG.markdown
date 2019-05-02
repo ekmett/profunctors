@@ -1,9 +1,10 @@
-5.4
----
+5.4 [????.??.??]
+----------------
 * Add `wander`-like combinator `roam` to `Mapping`.
 * Remove illegal `instance Choice (Costar w)`.
 * Add `strong` combinator #62.
 * Only depend on `semigroups` before GHC 8.0.
+* Add `Contravariant` instances for `Star` and `Forget`.
 
 5.3 [2018.07.02]
 ----------------
