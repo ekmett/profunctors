@@ -1,4 +1,4 @@
-5.4 [????.??.??]
+5.4 [2019.05.10]
 ----------------
 * Add `wander`-like combinator `roam` to `Mapping`.
 * Remove illegal `instance Choice (Costar w)`.
