@@ -1,3 +1,7 @@
+5.5 [???????]
+----------------
+* Change the type of `roam` to make it actually useful.
+
 5.4 [2019.05.10]
 ----------------
 * Add `wander`-like combinator `roam` to `Mapping`.
