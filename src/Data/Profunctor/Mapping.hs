@@ -47,34 +47,32 @@ class (Traversing p, Closed p) => Mapping p where
   -- 'dimap' 'Data.Functor.Identity.Identity' 'Data.Functor.Identity.runIdentity' '.' 'map'' ≡ 'id'
   -- @
   map' :: Functor f => p a b -> p (f a) (f b)
-  map' = roam collect
+  map' = roam fmap
 
-  roam :: (forall f. (Distributive f, Applicative f)
-                   => (a -> f b) -> s -> f t)
+  roam :: ((a -> b) -> s -> t)
        -> p a b -> p s t
-  roam f = dimap (\s -> Bar $ \afb -> f afb s) lent . map'
+  roam f = dimap (\s -> Bar $ \ab -> f ab s) lent . map'
 
 newtype Bar t b a = Bar
-  { runBar :: forall f. (Distributive f, Applicative f)
-           => (a -> f b) -> f t }
+  { runBar :: (a -> b) -> t }
   deriving Functor
 
 lent :: Bar t a a -> t
-lent m = runIdentity (runBar m Identity)
+lent m = runBar m id
 
 instance Mapping (->) where
   map' = fmap
-  roam f g = runIdentity #. f (Identity #. g)
+  roam f = f
 
 instance (Monad m, Distributive m) => Mapping (Kleisli m) where
   map' (Kleisli f) = Kleisli (collect f)
 #if __GLASGOW_HASKELL__ >= 710
-  roam f = Kleisli #. f .# runKleisli
+  roam f = Kleisli #. genMap f .# runKleisli
 #endif
 {-
 For earlier versions, we'd like to use something like
 
-  roam f = (Kleisli . (unwrapMonad .)) #. f .# ((WrapMonad .) . runKleisli)
+  roam f = (Kleisli . (unwrapMonad .)) #. genMap f .# ((WrapMonad .) . runKleisli)
 
 but it seems WrappedMonad doesn't have a Distributive instance.
 -}
@@ -82,10 +80,13 @@ but it seems WrappedMonad doesn't have a Distributive instance.
 -- see <https://github.com/ekmett/distributive/issues/12>
 instance (Applicative m, Distributive m) => Mapping (Star m) where
   map' (Star f) = Star (collect f)
-  roam f = Star #. f .# runStar
+  roam f = Star #. genMap f .# runStar
+
+genMap :: Distributive f => ((a -> b) -> s -> t) -> (a -> f b) -> s -> f t
+genMap abst afb s = fmap (\ab -> abst ab s) (distribute afb)
 
 wanderMapping :: Mapping p => (forall f. Applicative f => (a -> f b) -> s -> f t) -> p a b -> p s t
-wanderMapping f = roam f
+wanderMapping f = roam ((runIdentity .) #. f .# (Identity .))
 
 traverseMapping :: (Mapping p, Functor f) => p a b -> p (f a) (f b)
 traverseMapping = map'
@@ -111,15 +112,14 @@ instance Profunctor p => Closed (CofreeMapping p) where
 
 instance Profunctor p => Traversing (CofreeMapping p) where
   traverse' = map'
-  wander f = roam f
+  wander f = roam $ (runIdentity .) #. f .# (Identity .)
 
 instance Profunctor p => Mapping (CofreeMapping p) where
   -- !@(#*&() Compose isn't representational in its second arg or we could use #. and .#
   map' (CofreeMapping p) = CofreeMapping (dimap Compose getCompose p)
   roam f (CofreeMapping p) =
      CofreeMapping $
-       dimap (Compose #. fmap (\s -> Bar $ \afb -> f afb s))
-             (fmap lent .# getCompose) p
+       dimap (Compose #. fmap (\s -> Bar $ \ab -> f ab s)) (fmap lent .# getCompose) p
 
 instance ProfunctorFunctor CofreeMapping where
   promap f (CofreeMapping p) = CofreeMapping (f p)
@@ -150,7 +150,7 @@ instance Closed (FreeMapping p) where
 
 instance Traversing (FreeMapping p) where
   traverse' = map'
-  wander f = roam f
+  wander f = roam ((runIdentity .) #. f .# (Identity .))
 
 instance Mapping (FreeMapping p) where
   map' (FreeMapping l m r) = FreeMapping (fmap l .# getCompose) m (Compose #. fmap r)
