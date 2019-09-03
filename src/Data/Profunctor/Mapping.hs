@@ -68,22 +68,27 @@ instance (Monad m, Distributive m) => Mapping (Kleisli m) where
   map' (Kleisli f) = Kleisli (collect f)
 #if __GLASGOW_HASKELL__ >= 710
   roam f = Kleisli #. genMap f .# runKleisli
+#else
+  -- We could actually use this implementation everywhere, but it's kind of a
+  -- warty mess, and there have been rumblings of WrappedMonad deprecation.
+  -- If/when GHC 7.8 moves out of the support window, this will vanish in a
+  -- puff of cleanup.
+  roam f = (Kleisli . (unwrapMonad .)) #. genMapW f .# ((WrapMonad .) . runKleisli)
+    where
+      genMapW
+        :: (Monad m, Distributive m)
+        => ((a -> b) -> s -> t)
+        -> (a -> WrappedMonad m b) -> s -> WrappedMonad m t
+      genMapW abst amb s = WrapMonad $ (\ab -> abst ab s) <$> distribute (unwrapMonad #. amb)
 #endif
-{-
-For earlier versions, we'd like to use something like
 
-  roam f = (Kleisli . (unwrapMonad .)) #. genMap f .# ((WrapMonad .) . runKleisli)
-
-but it seems WrappedMonad doesn't have a Distributive instance.
--}
+genMap :: Distributive f => ((a -> b) -> s -> t) -> (a -> f b) -> s -> f t
+genMap abst afb s = fmap (\ab -> abst ab s) (distribute afb)
 
 -- see <https://github.com/ekmett/distributive/issues/12>
 instance (Applicative m, Distributive m) => Mapping (Star m) where
   map' (Star f) = Star (collect f)
   roam f = Star #. genMap f .# runStar
-
-genMap :: Distributive f => ((a -> b) -> s -> t) -> (a -> f b) -> s -> f t
-genMap abst afb s = fmap (\ab -> abst ab s) (distribute afb)
 
 wanderMapping :: Mapping p => (forall f. Applicative f => (a -> f b) -> s -> f t) -> p a b -> p s t
 wanderMapping f = roam ((runIdentity .) #. f .# (Identity .))
