@@ -289,8 +289,8 @@ class Profunctor p => Cochoice p where
   --   swapE :: 'Either' a b -> 'Either' b a
   --   swapE = 'either' 'Right' 'Left'
   -- 'rmap' ('either' 'id' 'absurd') ≡ 'unleft' '.' 'lmap' ('either' 'id' 'absurd')
-  -- 'unfirst' '.' 'rmap' ('second' f) ≡ 'unfirst' '.' 'lmap' ('second' f)
-  -- 'unleft' '.' 'unleft' ≡ 'unleft' '.' 'dimap' assocE unassocE where
+  -- 'unleft' '.' 'rmap' ('right' f) ≡ 'unleft' '.' 'lmap' ('right' f)
+  -- 'unleft' '.' 'unleft' ≡ 'unleft' '.' 'dimap' unassocE assocE where
   --   assocE :: 'Either' ('Either' a b) c -> 'Either' a ('Either' b c)
   --   assocE ('Left' ('Left' a)) = 'Left' a
   --   assocE ('Left' ('Right' b)) = 'Right' ('Left' b)
@@ -310,8 +310,8 @@ class Profunctor p => Cochoice p where
   --   swapE :: 'Either' a b -> 'Either' b a
   --   swapE = 'either' 'Right' 'Left'
   -- 'rmap' ('either' 'absurd' 'id') ≡ 'unright' '.' 'lmap' ('either' 'absurd' 'id')
-  -- 'unsecond' '.' 'rmap' ('first' f) ≡ 'unsecond' '.' 'lmap' ('first' f)
-  -- 'unright' '.' 'unright' ≡ 'unright' '.' 'dimap' unassocE assocE where
+  -- 'unright' '.' 'rmap' ('left' f) ≡ 'unright' '.' 'lmap' ('left' f)
+  -- 'unright' '.' 'unright' ≡ 'unright' '.' 'dimap' assocE unassocE where
   --   assocE :: 'Either' ('Either' a b) c -> 'Either' a ('Either' b c)
   --   assocE ('Left' ('Left' a)) = 'Left' a
   --   assocE ('Left' ('Right' b)) = 'Right' ('Left' b)
