@@ -73,8 +73,8 @@ class Profunctor p => Choice p where
   --   assocE ('Right' c) = 'Right' ('Right' c)
   --   unassocE :: 'Either' a ('Either' b c) -> 'Either' ('Either' a b) c
   --   unassocE ('Left' a) = 'Left' ('Left' a)
-  --   unassocE ('Right' ('Left' b) = 'Left' ('Right' b)
-  --   unassocE ('Right' ('Right' c)) = 'Right' c)
+  --   unassocE ('Right' ('Left' b)) = 'Left' ('Right' b)
+  --   unassocE ('Right' ('Right' c)) = 'Right' c
   -- @
   left'  :: p a b -> p (Either a c) (Either b c)
   left' =  dimap (either Right Left) (either Right Left) . right'
@@ -94,8 +94,8 @@ class Profunctor p => Choice p where
   --   assocE ('Right' c) = 'Right' ('Right' c)
   --   unassocE :: 'Either' a ('Either' b c) -> 'Either' ('Either' a b) c
   --   unassocE ('Left' a) = 'Left' ('Left' a)
-  --   unassocE ('Right' ('Left' b) = 'Left' ('Right' b)
-  --   unassocE ('Right' ('Right' c)) = 'Right' c)
+  --   unassocE ('Right' ('Left' b)) = 'Left' ('Right' b)
+  --   unassocE ('Right' ('Right' c)) = 'Right' c
   -- @
   right' :: p a b -> p (Either c a) (Either c b)
   right' =  dimap (either Right Left) (either Right Left) . left'
