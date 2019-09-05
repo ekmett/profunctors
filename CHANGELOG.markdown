@@ -1,6 +1,7 @@
-5.5 [???????]
+5.5 [????.??.??]
 ----------------
 * Change the type of `roam` to make it actually useful.
+* Add a `Cochoice` instance for `Forget`.
 
 5.4 [2019.05.10]
 ----------------
