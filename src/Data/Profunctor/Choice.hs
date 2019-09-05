@@ -349,6 +349,10 @@ instance (Cochoice p, Cochoice q) => Cochoice (Product p q) where
   unleft (Pair p q) = Pair (unleft p) (unleft q)
   unright (Pair p q) = Pair (unright p) (unright q)
 
+instance Cochoice (Forget r) where
+  unleft (Forget f) = Forget (f . Left)
+  unright (Forget f) = Forget (f . Right)
+
 ----------------------------------------------------------------------------
 -- * CotambaraSum
 ----------------------------------------------------------------------------
