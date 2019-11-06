@@ -1,3 +1,8 @@
+next [????.??.??]
+-----------------
+* Add `Choice`, `Cochoice`, `Closed`, `Strong`, and `Costrong` instances for
+  `Data.Bifunctor.Sum`.
+
 5.5 [2019.09.06]
 ----------------
 * Change the type of `roam` to make it actually useful.
