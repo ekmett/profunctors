@@ -39,13 +39,14 @@ import Control.Monad (liftM)
 import Control.Monad.Fix
 import Data.Bifunctor.Clown (Clown(..))
 import Data.Bifunctor.Product (Product(..))
+import Data.Bifunctor.Sum (Sum(..))
 import Data.Bifunctor.Tannen (Tannen(..))
 import Data.Functor.Contravariant (Contravariant(..))
 import Data.Profunctor.Adjunction
 import Data.Profunctor.Monad
 import Data.Profunctor.Types
 import Data.Profunctor.Unsafe
-import Data.Semigroup hiding (Product)
+import Data.Semigroup hiding (Product, Sum)
 import Data.Tagged
 import Data.Tuple
 import Prelude hiding (id,(.))
@@ -144,6 +145,14 @@ instance (Strong p, Strong q) => Strong (Product p q) where
   first' (Pair p q) = Pair (first' p) (first' q)
   {-# INLINE first' #-}
   second' (Pair p q) = Pair (second' p) (second' q)
+  {-# INLINE second' #-}
+
+instance (Strong p, Strong q) => Strong (Sum p q) where
+  first' (L2 p) = L2 (first' p)
+  first' (R2 q) = R2 (first' q)
+  {-# INLINE first' #-}
+  second' (L2 p) = L2 (second' p)
+  second' (R2 q) = R2 (second' q)
   {-# INLINE second' #-}
 
 instance (Functor f, Strong p) => Strong (Tannen f p) where
@@ -377,6 +386,12 @@ instance (Functor f, Costrong p) => Costrong (Tannen f p) where
 instance (Costrong p, Costrong q) => Costrong (Product p q) where
   unfirst (Pair p q) = Pair (unfirst p) (unfirst q)
   unsecond (Pair p q) = Pair (unsecond p) (unsecond q)
+
+instance (Costrong p, Costrong q) => Costrong (Sum p q) where
+  unfirst (L2 p) = L2 (unfirst p)
+  unfirst (R2 q) = R2 (unfirst q)
+  unsecond (L2 p) = L2 (unsecond p)
+  unsecond (R2 q) = R2 (unsecond q)
 
 ----------------------------------------------------------------------------
 -- * Cotambara

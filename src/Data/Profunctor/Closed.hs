@@ -30,6 +30,7 @@ import Control.Arrow
 import Control.Category
 import Control.Comonad
 import Data.Bifunctor.Product (Product(..))
+import Data.Bifunctor.Sum (Sum(..))
 import Data.Bifunctor.Tannen (Tannen(..))
 import Data.Coerce (Coercible, coerce)
 import Data.Distributive
@@ -38,7 +39,7 @@ import Data.Profunctor.Monad
 import Data.Profunctor.Strong
 import Data.Profunctor.Types
 import Data.Profunctor.Unsafe
-import Data.Semigroup hiding (Product)
+import Data.Semigroup hiding (Product, Sum)
 import Data.Tagged
 import Data.Tuple
 import Prelude hiding ((.),id)
@@ -80,6 +81,10 @@ instance (Distributive f, Monad f) => Closed (Kleisli f) where
 
 instance (Closed p, Closed q) => Closed (Product p q) where
   closed (Pair p q) = Pair (closed p) (closed q)
+
+instance (Closed p, Closed q) => Closed (Sum p q) where
+  closed (L2 p) = L2 (closed p)
+  closed (R2 q) = R2 (closed q)
 
 instance (Functor f, Closed p) => Closed (Tannen f p) where
   closed (Tannen fp) = Tannen (fmap closed fp)

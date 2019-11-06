@@ -33,8 +33,9 @@ import Control.Category
 import Control.Comonad
 import Data.Bifunctor.Joker (Joker(..))
 import Data.Bifunctor.Product (Product(..))
+import Data.Bifunctor.Sum (Sum(..))
 import Data.Bifunctor.Tannen (Tannen(..))
-import Data.Monoid hiding (Product)
+import Data.Monoid hiding (Product, Sum)
 import Data.Profunctor.Adjunction
 import Data.Profunctor.Monad
 import Data.Profunctor.Strong
@@ -156,6 +157,14 @@ instance (Choice p, Choice q) => Choice (Product p q) where
   left' (Pair p q) = Pair (left' p) (left' q)
   {-# INLINE left' #-}
   right' (Pair p q) = Pair (right' p) (right' q)
+  {-# INLINE right' #-}
+
+instance (Choice p, Choice q) => Choice (Sum p q) where
+  left' (L2 p) = L2 (left' p)
+  left' (R2 q) = R2 (left' q)
+  {-# INLINE left' #-}
+  right' (L2 p) = L2 (right' p)
+  right' (R2 q) = R2 (right' q)
   {-# INLINE right' #-}
 
 instance (Functor f, Choice p) => Choice (Tannen f p) where
@@ -348,6 +357,12 @@ instance (Functor f, Cochoice p) => Cochoice (Tannen f p) where
 instance (Cochoice p, Cochoice q) => Cochoice (Product p q) where
   unleft (Pair p q) = Pair (unleft p) (unleft q)
   unright (Pair p q) = Pair (unright p) (unright q)
+
+instance (Cochoice p, Cochoice q) => Cochoice (Sum p q) where
+  unleft (L2 p) = L2 (unleft p)
+  unleft (R2 q) = R2 (unleft q)
+  unright (L2 p) = L2 (unright p)
+  unright (R2 q) = R2 (unright q)
 
 instance Cochoice (Forget r) where
   unleft (Forget f) = Forget (f . Left)
