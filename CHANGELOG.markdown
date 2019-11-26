@@ -1,5 +1,5 @@
-next [????.??.??]
------------------
+5.5.1 [2019.11.26]
+------------------
 * Add `Choice`, `Cochoice`, `Closed`, `Strong`, and `Costrong` instances for
   `Data.Bifunctor.Sum`.
 
