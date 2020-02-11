@@ -19,6 +19,7 @@ import Control.Category
 import Control.Comonad
 import Data.Profunctor
 import Data.Profunctor.Monad
+import Data.Profunctor.Traversing
 import Data.Profunctor.Unsafe
 import Prelude hiding ((.), id)
 
@@ -52,6 +53,15 @@ instance (Functor f, Strong p) => Strong (Cayley f p) where
 instance (Functor f, Choice p) => Choice (Cayley f p) where
   left'   = Cayley . fmap left' . runCayley
   right'  = Cayley . fmap right' . runCayley
+
+instance (Functor f, Closed p) => Closed (Cayley f p) where
+  closed = Cayley . fmap closed . runCayley
+
+instance (Functor f, Traversing p) => Traversing (Cayley f p) where
+  traverse' = Cayley . fmap traverse' . runCayley
+
+instance (Functor f, Mapping p) => Mapping (Cayley f p) where
+  map' = Cayley . fmap map' . runCayley
 
 instance (Applicative f, Category p) => Category (Cayley f p) where
   id = Cayley $ pure id
