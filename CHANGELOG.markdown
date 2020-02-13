@@ -1,5 +1,5 @@
-next [????.??.??]
------------------
+5.5.2 [2020.02.13]
+------------------
 * Add `Cochoice`, `Costrong`, `Closed`, `Traversing`, and `Mapping` instances
   for `Cayley`.
 * Add `Mapping` and `Traversing` instances for `Tannen`.
