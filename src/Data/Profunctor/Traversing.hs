@@ -20,6 +20,7 @@ module Data.Profunctor.Traversing
 
 import Control.Applicative
 import Control.Arrow (Kleisli(..))
+import Data.Bifunctor.Tannen
 import Data.Functor.Compose
 import Data.Functor.Identity
 import Data.Orphans ()
@@ -135,6 +136,9 @@ instance Monad m => Traversing (Kleisli m) where
 instance Applicative m => Traversing (Star m) where
   traverse' (Star m) = Star (traverse m)
   wander f (Star amb) = Star (f amb)
+
+instance (Functor f, Traversing p) => Traversing (Tannen f p) where
+  traverse' = Tannen . fmap traverse' . runTannen
 
 newtype CofreeTraversing p a b = CofreeTraversing { runCofreeTraversing :: forall f. Traversable f => p (f a) (f b) }
 

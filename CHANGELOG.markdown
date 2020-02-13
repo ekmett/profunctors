@@ -1,6 +1,8 @@
 next [????.??.??]
 -----------------
-* Add `Closed`, `Traversing`, and `Mapping` instances for `Cayley`.
+* Add `Cochoice`, `Costrong`, `Closed`, `Traversing`, and `Mapping` instances
+  for `Cayley`.
+* Add `Mapping` and `Traversing` instances for `Tannen`.
 
 5.5.1 [2019.11.26]
 ------------------

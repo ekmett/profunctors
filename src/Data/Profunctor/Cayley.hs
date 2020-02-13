@@ -50,9 +50,19 @@ instance (Functor f, Strong p) => Strong (Cayley f p) where
   first'  = Cayley . fmap first' . runCayley
   second' = Cayley . fmap second' . runCayley
 
+instance (Functor f, Costrong p) => Costrong (Cayley f p) where
+  unfirst (Cayley fp) = Cayley (fmap unfirst fp)
+  unsecond (Cayley fp) = Cayley (fmap unsecond fp)
+
 instance (Functor f, Choice p) => Choice (Cayley f p) where
   left'   = Cayley . fmap left' . runCayley
   right'  = Cayley . fmap right' . runCayley
+
+instance (Functor f, Cochoice p) => Cochoice (Cayley f p) where
+  unleft (Cayley fp) = Cayley (fmap unleft fp)
+  {-# INLINE unleft #-}
+  unright (Cayley fp) = Cayley (fmap unright fp)
+  {-# INLINE unright #-}
 
 instance (Functor f, Closed p) => Closed (Cayley f p) where
   closed = Cayley . fmap closed . runCayley
