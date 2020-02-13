@@ -24,6 +24,7 @@ module Data.Profunctor.Mapping
   ) where
 
 import Control.Arrow (Kleisli(..))
+import Data.Bifunctor.Tannen
 import Data.Distributive
 import Data.Functor.Compose
 import Data.Functor.Identity
@@ -89,6 +90,9 @@ genMap abst afb s = fmap (\ab -> abst ab s) (distribute afb)
 instance (Applicative m, Distributive m) => Mapping (Star m) where
   map' (Star f) = Star (collect f)
   roam f = Star #. genMap f .# runStar
+
+instance (Functor f, Mapping p) => Mapping (Tannen f p) where
+  map' = Tannen . fmap map' . runTannen
 
 wanderMapping :: Mapping p => (forall f. Applicative f => (a -> f b) -> s -> f t) -> p a b -> p s t
 wanderMapping f = roam ((runIdentity .) #. f .# (Identity .))
