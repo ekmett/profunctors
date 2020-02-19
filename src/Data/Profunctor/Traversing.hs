@@ -6,6 +6,9 @@ module Data.Profunctor.Traversing
   ( Traversing(..)
   , CofreeTraversing(..)
   , FreeTraversing(..)
+  -- * Folds in terms of Traversing
+  , foldMap'
+  , foldr'
   -- * Profunctor in terms of Traversing
   , dimapWandering
   , lmapWandering
@@ -23,6 +26,7 @@ import Control.Arrow (Kleisli(..))
 import Data.Bifunctor.Tannen
 import Data.Functor.Compose
 import Data.Functor.Identity
+import Data.Monoid (Ap (..), Endo (..))
 import Data.Orphans ()
 import Data.Profunctor.Choice
 import Data.Profunctor.Monad
@@ -120,6 +124,15 @@ class (Choice p, Strong p) => Traversing p where
   wander f pab = dimap (\s -> Baz $ \afb -> f afb s) sold (traverse' pab)
 
   {-# MINIMAL wander | traverse' #-}
+
+-- | Fold efficiently a 'Traversing' profunctor.
+foldMap' :: (Traversing p, Foldable t, Monoid m) => p a m -> p (t a) m
+foldMap' = wander folder
+  where
+    folder f = getAp . foldMap (Ap . f)
+
+foldr' :: (Traversing p, Foldable t) => p a (b -> b) -> p (t a) (b -> b)
+foldr' = rmap appEndo . foldMap' . rmap Endo
 
 instance Traversing (->) where
   traverse' = fmap
