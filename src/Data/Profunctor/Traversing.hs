@@ -29,7 +29,6 @@ import Data.Bifunctor.Tannen
 import Data.Functor.Compose
 import Data.Functor.Const (Const (..))
 import Data.Functor.Identity
-import Data.Monoid (Ap (..), Endo (..))
 import Data.Orphans ()
 import Data.Profunctor.Choice
 import Data.Profunctor.Monad
@@ -40,9 +39,11 @@ import Data.Traversable
 import Data.Tuple (swap)
 
 #if __GLASGOW_HASKELL__ < 710
-import Data.Monoid (Monoid)
+import Data.Monoid (Monoid, Ap (..), Endo (..))
 import Data.Foldable
 import Prelude hiding (mapM)
+#else
+import Data.Monoid (Ap (..), Endo (..))
 #endif
 
 firstTraversing :: Traversing p => p a b -> p (a, c) (b, c)
