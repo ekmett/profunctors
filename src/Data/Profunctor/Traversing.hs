@@ -134,9 +134,12 @@ foldMap' = wander folder
   where
     folder f = getAp . foldMap (Ap . f)
 
+-- | Right-fold efficiently with a 'Traversing' profunctor.
 foldr' :: (Traversing p, Foldable t) => p a (b -> b) -> p (t a) (b -> b)
 foldr' = rmap appEndo . foldMap' . rmap Endo
 
+-- | Fold efficiently with a 'Traversing' profunctor, using a getter-like
+-- argument.
 foldMapOf' ::
   forall p m a s.
   (Traversing p, Monoid m) =>
