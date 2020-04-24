@@ -42,7 +42,6 @@ import Data.Profunctor.Strong
 import Data.Profunctor.Types
 import Data.Profunctor.Unsafe
 import Data.Tagged
-import Data.Void
 
 #if __GLASGOW_HASKELL__ < 710
 import Data.Traversable
@@ -199,7 +198,7 @@ instance ProfunctorFunctor TambaraSum where
   promap f (TambaraSum p) = TambaraSum (f p)
 
 instance ProfunctorComonad TambaraSum where
-  proextract (TambaraSum p)   = dimap Left port p
+  proextract (TambaraSum p)   = dimap Left fromEither p
   produplicate (TambaraSum p) = TambaraSum (TambaraSum $ dimap hither yon p) where
     hither :: Either (Either a b) c -> Either a (Either b c)
     hither (Left (Left x))   = Left x
@@ -240,10 +239,10 @@ tambaraSum f p = TambaraSum $ f $ left' p
 -- 'untambaraSum' '.' 'tambaraSum' ≡ 'id'
 -- @
 untambaraSum :: Profunctor q => (p :-> TambaraSum q) -> p :-> q
-untambaraSum f p = dimap Left port $ runTambaraSum $ f p
+untambaraSum f p = dimap Left fromEither $ runTambaraSum $ f p
 
-port :: Either a Void -> a
-port = either id absurd
+fromEither :: Either a a -> a
+fromEither = either id id
 
 ----------------------------------------------------------------------------
 -- * PastroSum
@@ -270,7 +269,7 @@ instance ProfunctorFunctor PastroSum where
   promap f (PastroSum l m r) = PastroSum l (f m) r
 
 instance ProfunctorMonad PastroSum where
-  proreturn p = PastroSum port p Left
+  proreturn p = PastroSum fromEither p Left
   projoin (PastroSum l (PastroSum m n o) q) = PastroSum lm n oq where
     oq a = case q a of
       Left b -> Left <$> o b
