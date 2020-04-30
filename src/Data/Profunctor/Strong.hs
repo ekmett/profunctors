@@ -42,6 +42,7 @@ import Data.Bifunctor.Product (Product(..))
 import Data.Bifunctor.Sum (Sum(..))
 import Data.Bifunctor.Tannen (Tannen(..))
 import Data.Functor.Contravariant (Contravariant(..))
+import Data.Functor.Identity (Identity (..))
 import Data.Profunctor.Adjunction
 import Data.Profunctor.Monad
 import Data.Profunctor.Types
@@ -76,7 +77,9 @@ class Profunctor p => Strong p where
   --   unassoc (a,(b,c)) = ((a,b),c)
   -- @
   first' :: p a b  -> p (a, c) (b, c)
-  first' = dimap swap swap . second'
+  first' = reach _1
+    where
+      _1 k ~(a,b) = (\a' -> (a',b)) <$> k a
 
   -- | Laws:
   --
@@ -91,7 +94,35 @@ class Profunctor p => Strong p where
   second' :: p a b -> p (c, a) (c, b)
   second' = dimap swap swap . first'
 
-  {-# MINIMAL first' | second' #-}
+  -- | This functions has two uses:
+  --
+  -- * It allows the definition of more efficient 'Profunctor'-transformation
+  --   functions, since it can avoid the construction of tuples demanded by the
+  --   other functions in this class.
+  --
+  -- * It acts as a compatibility layer with lenses, without the need for extra
+  --   dependencies. The first parameter of the function is essentially the
+  --   definition of a @Lens@. The default definition of 'first'', for example,
+  --   is:
+  --
+  --   @
+  --   first' = reach _1
+  --   @
+  --
+  -- Laws:
+  --
+  -- @
+  -- 'reach' id = id
+  -- 'reach' (f . g) = 'reach' f . 'reach' g
+  -- @
+  reach :: (forall f. Functor f => (a -> f b) -> (s -> f t)) -> p a b -> p s t
+  reach l p =
+    dimap
+      (\s -> let (Context f a) = l (Context id) s in (f, a))
+      (uncurry id)
+      (second' p)
+
+  {-# MINIMAL first' | second' | reach #-}
 
 uncurry' :: Strong p => p a (b -> c) -> p (a, b) c
 uncurry' = rmap (\(f,x) -> f x) . first'
@@ -105,8 +136,10 @@ instance Strong (->) where
   {-# INLINE first' #-}
   second' ab ~(c, a) = (c, ab a)
   {-# INLINE second' #-}
+  reach l f = runIdentity . l (Identity . f)
+  {-# INLINE reach #-}
 
-instance Monad m => Strong (Kleisli m) where
+instance (Functor m, Monad m) => Strong (Kleisli m) where
   first' (Kleisli f) = Kleisli $ \ ~(a, c) -> do
      b <- f a
      return (b, c)
@@ -115,12 +148,16 @@ instance Monad m => Strong (Kleisli m) where
      b <- f a
      return (c, b)
   {-# INLINE second' #-}
+  reach l = Kleisli . l . runKleisli
+  {-# INLINE reach #-}
 
 instance Functor m => Strong (Star m) where
   first' (Star f) = Star $ \ ~(a, c) -> (\b' -> (b', c)) <$> f a
   {-# INLINE first' #-}
   second' (Star f) = Star $ \ ~(c, a) -> (,) c <$> f a
   {-# INLINE second' #-}
+  reach l = Star . l . runStar
+  {-# INLINE reach #-}
 
 -- | 'Arrow' is 'Strong' 'Category'
 instance Arrow p => Strong (WrappedArrow p) where
@@ -128,6 +165,10 @@ instance Arrow p => Strong (WrappedArrow p) where
   {-# INLINE first' #-}
   second' (WrapArrow k) = WrapArrow (second k)
   {-# INLINE second' #-}
+  reach l (WrapArrow k) = WrapArrow (g ^>> second k >>^ uncurry id)
+    where
+      g s = let (Context f a) = l (Context id) s in (f, a)
+  {-# INLINE reach #-}
 
 instance Strong (Forget r) where
   first' (Forget k) = Forget (k . fst)
@@ -146,6 +187,8 @@ instance (Strong p, Strong q) => Strong (Product p q) where
   {-# INLINE first' #-}
   second' (Pair p q) = Pair (second' p) (second' q)
   {-# INLINE second' #-}
+  reach l (Pair p q) = Pair (reach l p) (reach l q)
+  {-# INLINE reach #-}
 
 instance (Strong p, Strong q) => Strong (Sum p q) where
   first' (L2 p) = L2 (first' p)
@@ -154,12 +197,17 @@ instance (Strong p, Strong q) => Strong (Sum p q) where
   second' (L2 p) = L2 (second' p)
   second' (R2 q) = R2 (second' q)
   {-# INLINE second' #-}
+  reach l (L2 p) = L2 (reach l p)
+  reach l (R2 p) = R2 (reach l p)
+  {-# INLINE reach #-}
 
 instance (Functor f, Strong p) => Strong (Tannen f p) where
   first' (Tannen fp) = Tannen (fmap first' fp)
   {-# INLINE first' #-}
   second' (Tannen fp) = Tannen (fmap second' fp)
   {-# INLINE second' #-}
+  reach l (Tannen fp) = Tannen (fmap (reach l) fp)
+  {-# INLINE reach #-}
 
 ----------------------------------------------------------------------------
 -- * Tambara
@@ -463,3 +511,14 @@ instance ProfunctorMonad Copastro where
 instance Costrong (Copastro p) where
   unfirst (Copastro p) = Copastro $ \n -> unfirst (p n)
   unsecond (Copastro p) = Copastro $ \n -> unsecond (p n)
+
+----------------------------------------------------------------------------
+-- Context
+----------------------------------------------------------------------------
+
+-- | This type has been backported from lens, to allow the definition of
+-- 'reach'.
+data Context a b t = Context (b -> t) a
+
+instance Functor (Context a b) where
+  fmap f (Context g x) = Context (f . g) x

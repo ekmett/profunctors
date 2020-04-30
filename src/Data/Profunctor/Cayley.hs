@@ -49,6 +49,7 @@ instance (Functor f, Profunctor p) => Profunctor (Cayley f p) where
 instance (Functor f, Strong p) => Strong (Cayley f p) where
   first'  = Cayley . fmap first' . runCayley
   second' = Cayley . fmap second' . runCayley
+  reach l = Cayley . fmap (reach l) . runCayley
 
 instance (Functor f, Costrong p) => Costrong (Cayley f p) where
   unfirst (Cayley fp) = Cayley (fmap unfirst fp)
