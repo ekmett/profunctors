@@ -1,4 +1,5 @@
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeOperators #-}
 -----------------------------------------------------------------------------
@@ -19,6 +20,9 @@ import Data.Bifunctor.Product
 import Data.Bifunctor.Sum
 import Data.Profunctor.Types
 
+-- | 'ProfunctorFunctor' has a polymorphic kind since profunctors 5.6.
+
+-- ProfunctorFunctor :: ((Type -> Type -> Type) -> (k1 -> k2 -> Type)) -> Constraint
 class ProfunctorFunctor t where
   -- | Laws:
   --
@@ -26,7 +30,7 @@ class ProfunctorFunctor t where
   -- 'promap' f '.' 'promap' g ≡ 'promap' (f '.' g)
   -- 'promap' 'id' ≡ 'id'
   -- @
-  promap    :: Profunctor p => (p :-> q) -> t p :-> t q
+  promap :: Profunctor p => (p :-> q) -> t p :-> t q
 
 instance Functor f => ProfunctorFunctor (Tannen f) where
   promap f (Tannen g) = Tannen (fmap f g)
@@ -46,6 +50,8 @@ instance ProfunctorFunctor (Sum p) where
 -- 'projoin' '.' 'promap' 'proreturn' ≡ 'id'
 -- 'projoin' '.' 'projoin' ≡ 'projoin' '.' 'promap' 'projoin'
 -- @
+
+-- ProfunctorMonad :: ((Type -> Type -> Type) -> (Type -> Type -> Type)) -> Constraint
 class ProfunctorFunctor t => ProfunctorMonad t where
   proreturn :: Profunctor p => p :-> t p
   projoin   :: Profunctor p => t (t p) :-> t p
@@ -71,6 +77,8 @@ instance ProfunctorMonad (Sum p) where
 -- 'promap' 'proextract' '.' 'produplicate' ≡ 'id'
 -- 'produplicate' '.' 'produplicate' ≡ 'promap' 'produplicate' '.' 'produplicate'
 -- @
+
+-- ProfunctorComonad :: ((Type -> Type -> Type) -> (Type -> Type -> Type)) -> Constraint
 class ProfunctorFunctor t => ProfunctorComonad t where
   proextract :: Profunctor p => t p :-> p
   produplicate :: Profunctor p => t p :-> t (t p)
