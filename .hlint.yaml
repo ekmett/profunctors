@@ -9,11 +9,12 @@
     - GADTs
     - InstanceSigs
     - MultiParamTypeClasses
+    - PolyKinds
     - RankNTypes
     - ScopedTypeVariables
     - Trustworthy
-    - TypeOperators
     - TypeFamilies
+    - TypeOperators
     - UndecidableInstances
 
 - functions:

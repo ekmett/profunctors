@@ -1,11 +1,12 @@
-{-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE UndecidableInstances #-}
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE GADTs #-}
-{-# LANGUAGE CPP #-}
+{-# LANGUAGE UndecidableInstances #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Profunctor.Rep
@@ -178,6 +179,10 @@ cotabulated = dimap cotabulate (fmap cosieve)
 --
 -- This gives rise to a monad in @Prof@, @('Star'.'Prep')@, and
 -- a comonad in @[Hask,Hask]@ @('Prep'.'Star')@
+--
+-- 'Prep' has a polymorphic kind since profunctors 5.6.
+
+-- Prep :: (Type -> k -> Type) -> (k -> Type)
 data Prep p a where
   Prep :: x -> p x a -> Prep p a
 
@@ -210,6 +215,9 @@ prepCounit (Prep x p) = runStar p x
 -- * Coprep
 --------------------------------------------------------------------------------
 
+-- | 'Prep' has a polymorphic kind since profunctors 5.6.
+
+-- Coprep :: (k -> Type -> Type) -> (k -> Type)
 newtype Coprep p a = Coprep { runCoprep :: forall r. p a r -> r }
 
 instance Profunctor p => Functor (Coprep p) where

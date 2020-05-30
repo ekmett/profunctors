@@ -1,3 +1,4 @@
+{-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE Trustworthy #-}
 -----------------------------------------------------------------------------
@@ -23,7 +24,11 @@ import Data.Profunctor.Traversing
 import Data.Profunctor.Unsafe
 import Prelude hiding ((.), id)
 
--- static arrows
+-- | Static arrows. Lifted by 'Applicative'.
+--
+-- 'Cayley' has a polymorphic kind since profunctors 5.6.
+
+-- Cayley :: (k3 -> Type) -> (k1 -> k2 -> k3) -> (k1 -> k2 -> Type)
 newtype Cayley f p a b = Cayley { runCayley :: f (p a b) }
 
 instance Functor f => ProfunctorFunctor (Cayley f) where
