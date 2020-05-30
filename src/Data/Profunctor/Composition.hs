@@ -62,7 +62,7 @@ type Iso s t a b = forall p f. (Profunctor p, Functor f) => p a (f b) -> p s (f 
 --
 -- <http://blog.sigfpe.com/2011/07/profunctors-in-haskell.html>
 --
--- 'Procompose' has a polymorphic kind since profunctors 5.6.
+-- 'Procompose' has a polymorphic kind since @5.6@.
 
 -- Procompose :: (k1 -> k2 -> Type) -> (k3 -> k1 -> Type) -> (k3 -> k2 -> Type)
 data Procompose p q d c where
@@ -242,9 +242,13 @@ cokleislis = dimap hither (fmap yon) where
 -- * Rift
 ----------------------------------------------------------------------------
 
--- | This represents the right Kan lift of a 'Profunctor' @q@ along a 'Profunctor' @p@ in a limited version of the 2-category of Profunctors where the only object is the category Hask, 1-morphisms are profunctors composed and compose with Profunctor composition, and 2-morphisms are just natural transformations.
+-- | This represents the right Kan lift of a 'Profunctor' @q@ along a
+-- 'Profunctor' @p@ in a limited version of the 2-category of Profunctors where
+-- the only object is the category Hask, 1-morphisms are profunctors composed
+-- and compose with Profunctor composition, and 2-morphisms are just natural
+-- transformations.
 --
--- 'Rift' has a polymorphic kind since profunctors 5.6.
+-- 'Rift' has a polymorphic kind since @5.6@.
 
 -- Rift :: (k3 -> k2 -> Type) -> (k1 -> k2 -> Type) -> (k1 -> k3 -> Type)
 newtype Rift p q a b = Rift { runRift :: forall x. p b x -> q a x }

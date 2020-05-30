@@ -20,7 +20,7 @@ import Data.Bifunctor.Product
 import Data.Bifunctor.Sum
 import Data.Profunctor.Types
 
--- | 'ProfunctorFunctor' has a polymorphic kind since profunctors 5.6.
+-- | 'ProfunctorFunctor' has a polymorphic kind since @5.6@.
 
 -- ProfunctorFunctor :: ((Type -> Type -> Type) -> (k1 -> k2 -> Type)) -> Constraint
 class ProfunctorFunctor t where

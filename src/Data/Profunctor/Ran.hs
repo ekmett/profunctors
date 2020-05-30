@@ -33,9 +33,13 @@ import Prelude hiding (id,(.))
 -- * Ran
 --------------------------------------------------------------------------------
 
--- | This represents the right Kan extension of a 'Profunctor' @q@ along a 'Profunctor' @p@ in a limited version of the 2-category of Profunctors where the only object is the category Hask, 1-morphisms are profunctors composed and compose with Profunctor composition, and 2-morphisms are just natural transformations.
+-- | This represents the right Kan extension of a 'Profunctor' @q@ along a
+-- 'Profunctor' @p@ in a limited version of the 2-category of Profunctors where
+-- the only object is the category Hask, 1-morphisms are profunctors composed
+-- and compose with Profunctor composition, and 2-morphisms are just natural
+-- transformations.
 --
--- 'Ran' has a polymorphic kind since profunctors 5.6.
+-- 'Ran' has a polymorphic kind since @5.6@.
 
 -- Ran :: (k1 -> k2 -> Type) -> (k1 -> k3 -> Type) -> (k2 -> k3 -> Type)
 newtype Ran p q a b = Ran { runRan :: forall x. p x a -> q x b }
@@ -93,9 +97,11 @@ uncurryRan f (Procompose p q) = runRan (f p) q
 -- * Codensity
 --------------------------------------------------------------------------------
 
--- | This represents the right Kan extension of a 'Profunctor' @p@ along itself. This provides a generalization of the \"difference list\" trick to profunctors.
+-- | This represents the right Kan extension of a 'Profunctor' @p@ along
+-- itself. This provides a generalization of the \"difference list\" trick to
+-- profunctors.
 --
--- 'Codensity' has a polymorphic kind since profunctors 5.6.
+-- 'Codensity' has a polymorphic kind since @5.6@.
 
 -- Codensity :: (k1 -> k2 -> Type) -> (k2 -> k2 -> Type)
 newtype Codensity p a b = Codensity { runCodensity :: forall x. p x a -> p x b }

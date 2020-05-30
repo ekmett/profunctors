@@ -1,5 +1,5 @@
-5.6
------
+5.6 [????.??.??]
+----------------
 * Enabled `PolyKinds` extension. The following datatypes now have polymorphic
   kinds: `(:->)`, `Cayley`, `Procompose`, `Rift`, `ProfunctorFunctor`, `Ran`,
   `Codensity`, `Prep`, `Coprep`, `Star`, `Costar`, `WrappedArrow`, `Forget`.

@@ -26,7 +26,7 @@ import Prelude hiding ((.), id)
 
 -- | Static arrows. Lifted by 'Applicative'.
 --
--- 'Cayley' has a polymorphic kind since profunctors 5.6.
+-- 'Cayley' has a polymorphic kind since @5.6@.
 
 -- Cayley :: (k3 -> Type) -> (k1 -> k2 -> k3) -> (k1 -> k2 -> Type)
 newtype Cayley f p a b = Cayley { runCayley :: f (p a b) }

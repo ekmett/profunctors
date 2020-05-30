@@ -48,8 +48,8 @@ import Prelude hiding (id,(.))
 
 infixr 0 :->
 
--- | ':->' has a polymorphic kind since profunctors 5.6.
-  
+-- | (':->') has a polymorphic kind since @5.6@.
+
 -- (:->) :: forall k1 k2. (k1 -> k2 -> Type) -> (k1 -> k2 -> Type) -> Type
 type p :-> q = forall a b. p a b -> q a b
 
@@ -59,7 +59,7 @@ type p :-> q = forall a b. p a b -> q a b
 
 -- | Lift a 'Functor' into a 'Profunctor' (forwards).
 --
--- 'Star' has a polymorphic kind since profunctors 5.6.
+-- 'Star' has a polymorphic kind since @5.6@.
 
 -- Star :: (k -> Type) -> (Type -> k -> Type)
 newtype Star f d c = Star { runStar :: d -> f c }
@@ -118,7 +118,7 @@ instance Contravariant f => Contravariant (Star f a) where
 
 -- | Lift a 'Functor' into a 'Profunctor' (backwards).
 --
--- 'Costar' has a polymorphic kind since profunctors 5.6.
+-- 'Costar' has a polymorphic kind since @5.6@.
 
 -- Costar :: (k -> Type) -> k -> Type -> Type
 newtype Costar f d c = Costar { runCostar :: f d -> c }
@@ -159,7 +159,7 @@ instance Monad (Costar f a) where
 
 -- | Wrap an arrow for use as a 'Profunctor'.
 --
--- 'WrappedArrow' has a polymorphic kind since profunctors 5.6.
+-- 'WrappedArrow' has a polymorphic kind since @5.6@.
 
 -- WrappedArrow :: (k1 -> k2 -> Type) -> (k1 -> k2 -> Type)
 newtype WrappedArrow p a b = WrapArrow { unwrapArrow :: p a b }
@@ -215,7 +215,7 @@ instance Arrow p => Profunctor (WrappedArrow p) where
 -- Forget
 ------------------------------------------------------------------------------
 
--- | 'Forget' has a polymorphic kind since profunctors 5.6.
+-- | 'Forget' has a polymorphic kind since @5.6@.
 
 -- Forget :: Type -> Type -> k -> Type
 newtype Forget r a b = Forget { runForget :: a -> r }
