@@ -2,10 +2,15 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module Data.Profunctor.Traversing
   ( Traversing(..)
   , CofreeTraversing(..)
   , FreeTraversing(..)
+  -- * Folds in terms of Traversing
+  , foldMap'
+  , foldr'
+  , foldMapOf'
   -- * Profunctor in terms of Traversing
   , dimapWandering
   , lmapWandering
@@ -22,6 +27,7 @@ import Control.Applicative
 import Control.Arrow (Kleisli(..))
 import Data.Bifunctor.Tannen
 import Data.Functor.Compose
+import Data.Functor.Const (Const (..))
 import Data.Functor.Identity
 import Data.Orphans ()
 import Data.Profunctor.Choice
@@ -33,9 +39,11 @@ import Data.Traversable
 import Data.Tuple (swap)
 
 #if __GLASGOW_HASKELL__ < 710
-import Data.Monoid (Monoid)
+import Data.Monoid (Monoid, Ap (..), Endo (..))
 import Data.Foldable
 import Prelude hiding (mapM)
+#else
+import Data.Monoid (Ap (..), Endo (..))
 #endif
 
 firstTraversing :: Traversing p => p a b -> p (a, c) (b, c)
@@ -120,6 +128,28 @@ class (Choice p, Strong p) => Traversing p where
   wander f pab = dimap (\s -> Baz $ \afb -> f afb s) sold (traverse' pab)
 
   {-# MINIMAL wander | traverse' #-}
+
+-- | Fold efficiently with a 'Traversing' profunctor.
+foldMap' :: (Traversing p, Foldable t, Monoid m) => p a m -> p (t a) m
+foldMap' = wander folder
+  where
+    folder f = getAp . foldMap (Ap . f)
+
+-- | Right-fold efficiently with a 'Traversing' profunctor.
+foldr' :: (Traversing p, Foldable t) => p a (b -> b) -> p (t a) (b -> b)
+foldr' = rmap appEndo . foldMap' . rmap Endo
+
+-- | Fold efficiently with a 'Traversing' profunctor, using a getter-like
+-- argument.
+foldMapOf' ::
+  forall p m a s.
+  (Traversing p, Monoid m) =>
+  (forall r. Monoid r => (a -> Const r a) -> s -> Const r s) ->
+  p a m -> p s m
+foldMapOf' w = wander folder
+  where
+    folder :: (Applicative f, Monoid m) => (a -> f m) -> s -> f m
+    folder f = getAp . getConst . w (Const . Ap . f)
 
 instance Traversing (->) where
   traverse' = fmap
