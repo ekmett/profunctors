@@ -185,7 +185,7 @@ instance ProfunctorComonad Tambara where
     yon    ~(x,~(y,z)) = ((x,y),z)
 
 instance Profunctor p => Strong (Tambara p) where
-  first' = runTambara . produplicate
+  first' p = runTambara $ produplicate p
   {-# INLINE first' #-}
 
 instance Category p => Category (Tambara p) where
@@ -425,7 +425,7 @@ instance Functor (Cotambara p a) where
 -- 'uncotambara' '.' 'cotambara' ≡ 'id'
 -- @
 cotambara :: Costrong p => (p :-> q) -> p :-> Cotambara q
-cotambara = Cotambara
+cotambara f = Cotambara f
 
 -- |
 -- @
