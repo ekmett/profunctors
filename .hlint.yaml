@@ -52,7 +52,10 @@
 
 - ignore:
     name: Eta reduce
-    within: Data.Profunctor.Mapping
+    within:
+    - Data.Profunctor.Mapping
+    - Data.Profunctor.Choice
+    - Data.Profunctor.Strong
 
 - ignore:
     name: "Use tuple-section"
