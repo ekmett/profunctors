@@ -215,7 +215,7 @@ instance Profunctor p => Profunctor (TambaraSum p) where
   {-# INLINE dimap #-}
 
 instance Profunctor p => Choice (TambaraSum p) where
-  left' = runTambaraSum . produplicate
+  left' p = runTambaraSum $ produplicate p
   {-# INLINE left' #-}
 
 instance Category p => Category (TambaraSum p) where
@@ -405,7 +405,7 @@ instance Functor (CotambaraSum p a) where
 -- 'uncotambaraSum' '.' 'cotambaraSum' ≡ 'id'
 -- @
 cotambaraSum :: Cochoice p => (p :-> q) -> p :-> CotambaraSum q
-cotambaraSum = CotambaraSum
+cotambaraSum f = CotambaraSum f
 
 -- |
 -- @
