@@ -1,4 +1,4 @@
-5.6 [????.??.??]
+5.6 [2020.10.01]
 ----------------
 * Enable the `PolyKinds` extension. The following datatypes now have
   polymorphic kinds: `(:->)`, `Cayley`, `Procompose`, `Rift`,
