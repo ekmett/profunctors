@@ -1,8 +1,10 @@
 5.6 [????.??.??]
 ----------------
-* Enabled `PolyKinds` extension. The following datatypes now have polymorphic
-  kinds: `(:->)`, `Cayley`, `Procompose`, `Rift`, `ProfunctorFunctor`, `Ran`,
-  `Codensity`, `Prep`, `Coprep`, `Star`, `Costar`, `WrappedArrow`, `Forget`.
+* Enable the `PolyKinds` extension. The following datatypes now have
+  polymorphic kinds: `(:->)`, `Cayley`, `Procompose`, `Rift`,
+  `ProfunctorFunctor`, `Ran`, `Codensity`, `Prep`, `Coprep`, `Star`, `Costar`,
+  `WrappedArrow`, `Forget`.
+* Allow building with GHC 9.0.
 
 5.5.2 [2020.02.13]
 ------------------
