@@ -167,6 +167,10 @@ instance Profunctor (Coyoneda p) where
   (#.) _ = coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
   {-# INLINE (#.) #-}
 
+instance Functor (Coyoneda p a) where
+  fmap = rmap
+  {-# INLINE fmap #-}
+
 instance ProfunctorFunctor Coyoneda where
   promap f (Coyoneda l r p) = Coyoneda l r (f p)
   {-# INLINE promap #-}
