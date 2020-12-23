@@ -155,6 +155,9 @@ returnCoyoneda = Coyoneda id id
 joinCoyoneda :: Coyoneda (Coyoneda p) a b -> Coyoneda p a b
 joinCoyoneda (Coyoneda l r p) = dimap l r p
 
+instance Functor (Coyoneda p a) where
+  fmap f (Coyoneda l r' p) = Coyoneda l (f . r') p
+
 instance Profunctor (Coyoneda p) where
   dimap l r (Coyoneda l' r' p) = Coyoneda (l' . l) (r . r') p
   {-# INLINE dimap #-}

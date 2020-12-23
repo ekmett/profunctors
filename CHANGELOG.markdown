@@ -1,3 +1,8 @@
+next [????.??.??]
+-----------------
+* Add `Functor` instances for `PastroSum`, `CopastroSum`, `Environment`,
+  `FreeMapping`, `Pastro`, `Copastro`, `FreeTraversing`, and `Coyoneda`.
+
 5.6 [2020.10.01]
 ----------------
 * Enable the `PolyKinds` extension. The following datatypes now have

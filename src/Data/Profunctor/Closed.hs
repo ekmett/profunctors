@@ -195,6 +195,9 @@ unclose f p = dimap const ($ ()) $ runClosure $ f p
 data Environment p a b where
   Environment :: ((z -> y) -> b) -> p x y -> (a -> z -> x) -> Environment p a b
 
+instance Functor (Environment p a) where
+  fmap f (Environment l m r) = Environment (f . l) m r
+
 instance Profunctor (Environment p) where
   dimap f g (Environment l m r) = Environment (g . l) m (r . f)
   lmap f (Environment l m r) = Environment l m (r . f)

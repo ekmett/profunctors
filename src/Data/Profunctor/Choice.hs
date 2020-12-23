@@ -254,6 +254,9 @@ fromEither = either id id
 data PastroSum p a b where
   PastroSum :: (Either y z -> b) -> p x y -> (a -> Either x z) -> PastroSum p a b
 
+instance Functor (PastroSum p a) where
+  fmap f (PastroSum l m r) = PastroSum (f . l) m r
+
 instance Profunctor (PastroSum p) where
   dimap f g (PastroSum l m r) = PastroSum (g . l) m (r . f)
   lmap f (PastroSum l m r) = PastroSum l m (r . f)
@@ -423,6 +426,9 @@ uncotambaraSum f p = proextract (f p)
 --
 -- 'CopastroSum' freely constructs costrength with respect to 'Either' (aka 'Choice')
 newtype CopastroSum p a b = CopastroSum { runCopastroSum :: forall r. Cochoice r => (forall x y. p x y -> r x y) -> r a b }
+
+instance Functor (CopastroSum p a) where
+  fmap f (CopastroSum h) = CopastroSum $ \ n -> rmap f (h n)
 
 instance Profunctor (CopastroSum p) where
   dimap f g (CopastroSum h) = CopastroSum $ \ n -> dimap f g (h n)
