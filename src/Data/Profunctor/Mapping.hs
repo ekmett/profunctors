@@ -141,6 +141,9 @@ instance ProfunctorComonad CofreeMapping where
 data FreeMapping p a b where
   FreeMapping :: Functor f => (f y -> b) -> p x y -> (a -> f x) -> FreeMapping p a b
 
+instance Functor (FreeMapping p a) where
+  fmap f (FreeMapping l m r) = FreeMapping (f . l) m r
+
 instance Profunctor (FreeMapping p) where
   lmap f (FreeMapping l m r) = FreeMapping l m (r . f)
   rmap g (FreeMapping l m r) = FreeMapping (g . l) m r

@@ -272,6 +272,9 @@ untambara f p = dimap (\a -> (a,())) fst $ runTambara $ f p
 data Pastro p a b where
   Pastro :: ((y, z) -> b) -> p x y -> (a -> (x, z)) -> Pastro p a b
 
+instance Functor (Pastro p a) where
+  fmap f (Pastro l m r) = Pastro (f . l) m r
+
 instance Profunctor (Pastro p) where
   dimap f g (Pastro l m r) = Pastro (g . l) m (r . f)
   lmap f (Pastro l m r) = Pastro l m (r . f)
@@ -443,6 +446,9 @@ uncotambara f p = proextract (f p)
 --
 -- Copastro freely constructs costrength
 newtype Copastro p a b = Copastro { runCopastro :: forall r. Costrong r => (forall x y. p x y -> r x y) -> r a b }
+
+instance Functor (Copastro p a) where
+  fmap f (Copastro h) = Copastro $ \ n -> rmap f (h n)
 
 instance Profunctor (Copastro p) where
   dimap f g (Copastro h) = Copastro $ \ n -> dimap f g (h n)

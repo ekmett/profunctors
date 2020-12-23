@@ -168,6 +168,9 @@ instance ProfunctorComonad CofreeTraversing where
 data FreeTraversing p a b where
   FreeTraversing :: Traversable f => (f y -> b) -> p x y -> (a -> f x) -> FreeTraversing p a b
 
+instance Functor (FreeTraversing p a) where
+  fmap f (FreeTraversing l m r) = FreeTraversing (f . l) m r
+
 instance Profunctor (FreeTraversing p) where
   lmap f (FreeTraversing l m r) = FreeTraversing l m (r . f)
   rmap g (FreeTraversing l m r) = FreeTraversing (g . l) m r
