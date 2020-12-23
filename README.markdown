@@ -1,7 +1,7 @@
 Profunctors
 ===========
 
-[![Hackage](https://img.shields.io/hackage/v/profunctors.svg)](https://hackage.haskell.org/package/profunctors) [![Build Status](https://secure.travis-ci.org/ekmett/profunctors.png?branch=master)](http://travis-ci.org/ekmett/profunctors)
+[![Hackage](https://img.shields.io/hackage/v/profunctors.svg)](https://hackage.haskell.org/package/profunctors) [![Build Status](https://github.com/ekmett/profunctors/workflows/Haskell-CI/badge.svg)](https://github.com/ekmett/profunctors/actions?query=workflow%3AHaskell-CI)
 
 Profunctors for Haskell.
 
