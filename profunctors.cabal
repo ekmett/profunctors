@@ -1,6 +1,6 @@
 name:          profunctors
 category:      Control, Categories
-version:       5.6
+version:       5.6.1
 license:       BSD3
 cabal-version: >= 1.10
 license-file:  LICENSE
@@ -35,17 +35,18 @@ source-repository head
 
 library
   build-depends:
-    base                >= 4.7   && < 5,
-    base-orphans        >= 0.4   && < 0.9,
-    bifunctors          >= 5.2   && < 6,
-    comonad             >= 4     && < 6,
-    contravariant       >= 1     && < 2,
-    distributive        >= 0.4.4 && < 1,
-    tagged              >= 0.4.4 && < 1,
-    transformers        >= 0.2   && < 0.6
+    base                >= 4.7     && < 5,
+    base-orphans        >= 0.8.4   && < 0.9,
+    bifunctors          >= 5.5.2   && < 6,
+    comonad             >= 5.0.3   && < 6,
+    contravariant       >= 1.5     && < 2,
+    distributive        >= 0.5.2   && < 1,
+    -- TODO: bump to 0.8.6.1
+    tagged              >= 0.8.6   && < 1,
+    transformers        >= 0.2     && < 0.6
 
   if !impl(ghc >= 8.0)
-    build-depends: semigroups >= 0.11 && < 0.20
+    build-depends: semigroups >= 0.18.5 && < 0.20
 
   exposed-modules:
     Data.Profunctor
@@ -72,6 +73,9 @@ library
 
   if impl(ghc >= 8.6)
     ghc-options: -Wno-star-is-type
+
+  if impl(ghc >= 8.10)
+    ghc-options: -Winferred-safe-imports -Wmissing-safe-haskell-mode
 
   hs-source-dirs:  src
 
