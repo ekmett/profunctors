@@ -1,4 +1,4 @@
-next [????.??.??]
+5.6.1 [????.??.??]
 -----------------
 * Add `Functor` instances for `PastroSum`, `CopastroSum`, `Environment`,
   `FreeMapping`, `Pastro`, `Copastro`, `FreeTraversing`, and `Coyoneda`.
