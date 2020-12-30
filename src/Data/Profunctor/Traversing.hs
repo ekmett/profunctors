@@ -2,6 +2,7 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE Safe #-}
 module Data.Profunctor.Traversing
   ( Traversing(..)
   , CofreeTraversing(..)
