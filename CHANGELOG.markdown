@@ -1,5 +1,5 @@
-5.6.1 [????.??.??]
------------------
+5.6.1 [2020.12.31]
+------------------
 * Add `Functor` instances for `PastroSum`, `CopastroSum`, `Environment`,
   `FreeMapping`, `Pastro`, `Copastro`, `FreeTraversing`, and `Coyoneda`.
 * Explicitly mark modules as `Safe`.
