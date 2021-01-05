@@ -41,7 +41,8 @@ import Data.Coerce (Coercible, coerce)
 import Data.Distributive
 import Data.Foldable
 import Data.Functor.Contravariant
-import Data.Monoid hiding (Product)
+import Data.Semigroup hiding (Product)
+import Data.Monoid hiding (Product, (<>))
 import Data.Profunctor.Unsafe
 import Data.Traversable
 import Prelude hiding (id,(.))
@@ -243,3 +244,21 @@ instance Traversable (Forget r a) where
 instance Contravariant (Forget r a) where
   contramap _ (Forget k) = Forget k
   {-# INLINE contramap #-}
+
+-- | Via @Semigroup r => (a -> r)@
+--
+-- @since 5.6.2
+instance Semigroup r => Semigroup (Forget r a b) where
+  Forget f <> Forget g = Forget (f <> g)
+  {-# INLINE (<>) #-}
+
+-- | Via @Monoid r => (a -> r)@
+--
+-- @since 5.6.2
+instance Monoid r => Monoid (Forget r a b) where
+  mempty = Forget mempty
+  {-# INLINE mempty #-}
+#if !(MIN_VERSION_base(4,11,0))
+  mappend (Forget f) (Forget g) = Forget (mappend f g)
+  {-# INLINE mappend #-}
+#endif

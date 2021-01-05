@@ -1,3 +1,7 @@
+5.6.2 [unreleased]
+------------------
+* Add `Semigroup` and `Monoid` instances for `Forget`
+
 5.6.1 [2020.12.31]
 ------------------
 * Add `Functor` instances for `PastroSum`, `CopastroSum`, `Environment`,
