@@ -1,4 +1,4 @@
-5.6.2 [unreleased]
+5.6.2 [2021.02.17]
 ------------------
 * Add `Semigroup` and `Monoid` instances for `Forget`
 
