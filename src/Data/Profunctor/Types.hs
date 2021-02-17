@@ -41,11 +41,17 @@ import Data.Coerce (Coercible, coerce)
 import Data.Distributive
 import Data.Foldable
 import Data.Functor.Contravariant
-import Data.Semigroup hiding (Product)
-import Data.Monoid hiding (Product, (<>))
 import Data.Profunctor.Unsafe
 import Data.Traversable
 import Prelude hiding (id,(.))
+
+#if !(MIN_VERSION_base(4,8,0))
+import Data.Monoid (Monoid(..))
+#endif
+
+#if !(MIN_VERSION_base(4,11,0))
+import Data.Semigroup (Semigroup(..))
+#endif
 
 infixr 0 :->
 
