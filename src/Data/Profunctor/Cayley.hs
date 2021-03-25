@@ -1,16 +1,13 @@
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE Trustworthy #-}
------------------------------------------------------------------------------
+
 -- |
--- Copyright   :  (C) 2014-2015 Edward Kmett
+-- Copyright   :  (C) 2014-2021 Edward Kmett
 -- License     :  BSD-style (see the file LICENSE)
---
 -- Maintainer  :  Edward Kmett <ekmett@gmail.com>
 -- Stability   :  experimental
 -- Portability :  portable
---
-----------------------------------------------------------------------------
 
 module Data.Profunctor.Cayley where
 
@@ -69,14 +66,8 @@ instance (Functor f, Cochoice p) => Cochoice (Cayley f p) where
   unright (Cayley fp) = Cayley (fmap unright fp)
   {-# INLINE unright #-}
 
-instance (Functor f, Closed p) => Closed (Cayley f p) where
-  closed = Cayley . fmap closed . runCayley
-
 instance (Functor f, Traversing p) => Traversing (Cayley f p) where
   traverse' = Cayley . fmap traverse' . runCayley
-
-instance (Functor f, Mapping p) => Mapping (Cayley f p) where
-  map' = Cayley . fmap map' . runCayley
 
 instance (Applicative f, Category p) => Category (Cayley f p) where
   id = Cayley $ pure id

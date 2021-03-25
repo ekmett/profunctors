@@ -114,14 +114,6 @@ instance Cochoice p => Cochoice (Yoneda p) where
   unright = proreturn . unright . extractYoneda
   {-# INLINE unright #-}
 
-instance Closed p => Closed (Yoneda p) where
-  closed = proreturn . closed . extractYoneda
-  {-# INLINE closed #-}
-
-instance Mapping p => Mapping (Yoneda p) where
-  map' = proreturn . map' . extractYoneda
-  {-# INLINE map' #-}
-
 instance Traversing p => Traversing (Yoneda p) where
   traverse' = proreturn . traverse' . extractYoneda
   {-# INLINE traverse' #-}
@@ -215,14 +207,6 @@ instance Cochoice p => Cochoice (Coyoneda p) where
   {-# INLINE unleft #-}
   unright = returnCoyoneda . unright . proextract
   {-# INLINE unright #-}
-
-instance Closed p => Closed (Coyoneda p) where
-  closed = returnCoyoneda . closed . proextract
-  {-# INLINE closed #-}
-
-instance Mapping p => Mapping (Coyoneda p) where
-  map' = returnCoyoneda . map' . proextract
-  {-# INLINE map' #-}
 
 instance Traversing p => Traversing (Coyoneda p) where
   traverse' = returnCoyoneda . traverse' . proextract

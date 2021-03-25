@@ -1,16 +1,14 @@
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
-
 {-# LANGUAGE Trustworthy #-}
 
------------------------------------------------------------------------------
 -- |
 -- Copyright   :  (C) 2011-2015 Edward Kmett,
 -- License     :  BSD-style (see the file LICENSE)
---
 -- Maintainer  :  Edward Kmett <ekmett@gmail.com>
 -- Stability   :  provisional
 -- Portability :  portable
@@ -22,15 +20,15 @@
 -- For more information on strength and costrength, see:
 --
 -- <http://comonad.com/reader/2008/deriving-strength-from-laziness/>
-----------------------------------------------------------------------------
+
 module Data.Profunctor.Types
-  ( Profunctor(dimap, lmap, rmap)
-  , Star(..)
-  , Costar(..)
-  , WrappedArrow(..)
-  , Forget(..)
-  , (:->)
-  ) where
+( Profunctor(dimap, lmap, rmap)
+, Star(..)
+, Costar(..)
+, WrappedArrow(..)
+, Forget(..)
+, (:->)
+) where
 
 import Control.Applicative hiding (WrappedArrow(..))
 import Control.Arrow
@@ -38,20 +36,12 @@ import Control.Category
 import Control.Comonad
 import Control.Monad (MonadPlus(..), (>=>))
 import Data.Coerce (Coercible, coerce)
-import Data.Distributive
 import Data.Foldable
 import Data.Functor.Contravariant
 import Data.Profunctor.Unsafe
 import Data.Traversable
+import GHC.Generics
 import Prelude hiding (id,(.))
-
-#if !(MIN_VERSION_base(4,8,0))
-import Data.Monoid (Monoid(..))
-#endif
-
-#if !(MIN_VERSION_base(4,11,0))
-import Data.Semigroup (Semigroup(..))
-#endif
 
 infixr 0 :->
 
@@ -70,6 +60,7 @@ type p :-> q = forall a b. p a b -> q a b
 
 -- Star :: (k -> Type) -> (Type -> k -> Type)
 newtype Star f d c = Star { runStar :: d -> f c }
+  deriving (Generic, Generic1)
 
 instance Functor f => Profunctor (Star f) where
   dimap ab cd (Star bfc) = Star (fmap cd . bfc . ab)
@@ -97,9 +88,6 @@ instance Alternative f => Alternative (Star f a) where
   Star f <|> Star g = Star $ \a -> f a <|> g a
 
 instance Monad f => Monad (Star f a) where
-#if __GLASGOW_HASKELL__ < 710
-  return a = Star $ \_ -> return a
-#endif
   Star m >>= f = Star $ \ e -> do
     a <- m e
     runStar (f a) e
@@ -107,9 +95,6 @@ instance Monad f => Monad (Star f a) where
 instance MonadPlus f => MonadPlus (Star f a) where
   mzero = Star $ \_ -> mzero
   Star f `mplus` Star g = Star $ \a -> f a `mplus` g a
-
-instance Distributive f => Distributive (Star f a) where
-  distribute fs = Star $ \a -> collect (($ a) .# runStar) fs
 
 instance Monad f => Category (Star f) where
   id = Star return
@@ -129,6 +114,7 @@ instance Contravariant f => Contravariant (Star f a) where
 
 -- Costar :: (k -> Type) -> k -> Type -> Type
 newtype Costar f d c = Costar { runCostar :: f d -> c }
+  deriving (Generic, Generic1)
 
 instance Functor f => Profunctor (Costar f) where
   dimap ab cd (Costar fbc) = Costar (cd . fbc . fmap ab)
@@ -140,9 +126,6 @@ instance Functor f => Profunctor (Costar f) where
   (#.) _ = coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
   {-# INLINE (#.) #-}
   -- We cannot overload (.#) because we didn't write the 'Functor'.
-
-instance Distributive (Costar f d) where
-  distribute fs = Costar $ \gd -> fmap (($ gd) .# runCostar) fs
 
 instance Functor (Costar f a) where
   fmap k (Costar f) = Costar (k . f)
@@ -264,7 +247,3 @@ instance Semigroup r => Semigroup (Forget r a b) where
 instance Monoid r => Monoid (Forget r a b) where
   mempty = Forget mempty
   {-# INLINE mempty #-}
-#if !(MIN_VERSION_base(4,11,0))
-  mappend (Forget f) (Forget g) = Forget (mappend f g)
-  {-# INLINE mappend #-}
-#endif

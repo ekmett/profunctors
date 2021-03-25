@@ -1,3 +1,11 @@
+6 [unreleased]
+--------------
+* Removed support for GHC < 8.6
+* Inverted dependency between `distributive` v1 and `profunctors` v6
+* `Data.Profunctor.Mapping`, `Data.Profunctor.Closed`, `Data.Profunctor.Rep`
+  and `Data.Profunctor.Sieve` have moved to `distributive` to reduce orphan
+  pressure, and shrink the core of this package.
+
 5.6.2 [2021.02.17]
 ------------------
 * Add `Semigroup` and `Monoid` instances for `Forget`

@@ -4,29 +4,27 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE Safe #-}
------------------------------------------------------------------------------
+
 -- |
--- Copyright   :  (C) 2014-2015 Edward Kmett
--- License     :  BSD-style (see the file LICENSE)
---
--- Maintainer  :  Edward Kmett <ekmett@gmail.com>
--- Stability   :  provisional
--- Portability :  Rank2Types
---
-----------------------------------------------------------------------------
+-- Copyright   : (c) 2014-2015 Edward Kmett
+-- License     : BSD-style (see the file LICENSE)
+-- Maintainer  : Edward Kmett <ekmett@gmail.com>
+-- Stability   : provisional
+-- Portability : Rank2Types
+
 module Data.Profunctor.Choice
-  (
-  -- * Strength
-    Choice(..)
-  , TambaraSum(..)
-  , tambaraSum, untambaraSum
-  , PastroSum(..)
-  -- * Costrength
-  , Cochoice(..)
-  , CotambaraSum(..)
-  , cotambaraSum, uncotambaraSum
-  , CopastroSum(..)
-  ) where
+(
+-- * Strength
+  Choice(..)
+, TambaraSum(..)
+, tambaraSum, untambaraSum
+, PastroSum(..)
+-- * Costrength
+, Cochoice(..)
+, CotambaraSum(..)
+, cotambaraSum, uncotambaraSum
+, CopastroSum(..)
+) where
 
 import Control.Applicative hiding (WrappedArrow(..))
 import Control.Arrow

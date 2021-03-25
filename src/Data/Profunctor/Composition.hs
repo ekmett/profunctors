@@ -9,7 +9,7 @@
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Profunctor.Composition
--- Copyright   :  (C) 2014-2015 Edward Kmett
+-- Copyright   :  (C) 2014-2021 Edward Kmett
 -- License     :  BSD-style (see the file LICENSE)
 --
 -- Maintainer  :  Edward Kmett <ekmett@gmail.com>
@@ -45,8 +45,6 @@ import Data.Functor.Compose
 import Data.Profunctor
 import Data.Profunctor.Adjunction
 import Data.Profunctor.Monad
-import Data.Profunctor.Rep
-import Data.Profunctor.Sieve
 import Data.Profunctor.Traversing
 import Data.Profunctor.Unsafe
 import Prelude hiding ((.),id)
@@ -96,26 +94,6 @@ instance Profunctor p => Functor (Procompose p q a) where
   fmap k (Procompose f g) = Procompose (rmap k f) g
   {-# INLINE fmap #-}
 
-instance (Sieve p f, Sieve q g) => Sieve (Procompose p q) (Compose g f) where
-  sieve (Procompose g f) d = Compose $ sieve g <$> sieve f d
-  {-# INLINE sieve #-}
-
--- | The composition of two 'Representable' 'Profunctor's is 'Representable' by
--- the composition of their representations.
-instance (Representable p, Representable q) => Representable (Procompose p q) where
-  type Rep (Procompose p q) = Compose (Rep q) (Rep p)
-  tabulate f = Procompose (tabulate id) (tabulate (getCompose . f))
-  {-# INLINE tabulate #-}
-
-instance (Cosieve p f, Cosieve q g) => Cosieve (Procompose p q) (Compose f g) where
-  cosieve (Procompose g f) (Compose d) = cosieve g $ cosieve f <$> d
-  {-# INLINE cosieve #-}
-
-instance (Corepresentable p, Corepresentable q) => Corepresentable (Procompose p q) where
-  type Corep (Procompose p q) = Compose (Corep p) (Corep q)
-  cotabulate f = Procompose (cotabulate (f . Compose)) (cotabulate id)
-  {-# INLINE cotabulate #-}
-
 instance (Strong p, Strong q) => Strong (Procompose p q) where
   first' (Procompose x y) = Procompose (first' x) (first' y)
   {-# INLINE first' #-}
@@ -128,23 +106,9 @@ instance (Choice p, Choice q) => Choice (Procompose p q) where
   right' (Procompose x y) = Procompose (right' x) (right' y)
   {-# INLINE right' #-}
 
-instance (Closed p, Closed q) => Closed (Procompose p q) where
-  closed (Procompose x y) = Procompose (closed x) (closed y)
-  {-# INLINE closed #-}
-
 instance (Traversing p, Traversing q) => Traversing (Procompose p q) where
   traverse' (Procompose p q) = Procompose (traverse' p) (traverse' q)
   {-# INLINE traverse' #-}
-
-instance (Mapping p, Mapping q) => Mapping (Procompose p q) where
-  map' (Procompose p q) = Procompose (map' p) (map' q)
-  {-# INLINE map' #-}
-
-instance (Corepresentable p, Corepresentable q) => Costrong (Procompose p q) where
-  unfirst = unfirstCorep
-  {-# INLINE unfirst #-}
-  unsecond = unsecondCorep
-  {-# INLINE unsecond #-}
 
 -- * Lax identity
 
@@ -309,3 +273,5 @@ eta f = rmap f id
 
 mu :: Category p => Procompose p p :-> p
 mu (Procompose f g) = f . g
+
+
