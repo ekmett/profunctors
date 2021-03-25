@@ -5,6 +5,9 @@
 * `Data.Profunctor.Mapping`, `Data.Profunctor.Closed`, `Data.Profunctor.Rep`
   and `Data.Profunctor.Sieve` have moved to `distributive` to reduce orphan
   pressure, and shrink the core of this package.
+* Added `Data.Profunctor.Strong.lensVL`
+* Added `forall a. Functor (p a)` as a superclass of `Profunctor` to allow
+  better interoperability with `bifunctors`.
 
 5.6.2 [2021.02.17]
 ------------------
