@@ -1,5 +1,10 @@
+{-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE Trustworthy #-}
 
 -- |
@@ -15,10 +20,12 @@ import Control.Applicative
 import Control.Arrow
 import Control.Category
 import Control.Comonad
+import Data.Data
 import Data.Profunctor
 import Data.Profunctor.Monad
 import Data.Profunctor.Traversing
 import Data.Profunctor.Unsafe
+import GHC.Generics
 import Prelude hiding ((.), id)
 
 -- | Static arrows. Lifted by 'Applicative'.
@@ -27,6 +34,11 @@ import Prelude hiding ((.), id)
 
 -- Cayley :: (k3 -> Type) -> (k1 -> k2 -> k3) -> (k1 -> k2 -> Type)
 newtype Cayley f p a b = Cayley { runCayley :: f (p a b) }
+  deriving (Generic, Generic1, Data)
+
+deriving stock instance (Functor f, Functor (p a)) => Functor (Cayley f p a)
+deriving stock instance (Foldable f, Foldable (p a)) => Foldable (Cayley f p a)
+deriving stock instance (Traversable f, Traversable (p a)) => Traversable (Cayley f p a)
 
 instance Functor f => ProfunctorFunctor (Cayley f) where
   promap f (Cayley p) = Cayley (fmap f p)

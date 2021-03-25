@@ -33,7 +33,6 @@ module Data.Profunctor.Unsafe
 import Control.Arrow
 import Control.Category
 import Control.Comonad (Cokleisli(..))
-import Control.Monad (liftM)
 import Data.Bifunctor.Biff (Biff(..))
 import Data.Bifunctor.Clown (Clown(..))
 import Data.Bifunctor.Joker (Joker(..))
@@ -186,14 +185,14 @@ instance Profunctor Tagged where
   Tagged s .# _ = Tagged s
   {-# INLINE (.#) #-}
 
-instance Monad m => Profunctor (Kleisli m) where
-  dimap f g (Kleisli h) = Kleisli (liftM g . h . f)
+instance Functor m => Profunctor (Kleisli m) where
+  dimap f g (Kleisli h) = Kleisli (fmap g . h . f)
   {-# INLINE dimap #-}
   lmap k (Kleisli f) = Kleisli (f . k)
   {-# INLINE lmap #-}
-  rmap k (Kleisli f) = Kleisli (liftM k . f)
+  rmap k (Kleisli f) = Kleisli (fmap k . f)
   {-# INLINE rmap #-}
-  -- We cannot safely overload (#.) because we didn't provide the 'Monad'.
+  -- We cannot safely overload (#.) because we didn't provide the 'Functor'.
   (.#) pbc _ = coerce pbc
   {-# INLINE (.#) #-}
 

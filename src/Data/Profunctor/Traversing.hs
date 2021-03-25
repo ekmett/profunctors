@@ -136,6 +136,9 @@ instance (Functor f, Traversing p) => Traversing (Tannen f p) where
 
 newtype CofreeTraversing p a b = CofreeTraversing { runCofreeTraversing :: forall f. Traversable f => p (f a) (f b) }
 
+instance Profunctor p => Functor (CofreeTraversing p a) where
+  fmap g (CofreeTraversing p) = CofreeTraversing (rmap (fmap g) p)
+
 instance Profunctor p => Profunctor (CofreeTraversing p) where
   lmap f (CofreeTraversing p) = CofreeTraversing (lmap (fmap f) p)
   rmap g (CofreeTraversing p) = CofreeTraversing (rmap (fmap g) p)
