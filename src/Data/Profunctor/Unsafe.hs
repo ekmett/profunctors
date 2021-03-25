@@ -1,9 +1,8 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE Trustworthy #-}
 {-# LANGUAGE ScopedTypeVariables #-}
------------------------------------------------------------------------------
+
 -- |
--- Copyright   :  (C) 2011-2018 Edward Kmett
+-- Copyright   :  (C) 2011-2021 Edward Kmett
 -- License     :  BSD-style (see the file LICENSE)
 --
 -- Maintainer  :  Edward Kmett <ekmett@gmail.com>
@@ -23,7 +22,7 @@
 -- accessor of a @newtype@.
 --
 -- If you are ever in doubt, use 'rmap' or 'lmap'.
-----------------------------------------------------------------------------
+
 module Data.Profunctor.Unsafe
   (
   -- * Profunctors
@@ -41,9 +40,6 @@ import Data.Bifunctor.Product (Product(..))
 import Data.Bifunctor.Sum (Sum(..))
 import Data.Bifunctor.Tannen (Tannen(..))
 import Data.Coerce (Coercible, coerce)
-#if __GLASGOW_HASKELL__ < 710
-import Data.Functor
-#endif
 import Data.Functor.Contravariant (Contravariant(..))
 import Data.Tagged
 import Prelude hiding (id,(.))

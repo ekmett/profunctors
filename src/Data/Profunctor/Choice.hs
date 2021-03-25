@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeOperators #-}
@@ -41,13 +40,7 @@ import Data.Profunctor.Strong
 import Data.Profunctor.Types
 import Data.Profunctor.Unsafe
 import Data.Tagged
-
-#if __GLASGOW_HASKELL__ < 710
-import Data.Traversable
-import Prelude hiding (id,(.),sequence)
-#else
 import Prelude hiding (id,(.))
-#endif
 
 ------------------------------------------------------------------------------
 -- Choice
