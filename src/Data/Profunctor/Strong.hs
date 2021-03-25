@@ -219,9 +219,10 @@ instance ArrowPlus p => ArrowPlus (Tambara p) where
 instance Profunctor p => Functor (Tambara p a) where
   fmap = rmap
 
-instance (Profunctor p, Arrow p) => Applicative (Tambara p a) where
-  pure x = arr (const x)
-  f <*> g = arr (uncurry id) . (f &&& g)
+instance (Profunctor p, Category p) => Applicative (Tambara p a) where
+  pure x = lmap (const x) id
+  pf <*> px = uncurry' pf . strong (,) px
+  liftA2 f px py = strong (f . snd) (lmap fst py) . strong (,) px
 
 instance (Profunctor p, ArrowPlus p) => Alternative (Tambara p a) where
   empty = zeroArrow
