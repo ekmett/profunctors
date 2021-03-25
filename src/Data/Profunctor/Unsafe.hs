@@ -41,6 +41,7 @@ import Data.Bifunctor.Sum (Sum(..))
 import Data.Bifunctor.Tannen (Tannen(..))
 import Data.Coerce (Coercible, coerce)
 import Data.Functor.Contravariant (Contravariant(..))
+import Data.Orphans ()
 import Data.Tagged
 import Prelude hiding (id,(.))
 

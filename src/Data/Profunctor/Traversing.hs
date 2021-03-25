@@ -1,6 +1,10 @@
+{-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE Safe #-}
 module Data.Profunctor.Traversing
   ( Traversing(..)
@@ -136,8 +140,11 @@ instance (Functor f, Traversing p) => Traversing (Tannen f p) where
 
 newtype CofreeTraversing p a b = CofreeTraversing { runCofreeTraversing :: forall f. Traversable f => p (f a) (f b) }
 
-instance Profunctor p => Functor (CofreeTraversing p a) where
-  fmap g (CofreeTraversing p) = CofreeTraversing (rmap (fmap g) p)
+instance (forall f. Traversable f => Functor (p (f a))) => Functor (CofreeTraversing p a) where
+  fmap f p = CofreeTraversing $ fmap (fmap f) (runCofreeTraversing p)
+
+instance (forall f. Traversable f => Foldable (p (f a))) => Foldable (CofreeTraversing p a) where
+  foldMap f (CofreeTraversing p) = foldMap (f . runIdentity) p
 
 instance Profunctor p => Profunctor (CofreeTraversing p) where
   lmap f (CofreeTraversing p) = CofreeTraversing (lmap (fmap f) p)
