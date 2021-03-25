@@ -18,6 +18,7 @@ module Data.Profunctor.Strong
     Strong(..)
   , uncurry'
   , strong
+  , lensVL
   , Tambara(..)
   , tambara, untambara
   , Pastro(..)
@@ -39,6 +40,7 @@ import Data.Bifunctor.Clown (Clown(..))
 import Data.Bifunctor.Product (Product(..))
 import Data.Bifunctor.Sum (Sum(..))
 import Data.Bifunctor.Tannen (Tannen(..))
+import Data.Functor.Compose
 import Data.Functor.Contravariant (Contravariant(..))
 import Data.Profunctor.Adjunction
 import Data.Profunctor.Monad
@@ -97,6 +99,11 @@ uncurry' = rmap (\(f,x) -> f x) . first'
 
 strong :: Strong p => (a -> b -> c) -> p a b -> p a c
 strong f x = dimap (\a -> (a, a)) (\(b, a) -> f a b) (first' x)
+{-# INLINE strong #-}
+
+lensVL :: Strong p => (forall f. (a -> f b) -> s -> f t) -> p a b -> p s t
+lensVL l = dimap (getCompose #. l (\a -> Compose (a, id))) (uncurry (flip id)) . first'
+{-# INLINE lensVL #-}
 
 instance Strong (->) where
   first' ab ~(a, c) = (ab a, c)
