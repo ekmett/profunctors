@@ -1,5 +1,6 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -20,7 +21,9 @@
 module Data.Profunctor.Composition
   (
   -- * Profunctor Composition
-    Procompose(..)
+    Procompose((:.:),(:<<<:),(:>>>:),..)
+  , type (<<<)
+  , type (>>>)
   , procomposed
   -- * Unitors and Associator
   , idl
@@ -274,4 +277,14 @@ eta f = rmap f id
 mu :: Category p => Procompose p p :-> p
 mu (Procompose f g) = f . g
 
+type pro >>> pro' = Procompose pro' pro
+type (<<<) = Procompose
 
+pattern (:.:) :: () => forall (bb :: k). pro' bb c -> pro a bb -> (pro' <<< pro) a c
+pattern f :.: g = Procompose f g
+
+pattern (:<<<:) :: () => forall (bb :: k). pro' bb c -> pro a bb -> (pro' <<< pro) a c
+pattern f :<<<: g = Procompose f g
+
+pattern (:>>>:) :: () => forall (bb :: k). pro a bb -> pro' bb c -> (pro >>> pro') a c
+pattern f :>>>: f' = Procompose f' f
