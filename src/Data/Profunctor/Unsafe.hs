@@ -1,5 +1,6 @@
 {-# LANGUAGE Trustworthy #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE QuantifiedConstraints #-}
 
 -- |
 -- Copyright   :  (C) 2011-2021 Edward Kmett
@@ -82,7 +83,7 @@ infixl 8 .#
 -- 'lmap' (f '.' g) ≡ 'lmap' g '.' 'lmap' f
 -- 'rmap' (f '.' g) ≡ 'rmap' f '.' 'rmap' g
 -- @
-class Profunctor p where
+class (forall a. Functor (p a)) => Profunctor p where
   -- | Map over both arguments at the same time.
   --
   -- @'dimap' f g ≡ 'lmap' f '.' 'rmap' g@

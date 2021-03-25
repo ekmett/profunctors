@@ -154,6 +154,10 @@ instance Monad (Costar f a) where
 -- WrappedArrow :: (k1 -> k2 -> Type) -> (k1 -> k2 -> Type)
 newtype WrappedArrow p a b = WrapArrow { unwrapArrow :: p a b }
 
+instance Arrow p => Functor (WrappedArrow p a) where
+  fmap f p = arr f . p
+  {-# INLINE fmap #-}
+
 instance Category p => Category (WrappedArrow p) where
   WrapArrow f . WrapArrow g = WrapArrow (f . g)
   {-# INLINE (.) #-}

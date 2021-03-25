@@ -1,20 +1,17 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE GADTs #-}
-{-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE Safe #-}
+{-# LANGUAGE TupleSections #-}
+{-# LANGUAGE TypeOperators #-}
 
------------------------------------------------------------------------------
 -- |
 -- Copyright   :  (C) 2014-2015 Edward Kmett
 -- License     :  BSD-style (see the file LICENSE)
---
 -- Maintainer  :  Edward Kmett <ekmett@gmail.com>
 -- Stability   :  provisional
 -- Portability :  Rank2Types
---
-----------------------------------------------------------------------------
+
 module Data.Profunctor.Strong
   (
   -- * Strength
@@ -107,14 +104,10 @@ instance Strong (->) where
   second' ab ~(c, a) = (c, ab a)
   {-# INLINE second' #-}
 
-instance Monad m => Strong (Kleisli m) where
-  first' (Kleisli f) = Kleisli $ \ ~(a, c) -> do
-     b <- f a
-     return (b, c)
+instance Functor m => Strong (Kleisli m) where
+  first' (Kleisli f) = Kleisli $ \ ~(a, c) -> (,c) <$> f a
   {-# INLINE first' #-}
-  second' (Kleisli f) = Kleisli $ \ ~(c, a) -> do
-     b <- f a
-     return (c, b)
+  second' (Kleisli f) = Kleisli $ \ ~(c, a) -> (c,) <$> f a
   {-# INLINE second' #-}
 
 instance Functor m => Strong (Star m) where
@@ -239,9 +232,6 @@ instance ArrowPlus p => Semigroup (Tambara p a b) where
 
 instance ArrowPlus p => Monoid (Tambara p a b) where
   mempty = zeroArrow
-#if !(MIN_VERSION_base(4,11,0))
-  mappend = (<>)
-#endif
 
 -- |
 -- @
