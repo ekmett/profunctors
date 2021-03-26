@@ -1,8 +1,9 @@
 {-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE GADTs #-}
-{-# LANGUAGE Safe #-}
+{-# LANGUAGE Trustworthy #-}
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE RoleAnnotations #-}
 {-# LANGUAGE ViewPatterns #-}
 
 -- |
@@ -14,7 +15,7 @@
 --
 -- Day convolution for profunctors
 
-module Data.Profunctor.Day 
+module Data.Profunctor.Day
 ( Day(..)
 , assoc, unassoc
 , lambda, unlambda
@@ -23,35 +24,71 @@ module Data.Profunctor.Day
 , oneday
 ) where
 
+import Data.Coerce
 import Data.Profunctor
+import Data.Profunctor.Functor
+import Data.Profunctor.Monad
 import Data.Profunctor.Monoidal
 import Data.Profunctor.Unsafe
 import Data.Tagged
 
 -- 'Tagged' is the unit of @profunctor@ 'Day' convolution
+type role Day representational representational representational representational
 data Day p q s t where
-  Day 
-    :: (s -> (a, c)) 
+  Day
+    :: (s -> (a, c))
     -> ((b, d) -> t)
     -> p a b
     -> q c d
     -> Day p q s t
 
+instance Functor (Day p q s) where
+  fmap = \h (Day f g p q) -> Day f (h . g) p q
+  {-# inline fmap #-}
+
+instance (Profunctor p, Profunctor q) => Profunctor (Day p q) where
+  dimap = \f g (Day f' g' p q) -> Day (f' . f) (g . g') p q
+  lmap = \f (Day f' g p q) -> Day (f' . f) g p q
+  rmap = \g (Day f g' p q) -> Day f (g . g') p q
+  (#.) = \_ -> coerce
+  (.#) = \p _ -> coerce p
+  {-# inline dimap #-}
+  {-# inline lmap #-}
+  {-# inline rmap #-}
+  {-# inline (#.) #-}
+  {-# inline (.#) #-}
+
+instance Profunctor p => ProfunctorFunctor (Day p) where
+  promap = \h (Day f g p q) -> Day f g p (h q)
+  {-# inline promap #-}
+
+instance Monoidal p => ProfunctorMonad (Day p) where
+  proreturn = Day ((),) snd pempty
+  {-# inline proreturn #-}
+
+  projoin = \(Day f g p (Day h i p' q)) ->
+    Day
+      (\(f -> (a1,h -> (a2,c1))) -> ((a1,a2),c1))
+      (\((b1,b2),d1) -> g (b1, i (b2,d1)))
+      (pappend p p')
+      q
+  {-# inline projoin #-}
+
 assoc :: Day (Day p q) r :-> Day p (Day q r)
-assoc = \(Day i h (Day g f p q) r) -> Day 
+assoc = \(Day i h (Day g f p q) r) -> Day
   (\(i -> (g -> (a1,c1), c)) -> (a1, (c1, c)))
   (\(b1,(d1,d)) -> h (f (b1,d1), d))
-  p 
-  (Day id id q r) 
+  p
+  (Day id id q r)
 {-# inline assoc #-}
 
 unassoc :: Day p (Day q r) :-> Day (Day p q) r
 unassoc = \(Day i h p (Day g f q r)) ->
-  Day 
+  Day
     (\(i -> (a, g -> (a1,c1))) -> ((a,a1),c1))
     (\((b,b1),d1) -> h (b, f (b1,d1)))
     (Day id id p q)
-    r 
+    r
 {-# inline unassoc #-}
 
 lambda :: p :-> Day Tagged p
