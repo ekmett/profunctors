@@ -45,6 +45,8 @@ library
     Data.Profunctor.Choice
     Data.Profunctor.Composition
     Data.Profunctor.Day
+    Data.Profunctor.Fix
+    Data.Profunctor.Functor
     Data.Profunctor.Monad
     Data.Profunctor.Monoidal
     Data.Profunctor.Ran

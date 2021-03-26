@@ -15,7 +15,7 @@ module Data.Profunctor.Adjunction
 ) where
 
 import Data.Profunctor.Types
-import Data.Profunctor.Monad
+import Data.Profunctor.Functor
 
 -- | Laws:
 --

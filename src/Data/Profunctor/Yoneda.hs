@@ -21,6 +21,7 @@ module Data.Profunctor.Yoneda
 import Control.Category
 import Data.Coerce (Coercible, coerce)
 import Data.Profunctor
+import Data.Profunctor.Functor
 import Data.Profunctor.Monad
 import Data.Profunctor.Traversing
 import Data.Profunctor.Unsafe

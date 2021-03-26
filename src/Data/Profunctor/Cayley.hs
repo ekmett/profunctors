@@ -22,6 +22,7 @@ import Control.Category
 import Control.Comonad
 import Data.Data
 import Data.Profunctor
+import Data.Profunctor.Functor
 import Data.Profunctor.Monad
 import Data.Profunctor.Traversing
 import Data.Profunctor.Unsafe

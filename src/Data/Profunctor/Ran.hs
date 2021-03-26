@@ -26,6 +26,7 @@ module Data.Profunctor.Ran
 import Control.Category
 import Data.Profunctor
 import Data.Profunctor.Composition
+import Data.Profunctor.Functor
 import Data.Profunctor.Monad
 import Data.Profunctor.Unsafe
 import Prelude hiding (id,(.))
@@ -45,10 +46,10 @@ import Prelude hiding (id,(.))
 -- Ran :: (k1 -> k2 -> Type) -> (k1 -> k3 -> Type) -> (k2 -> k3 -> Type)
 newtype Ran p q a b = Ran { runRan :: forall x. p x a -> q x b }
 
-instance ProfunctorFunctor (Ran p) where
+instance Profunctor p => ProfunctorFunctor (Ran p) where
   promap f (Ran g) = Ran (f . g)
 
-instance Category p => ProfunctorComonad (Ran p) where
+instance (Profunctor p, Category p) => ProfunctorComonad (Ran p) where
   proextract (Ran f) = f id
   produplicate (Ran f) = Ran $ \ p -> Ran $ \q -> f (p . q)
 

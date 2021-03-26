@@ -1,6 +1,7 @@
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE Safe #-}
 -----------------------------------------------------------------------------
 -- |
@@ -18,29 +19,9 @@ import Control.Comonad
 import Data.Bifunctor.Tannen
 import Data.Bifunctor.Product
 import Data.Bifunctor.Sum
+import Data.Profunctor.Functor
+import Data.Profunctor.Unsafe
 import Data.Profunctor.Types
-
--- | 'ProfunctorFunctor' has a polymorphic kind since @5.6@.
-
--- ProfunctorFunctor :: ((Type -> Type -> Type) -> (k1 -> k2 -> Type)) -> Constraint
-class ProfunctorFunctor t where
-  -- | Laws:
-  --
-  -- @
-  -- 'promap' f '.' 'promap' g ≡ 'promap' (f '.' g)
-  -- 'promap' 'id' ≡ 'id'
-  -- @
-  promap :: Profunctor p => (p :-> q) -> t p :-> t q
-
-instance Functor f => ProfunctorFunctor (Tannen f) where
-  promap f (Tannen g) = Tannen (fmap f g)
-
-instance ProfunctorFunctor (Product p) where
-  promap f (Pair p q) = Pair p (f q)
-
-instance ProfunctorFunctor (Sum p) where
-  promap _ (L2 p) = L2 p
-  promap f (R2 q) = R2 (f q)
 
 -- | Laws:
 --
@@ -60,7 +41,7 @@ instance Monad f => ProfunctorMonad (Tannen f) where
   proreturn = Tannen . return
   projoin (Tannen m) = Tannen $ m >>= runTannen
 
-instance ProfunctorMonad (Sum p) where
+instance Profunctor p => ProfunctorMonad (Sum p) where
   proreturn = R2
   projoin (L2 p) = L2 p
   projoin (R2 m) = m
@@ -83,6 +64,6 @@ instance Comonad f => ProfunctorComonad (Tannen f) where
   proextract = extract . runTannen
   produplicate (Tannen w) = Tannen $ extend Tannen w
 
-instance ProfunctorComonad (Product p) where
+instance Profunctor p => ProfunctorComonad (Product p) where
   proextract (Pair _ q) = q
   produplicate pq@(Pair p _) = Pair p pq

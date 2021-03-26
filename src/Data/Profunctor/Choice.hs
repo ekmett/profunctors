@@ -35,6 +35,7 @@ import Data.Bifunctor.Sum (Sum(..))
 import Data.Bifunctor.Tannen (Tannen(..))
 import Data.Monoid hiding (Product, Sum)
 import Data.Profunctor.Adjunction
+import Data.Profunctor.Functor
 import Data.Profunctor.Monad
 import Data.Profunctor.Strong
 import Data.Profunctor.Types

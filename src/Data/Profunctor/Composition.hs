@@ -47,6 +47,7 @@ import Control.Monad (liftM)
 import Data.Functor.Compose
 import Data.Profunctor
 import Data.Profunctor.Adjunction
+import Data.Profunctor.Functor
 import Data.Profunctor.Monad
 import Data.Profunctor.Traversing
 import Data.Profunctor.Unsafe
@@ -70,10 +71,10 @@ type Iso s t a b = forall p f. (Profunctor p, Functor f) => p a (f b) -> p s (f 
 data Procompose p q d c where
   Procompose :: p x c -> q d x -> Procompose p q d c
 
-instance ProfunctorFunctor (Procompose p) where
+instance Profunctor p => ProfunctorFunctor (Procompose p) where
   promap f (Procompose p q) = Procompose p (f q)
 
-instance Category p => ProfunctorMonad (Procompose p) where
+instance (Profunctor p, Category p) => ProfunctorMonad (Procompose p) where
   proreturn = Procompose id
   projoin (Procompose p (Procompose q r)) = Procompose (p . q) r
 
@@ -221,10 +222,10 @@ cokleislis = dimap hither (fmap yon) where
 -- Rift :: (k3 -> k2 -> Type) -> (k1 -> k2 -> Type) -> (k1 -> k3 -> Type)
 newtype Rift p q a b = Rift { runRift :: forall x. p b x -> q a x }
 
-instance ProfunctorFunctor (Rift p) where
+instance Profunctor p => ProfunctorFunctor (Rift p) where
   promap f (Rift g) = Rift (f . g)
 
-instance Category p => ProfunctorComonad (Rift p) where
+instance (Profunctor p, Category p) => ProfunctorComonad (Rift p) where
   proextract (Rift f) = f id
   produplicate (Rift f) = Rift $ \p -> Rift $ \q -> f (q . p)
 
@@ -258,7 +259,7 @@ decomposeRift :: Procompose p (Rift p q) :-> q
 decomposeRift (Procompose p (Rift pq)) = pq p
 {-# INLINE decomposeRift #-}
 
-instance ProfunctorAdjunction (Procompose p) (Rift p) where
+instance Profunctor p => ProfunctorAdjunction (Procompose p) (Rift p) where
   counit (Procompose p (Rift pq)) = pq p
   unit q = Rift $ \p -> Procompose p q
 

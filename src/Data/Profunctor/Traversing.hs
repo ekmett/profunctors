@@ -29,6 +29,7 @@ import Data.Functor.Compose
 import Data.Functor.Identity
 import Data.Orphans ()
 import Data.Profunctor.Choice
+import Data.Profunctor.Functor
 import Data.Profunctor.Monad
 import Data.Profunctor.Strong
 import Data.Profunctor.Types

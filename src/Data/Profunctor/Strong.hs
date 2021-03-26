@@ -43,6 +43,7 @@ import Data.Bifunctor.Tannen (Tannen(..))
 import Data.Functor.Compose
 import Data.Functor.Contravariant (Contravariant(..))
 import Data.Profunctor.Adjunction
+import Data.Profunctor.Functor
 import Data.Profunctor.Monad
 import Data.Profunctor.Types
 import Data.Profunctor.Unsafe
