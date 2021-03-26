@@ -3,6 +3,7 @@
 {-# LANGUAGE Trustworthy #-}
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RoleAnnotations #-}
 {-# LANGUAGE ViewPatterns #-}
 
@@ -20,6 +21,9 @@ module Data.Profunctor.Day
 , assoc, unassoc
 , lambda, unlambda
 , rho, unrho
+, swapped
+, trans1
+, trans2
 , monday
 , oneday
 ) where
@@ -31,6 +35,7 @@ import Data.Profunctor.Monad
 import Data.Profunctor.Monoidal
 import Data.Profunctor.Unsafe
 import Data.Tagged
+import Data.Tuple
 
 -- 'Tagged' is the unit of @profunctor@ 'Day' convolution
 type role Day representational representational representational representational
@@ -58,10 +63,13 @@ instance (Profunctor p, Profunctor q) => Profunctor (Day p q) where
   {-# inline (#.) #-}
   {-# inline (.#) #-}
 
+-- (p :-> q) -> Day r p :-> Day r q
 instance Profunctor p => ProfunctorFunctor (Day p) where
   promap = \h (Day f g p q) -> Day f g p (h q)
   {-# inline promap #-}
 
+-- p :-> Day r p
+-- Day r (Day r p) :-> Day r p
 instance Monoidal p => ProfunctorMonad (Day p) where
   proreturn = Day ((),) snd pempty
   {-# inline proreturn #-}
@@ -107,8 +115,22 @@ unrho :: Profunctor p => Day p Tagged :-> p
 unrho = \(Day g f p (Tagged x)) -> dimap (fst . g) (f . (,x)) p
 {-# inline unrho #-}
 
+-- | Apply a profunctor homomorphism to the left-hand side of a Day convolution.
+trans1 :: (p :-> q) -> Day p r :-> Day q r
+trans1 = \f (Day h i j k) -> Day h i (f j) k
+{-# inline trans1 #-}
+
+-- | Apply a profunctor homomorphism to the left-hand side of a Day convolution.
+trans2 :: (p :-> q) -> Day r p :-> Day r q
+trans2 = \f (Day h i j k) -> Day h i j (f k)
+{-# inline trans2 #-}
+
+swapped :: Day p q :-> Day q p
+swapped (Day f g p q) = Day (swap . f) (g . swap) q p
+{-# inline swapped #-}
+
 monday :: Monoidal p => Day p p :-> p
-monday = \(Day g f p q) -> dimap g f $ pappend p q
+monday = \(Day g f p q) -> pappendWith g (curry f) p q
 {-# inline monday #-}
 
 oneday :: Monoidal p => Tagged :-> p

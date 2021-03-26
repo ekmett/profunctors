@@ -17,9 +17,14 @@
 module Data.Profunctor.Cayley where
 
 import Control.Applicative
-import Control.Arrow
+import Control.Arrow as A
 import Control.Category
 import Control.Comonad
+import Data.Biapplicative
+import Data.Bifunctor as B
+import Data.Bifunctor.Functor
+import Data.Bifoldable
+import Data.Bitraversable
 import Data.Data
 import Data.Profunctor
 import Data.Profunctor.Functor
@@ -42,74 +47,139 @@ deriving stock instance (Foldable f, Foldable (p a)) => Foldable (Cayley f p a)
 deriving stock instance (Traversable f, Traversable (p a)) => Traversable (Cayley f p a)
 
 instance Functor f => ProfunctorFunctor (Cayley f) where
-  promap f (Cayley p) = Cayley (fmap f p)
+  promap f = Cayley #. fmap f .# runCayley
 
 -- | Cayley transforms Monads in @Hask@ into monads on @Prof@
 instance Monad f => ProfunctorMonad (Cayley f) where
-  proreturn = Cayley . return
-  projoin (Cayley m) = Cayley $ m >>= runCayley
+  proreturn = Cayley #. return
+  projoin m = Cayley $ runCayley m >>= runCayley
 
 -- | Cayley transforms Comonads in @Hask@ into comonads on @Prof@
 instance Comonad f => ProfunctorComonad (Cayley f) where
-  proextract = extract . runCayley
-  produplicate (Cayley w) = Cayley $ extend Cayley w
+  proextract = extract .# runCayley
+  produplicate = Cayley #. extend Cayley .# runCayley
 
 instance (Functor f, Profunctor p) => Profunctor (Cayley f p) where
-  dimap f g = Cayley . fmap (dimap f g) . runCayley
-  lmap f = Cayley . fmap (lmap f) . runCayley
-  rmap g = Cayley . fmap (rmap g) . runCayley
-  w #. Cayley fp = Cayley $ fmap (w #.) fp
-  Cayley fp .# w = Cayley $ fmap (.# w) fp
+  dimap = \f g -> Cayley #. fmap (dimap f g) .# runCayley
+  {-# inline dimap #-}
+  lmap = \f -> Cayley #. fmap (lmap f) .# runCayley
+  {-# inline lmap #-}
+  rmap = \g -> Cayley #. fmap (rmap g) .# runCayley
+  {-# inline rmap #-}
+  (#.) = \w -> Cayley #. fmap (w #.) .# runCayley
+  {-# inline (#.) #-}
+  (.#) = \fp w -> Cayley $ fmap (.# w) (runCayley fp)
+  {-# inline (.#) #-}
+
+instance (Functor f, Bifunctor p) => Bifunctor (Cayley f p) where
+  first = \f -> Cayley #. fmap (B.first f) .# runCayley
+  {-# inline first #-}
+  second = \f -> Cayley #. fmap (B.second f) .# runCayley
+  {-# inline second #-}
+  bimap = \f g -> Cayley #. fmap (bimap f g) .# runCayley
+  {-# inline bimap #-}
+
+instance (Applicative f, Biapplicative p) => Biapplicative (Cayley f p) where
+  bipure = \a b -> Cayley $ pure $ bipure a b
+  {-# inline bipure #-}
+
+  (<<*>>) = \ fg -> Cayley #. liftA2 (<<*>>) (runCayley fg) .# runCayley
+  {-# inline (<<*>>) #-}
+
+instance (Foldable f, Bifoldable p) => Bifoldable (Cayley f p) where
+  bifoldMap = \f g -> foldMap (bifoldMap f g) .# runCayley
+  {-# inline bifoldMap #-}
+
+instance (Traversable f, Bitraversable p) => Bitraversable (Cayley f p) where
+  bitraverse = \f g -> fmap Cayley . traverse (bitraverse f g) .# runCayley
+  {-# inline bitraverse #-}
+
+instance Functor f => BifunctorFunctor (Cayley f) where
+  bifmap = \f -> Cayley #. fmap f .# runCayley
+  {-# inline bifmap #-}
+
+instance (Functor f, Monad f) => BifunctorMonad (Cayley f) where
+  bireturn = Cayley . return
+  bibind = \f (Cayley fp) -> Cayley $ fp >>= runCayley . f
+  {-# inline bireturn #-}
+  {-# inline bibind #-}
+
+instance Comonad f => BifunctorComonad (Cayley f) where
+  biextract = extract .# runCayley
+  biextend = \f -> Cayley #. extend (f .# Cayley) .# runCayley
+  {-# inline biextract #-}
+  {-# inline biextend #-}
 
 instance (Functor f, Strong p) => Strong (Cayley f p) where
-  first'  = Cayley . fmap first' . runCayley
-  second' = Cayley . fmap second' . runCayley
+  first'  = Cayley #. fmap first' .# runCayley
+  second' = Cayley #. fmap second' .# runCayley
+  {-# inline first' #-}
+  {-# inline second' #-}
 
 instance (Functor f, Costrong p) => Costrong (Cayley f p) where
-  unfirst (Cayley fp) = Cayley (fmap unfirst fp)
-  unsecond (Cayley fp) = Cayley (fmap unsecond fp)
+  unfirst = Cayley #. fmap unfirst .# runCayley
+  unsecond = Cayley #. fmap unsecond .# runCayley
+  {-# inline unfirst #-}
+  {-# inline unsecond #-}
 
 instance (Functor f, Choice p) => Choice (Cayley f p) where
-  left'   = Cayley . fmap left' . runCayley
-  right'  = Cayley . fmap right' . runCayley
+  left' = Cayley #. fmap left' .# runCayley
+  right' = Cayley #. fmap right' .# runCayley
+  {-# inline left' #-}
+  {-# inline right' #-}
 
 instance (Functor f, Cochoice p) => Cochoice (Cayley f p) where
-  unleft (Cayley fp) = Cayley (fmap unleft fp)
-  {-# INLINE unleft #-}
-  unright (Cayley fp) = Cayley (fmap unright fp)
-  {-# INLINE unright #-}
+  unleft = Cayley #. fmap unleft .# runCayley
+  {-# inline unleft #-}
+  unright = Cayley #. fmap unright .# runCayley
+  {-# inline unright #-}
 
 instance (Functor f, Traversing p) => Traversing (Cayley f p) where
-  traverse' = Cayley . fmap traverse' . runCayley
+  traverse' = Cayley #. fmap traverse' .# runCayley
+  {-# inline traverse' #-}
 
 instance (Applicative f, Category p) => Category (Cayley f p) where
   id = Cayley $ pure id
-  Cayley fpbc . Cayley fpab = Cayley $ liftA2 (.) fpbc fpab
+  (.) = \fpbc -> Cayley #. liftA2 (.) (runCayley fpbc) .# runCayley
+  {-# inline (.) #-}
+  {-# inline id #-}
 
 instance (Applicative f, Arrow p) => Arrow (Cayley f p) where
-  arr f = Cayley $ pure $ arr f
-  first = Cayley . fmap first . runCayley
-  second = Cayley . fmap second . runCayley
-  Cayley ab *** Cayley cd = Cayley $ liftA2 (***) ab cd
-  Cayley ab &&& Cayley ac = Cayley $ liftA2 (&&&) ab ac
+  arr = Cayley #. pure . arr
+  first = Cayley #. fmap A.first .# runCayley
+  second = Cayley #. fmap A.second .# runCayley
+  (***) = \fpbc -> Cayley #. liftA2 (***) (runCayley fpbc) .# runCayley
+  (&&&) = \fpbc -> Cayley #. liftA2 (&&&) (runCayley fpbc) .# runCayley
+  {-# inline arr #-}
+  {-# inline first #-}
+  {-# inline (***) #-}
+  {-# inline (&&&) #-}
 
 instance (Applicative f, ArrowChoice p) => ArrowChoice (Cayley f p) where
-  left  = Cayley . fmap left . runCayley
-  right = Cayley . fmap right . runCayley
-  Cayley ab +++ Cayley cd = Cayley $ liftA2 (+++) ab cd
-  Cayley ac ||| Cayley bc = Cayley $ liftA2 (|||) ac bc
+  left  = Cayley #. fmap left .# runCayley
+  right = Cayley #. fmap right .# runCayley
+  (+++) = \fpbc -> Cayley #. liftA2 (+++) (runCayley fpbc) .# runCayley
+  (|||) = \fpbc -> Cayley #. liftA2 (|||) (runCayley fpbc) .# runCayley
+  {-# inline right #-}
+  {-# inline left #-}
+  {-# inline (+++) #-}
+  {-# inline (|||) #-}
 
 instance (Applicative f, ArrowLoop p) => ArrowLoop (Cayley f p) where
-  loop = Cayley . fmap loop . runCayley
+  loop = Cayley #. fmap loop .# runCayley
+  {-# inline loop #-}
 
 instance (Applicative f, ArrowZero p) => ArrowZero (Cayley f p) where
   zeroArrow = Cayley $ pure zeroArrow
+  {-# inline zeroArrow #-}
 
 instance (Applicative f, ArrowPlus p) => ArrowPlus (Cayley f p) where
-  Cayley f <+> Cayley g = Cayley (liftA2 (<+>) f g)
+  (<+>) = \fpbc -> Cayley #. liftA2 (<+>) (runCayley fpbc) .# runCayley
+  {-# inline (<+>) #-}
 
 mapCayley :: (forall a. f a -> g a) -> Cayley f p x y -> Cayley g p x y
-mapCayley f (Cayley g) = Cayley (f g)
+mapCayley = \f -> Cayley #. f .# runCayley
+{-# inline mapCayley #-}
 
 -- instance Adjunction f g => ProfunctorAdjunction (Cayley f) (Cayley g) where
 
