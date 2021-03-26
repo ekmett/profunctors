@@ -177,10 +177,7 @@ instance (Monoidal p, Functor f, Applicative g) => Monoidal (Biff p f g) where
   pappend (Biff f) (Biff g) = Biff $ pappendWith
     (fmap fst &&& fmap snd) (liftA2 (,)) f g
   pappendWith h i (Biff f) (Biff g) = Biff $ pappendWith
-    ((fmap fst &&& fmap snd) . fmap h)
-    (liftA2 i)
-    f
-    g
+    ((fmap fst &&& fmap snd) . fmap h) (liftA2 i) f g
   {-# inline ppure #-}
   {-# inline pempty #-}
   {-# inline pappend #-}

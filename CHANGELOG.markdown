@@ -8,6 +8,9 @@
 * Added `Data.Profunctor.Strong.lensVL`
 * Added `forall a. Functor (p a)` as a superclass of `Profunctor` to allow
   better interoperability with `bifunctors`.
+* Re-export Data.Bifunctor.Functor's (:->) rather than supply our own
+  so the two definitions do not conflict.
+* Added fixpoints of ProfunctorFunctors.
 
 5.6.2 [2021.02.17]
 ------------------

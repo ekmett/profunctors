@@ -38,6 +38,9 @@ library
     , tagged        ^>= 0.8.6.1
     , transformers  ^>= 0.5
 
+  other-modules:
+    Data.Profunctor.Internal
+
   exposed-modules:
     Data.Profunctor
     Data.Profunctor.Adjunction
@@ -45,8 +48,8 @@ library
     Data.Profunctor.Choice
     Data.Profunctor.Composition
     Data.Profunctor.Day
-    Data.Profunctor.Fix
     Data.Profunctor.Functor
+    Data.Profunctor.Functor.Fix
     Data.Profunctor.Monad
     Data.Profunctor.Monoidal
     Data.Profunctor.Ran

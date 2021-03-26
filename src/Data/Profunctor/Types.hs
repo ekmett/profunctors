@@ -35,6 +35,7 @@ import Control.Arrow
 import Control.Category
 import Control.Comonad
 import Control.Monad (MonadPlus(..), (>=>))
+import Data.Bifunctor.Functor ((:->))
 import Data.Coerce (Coercible, coerce)
 import Data.Foldable
 import Data.Functor.Contravariant
@@ -42,13 +43,6 @@ import Data.Profunctor.Unsafe
 import Data.Traversable
 import GHC.Generics
 import Prelude hiding (id,(.))
-
-infixr 0 :->
-
--- | (':->') has a polymorphic kind since @5.6@.
-
--- (:->) :: forall k1 k2. (k1 -> k2 -> Type) -> (k1 -> k2 -> Type) -> Type
-type p :-> q = forall a b. p a b -> q a b
 
 ------------------------------------------------------------------------------
 -- Star

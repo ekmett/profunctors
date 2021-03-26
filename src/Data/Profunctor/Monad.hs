@@ -21,7 +21,6 @@ import Data.Bifunctor.Product
 import Data.Bifunctor.Sum
 import Data.Profunctor.Functor
 import Data.Profunctor.Unsafe
-import Data.Profunctor.Types
 
 -- | Laws:
 --
