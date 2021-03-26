@@ -44,7 +44,9 @@ library
     Data.Profunctor.Cayley
     Data.Profunctor.Choice
     Data.Profunctor.Composition
+    Data.Profunctor.Day
     Data.Profunctor.Monad
+    Data.Profunctor.Monoidal
     Data.Profunctor.Ran
     Data.Profunctor.Strong
     Data.Profunctor.Traversing
