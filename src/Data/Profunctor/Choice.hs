@@ -116,6 +116,8 @@ instance Applicative f => Choice (Star f) where
   right' (Star f) = Star $ either (pure . Left) (fmap Right . f)
   {-# INLINE right' #-}
 
+-- this actually needs a linear- "control" functor in the linear-haskell sense
+
 -- | 'extract' approximates 'costrength'
 instance Comonad w => Choice (Cokleisli w) where
   left' = left
@@ -339,9 +341,11 @@ instance Cochoice (->) where
   unleft f = go . Left where go = either id (go . Right) . f
   unright f = go . Right where go = either (go . Left) id . f
 
+{-
 instance Applicative f => Cochoice (Costar f) where
   unleft (Costar f) = Costar (go . fmap Left)
     where go = either id (go . pure . Right) . f
+-}
 
 -- NB: Another instance that's highly questionable
 instance Traversable f => Cochoice (Star f) where
