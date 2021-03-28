@@ -1,8 +1,13 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE Unsafe #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE UndecidableSuperClasses #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE MonoLocalBinds #-}
 {-# options_haddock not-home #-}
 
 -- |
@@ -89,6 +94,7 @@ infixl 8 .#
 -- 'lmap' (f '.' g) ≡ 'lmap' g '.' 'lmap' f
 -- 'rmap' (f '.' g) ≡ 'rmap' f '.' 'rmap' g
 -- @
+
 class (forall a. Functor (p a)) => Profunctor p where
   -- | Map over both arguments at the same time.
   --
@@ -276,11 +282,18 @@ instance (Functor f, Profunctor p) => Profunctor (Tannen f p) where
   (.#) (Tannen h) f = Tannen ((.# f) <$> h)
   {-# INLINE (.#) #-}
 
+
+class (forall a. Functor (p a)) => QFunctor p
+instance (forall a. Functor (p a)) => QFunctor p
+
+
 -- | 'ProfunctorFunctor' has a polymorphic kind since @5.6@.
 -- 'ProfunctorFunctor' has a quanitified superclass since @6@.
 --
 -- ProfunctorFunctor :: ((Type -> Type -> Type) -> (Type -> Type -> Type)) -> Constraint
-class (forall p. Profunctor p => Profunctor (t p)) => ProfunctorFunctor t where
+class
+  ( forall p. Profunctor p => Profunctor (t p)
+  ) => ProfunctorFunctor t where
   -- | Laws:
   --
   -- @
@@ -300,7 +313,12 @@ instance Profunctor p => ProfunctorFunctor (Sum p) where
   promap f (R2 q) = R2 (f q)
 
 -- Orphan. FML. Need to move ProfunctorFunctor and Profunctor into the same defining module
-instance ProfunctorFunctor f => Profunctor (Fix f) where
+instance
+  ( ProfunctorFunctor f
+#if __GLASGOW_HASKELL__ < 900
+  , QFunctor (Fix f) -- make 8.10 happy
+#endif
+  )  => Profunctor (Fix f) where
   dimap f g (In p) = In (dimap f g p)
   {-# inline dimap #-}
   rmap f (In p) = In (rmap f p)
