@@ -34,7 +34,7 @@ library
     , base-orphans  ^>= 0.8.4
     , bifunctors    ^>= 6
     , comonad       ^>= 6
-    , contravariant ^>= 1.5.3
+    , contravariant ^>= 1.6
     , tagged        ^>= 0.8.6.1
     , transformers  ^>= 0.5
 
