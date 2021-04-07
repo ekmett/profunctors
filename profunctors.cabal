@@ -17,7 +17,6 @@ tested-with:   GHC == 8.6.5
              , GHC == 8.10.1
 build-type:    Simple
 extra-source-files:
-  .ghci
   .gitignore
   .hlint.yaml
   .vim.custom
