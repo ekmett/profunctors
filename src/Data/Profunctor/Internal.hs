@@ -2,6 +2,7 @@
 {-# LANGUAGE Unsafe #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE QuantifiedConstraints #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
@@ -181,111 +182,113 @@ instance Profunctor (->) where
   {-# INLINE lmap #-}
   rmap = (.)
   {-# INLINE rmap #-}
-  (#.) _ = coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
-  (.#) pbc _ = coerce pbc
+  (#.) = \_ -> coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
+  (.#) = \pbc _ -> coerce pbc
   {-# INLINE (#.) #-}
   {-# INLINE (.#) #-}
 
 instance Profunctor Tagged where
-  dimap _ f (Tagged s) = Tagged (f s)
+  dimap = \_ f (Tagged s) -> Tagged (f s)
   {-# INLINE dimap #-}
-  lmap _ = retag
+  lmap = \_ -> retag
   {-# INLINE lmap #-}
   rmap = fmap
   {-# INLINE rmap #-}
-  (#.) _ = coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
+  (#.) = \_ -> coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
   {-# INLINE (#.) #-}
-  Tagged s .# _ = Tagged s
+  (.#) = \(Tagged s) _ -> Tagged s
   {-# INLINE (.#) #-}
 
 instance Functor m => Profunctor (Kleisli m) where
-  dimap f g (Kleisli h) = Kleisli (fmap g . h . f)
+  dimap = \f g (Kleisli h) -> Kleisli (fmap g . h . f)
   {-# INLINE dimap #-}
-  lmap k (Kleisli f) = Kleisli (f . k)
+  lmap = \k (Kleisli f) -> Kleisli (f . k)
   {-# INLINE lmap #-}
-  rmap k (Kleisli f) = Kleisli (fmap k . f)
+  rmap = \k (Kleisli f) -> Kleisli (fmap k . f)
   {-# INLINE rmap #-}
   -- We cannot safely overload (#.) because we didn't provide the 'Functor'.
-  (.#) pbc _ = coerce pbc
+  (.#) = \pbc _ -> coerce pbc
   {-# INLINE (.#) #-}
 
 instance Functor w => Profunctor (Cokleisli w) where
-  dimap f g (Cokleisli h) = Cokleisli (g . h . fmap f)
+  dimap = \f g (Cokleisli h) -> Cokleisli (g . h . fmap f)
   {-# INLINE dimap #-}
-  lmap k (Cokleisli f) = Cokleisli (f . fmap k)
+  lmap = \k (Cokleisli f) -> Cokleisli (f . fmap k)
   {-# INLINE lmap #-}
-  rmap k (Cokleisli f) = Cokleisli (k . f)
+  rmap = \k (Cokleisli f) -> Cokleisli (k . f)
   {-# INLINE rmap #-}
   -- We cannot safely overload (.#) because we didn't provide the 'Functor'.
-  (#.) _ = coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
+  (#.) = \_ -> coerce (\x -> x :: b) :: forall a b. Coercible b a => a -> b
   {-# INLINE (#.) #-}
 
 instance Contravariant f => Profunctor (Clown f) where
-  lmap f (Clown fa) = Clown (contramap f fa)
+  lmap = \f (Clown fa) -> Clown (contramap f fa)
   {-# INLINE lmap #-}
-  rmap _ (Clown fa) = Clown fa
+  rmap = \_ (Clown fa) -> Clown fa
   {-# INLINE rmap #-}
-  dimap f _ (Clown fa) = Clown (contramap f fa)
+  dimap = \f _ (Clown fa) -> Clown (contramap f fa)
   {-# INLINE dimap #-}
 
 instance Functor f => Profunctor (Joker f) where
-  lmap _ (Joker fb) = Joker fb
+  lmap = \_ (Joker fb) -> Joker fb
   {-# INLINE lmap #-}
-  rmap g (Joker fb) = Joker (fmap g fb)
+  rmap = \g (Joker fb) -> Joker (fmap g fb)
   {-# INLINE rmap #-}
-  dimap _ g (Joker fb) = Joker (fmap g fb)
+  dimap = \_ g (Joker fb) -> Joker (fmap g fb)
   {-# INLINE dimap #-}
 
 instance (Profunctor p, Functor f, Functor g) => Profunctor (Biff p f g) where
-  lmap f (Biff p) = Biff (lmap (fmap f) p)
-  rmap g (Biff p) = Biff (rmap (fmap g) p)
-  dimap f g (Biff p) = Biff (dimap (fmap f) (fmap g) p)
+  lmap = \f (Biff p) -> Biff (lmap (fmap f) p)
+  rmap = \g (Biff p) -> Biff (rmap (fmap g) p)
+  dimap = \f g (Biff p) -> Biff (dimap (fmap f) (fmap g) p)
 
 instance (Profunctor p, Profunctor q) => Profunctor (Product p q) where
-  lmap  f   (Pair p q) = Pair (lmap f p) (lmap f q)
+  lmap = \f (Pair p q) -> Pair (lmap f p) (lmap f q)
   {-# INLINE lmap #-}
-  rmap    g (Pair p q) = Pair (rmap g p) (rmap g q)
+  rmap = \g (Pair p q) -> Pair (rmap g p) (rmap g q)
   {-# INLINE rmap #-}
-  dimap f g (Pair p q) = Pair (dimap f g p) (dimap f g q)
+  dimap = \f g (Pair p q) -> Pair (dimap f g p) (dimap f g q)
   {-# INLINE dimap #-}
-  (#.) f (Pair p q) = Pair (f #. p) (f #. q)
+  (#.) = \f (Pair p q) -> Pair (f #. p) (f #. q)
   {-# INLINE (#.) #-}
-  (.#) (Pair p q) f = Pair (p .# f) (q .# f)
+  (.#) = \(Pair p q) f -> Pair (p .# f) (q .# f)
   {-# INLINE (.#) #-}
 
 instance (Profunctor p, Profunctor q) => Profunctor (Sum p q) where
-  lmap f (L2 x) = L2 (lmap f x)
-  lmap f (R2 y) = R2 (lmap f y)
+  lmap = \f -> \case
+    L2 x -> L2 (lmap f x)
+    R2 y -> R2 (lmap f y)
   {-# INLINE lmap #-}
-  rmap g (L2 x) = L2 (rmap g x)
-  rmap g (R2 y) = R2 (rmap g y)
+  rmap = \g -> \case
+    L2 x -> L2 (rmap g x)
+    R2 y -> R2 (rmap g y)
   {-# INLINE rmap #-}
-  dimap f g (L2 x) = L2 (dimap f g x)
-  dimap f g (R2 y) = R2 (dimap f g y)
+  dimap = \f g -> \case
+    L2 x -> L2 (dimap f g x)
+    R2 y -> R2 (dimap f g y)
   {-# INLINE dimap #-}
-  f #. L2 x = L2 (f #. x)
-  f #. R2 y = R2 (f #. y)
+  (#.) = \f -> \case
+    L2 x -> L2 (f #. x)
+    R2 y -> R2 (f #. y)
   {-# INLINE (#.) #-}
   L2 x .# f = L2 (x .# f)
   R2 y .# f = R2 (y .# f)
   {-# INLINE (.#) #-}
 
 instance (Functor f, Profunctor p) => Profunctor (Tannen f p) where
-  lmap f (Tannen h) = Tannen (lmap f <$> h)
+  lmap = \f (Tannen h) -> Tannen (lmap f <$> h)
   {-# INLINE lmap #-}
-  rmap g (Tannen h) = Tannen (rmap g <$> h)
+  rmap = \g (Tannen h) -> Tannen (rmap g <$> h)
   {-# INLINE rmap #-}
-  dimap f g (Tannen h) = Tannen (dimap f g <$> h)
+  dimap = \f g (Tannen h) -> Tannen (dimap f g <$> h)
   {-# INLINE dimap #-}
-  (#.) f (Tannen h) = Tannen ((f #.) <$> h)
+  (#.) = \f (Tannen h) -> Tannen ((f #.) <$> h)
   {-# INLINE (#.) #-}
-  (.#) (Tannen h) f = Tannen ((.# f) <$> h)
+  (.#) = \(Tannen h) f -> Tannen ((.# f) <$> h)
   {-# INLINE (.#) #-}
-
 
 class (forall a. Functor (p a)) => QFunctor p
 instance (forall a. Functor (p a)) => QFunctor p
-
 
 -- | 'ProfunctorFunctor' has a polymorphic kind since @5.6@.
 -- 'ProfunctorFunctor' has a quanitified superclass since @6@.
@@ -303,14 +306,18 @@ class
   promap :: Profunctor p => (p :-> q) -> t p :-> t q
 
 instance Functor f => ProfunctorFunctor (Tannen f) where
-  promap f (Tannen g) = Tannen (fmap f g)
+  promap = \f (Tannen g) -> Tannen (fmap f g)
+  {-# inline promap #-}
 
 instance Profunctor p => ProfunctorFunctor (Product p) where
-  promap f (Pair p q) = Pair p (f q)
+  promap = \f (Pair p q) -> Pair p (f q)
+  {-# inline promap #-}
 
 instance Profunctor p => ProfunctorFunctor (Sum p) where
-  promap _ (L2 p) = L2 p
-  promap f (R2 q) = R2 (f q)
+  promap = \f -> \case
+    L2 p -> L2 p
+    R2 q -> R2 (f q)
+  {-# inline promap #-}
 
 -- Orphan. FML. Need to move ProfunctorFunctor and Profunctor into the same defining module
 instance
@@ -319,13 +326,13 @@ instance
   , QFunctor (Fix f) -- make 8.10 happy
 #endif
   )  => Profunctor (Fix f) where
-  dimap f g (In p) = In (dimap f g p)
+  dimap = \f g (In p) -> In (dimap f g p)
   {-# inline dimap #-}
-  rmap f (In p) = In (rmap f p)
+  rmap = \f (In p) -> In (rmap f p)
   {-# inline rmap #-}
-  lmap f (In p) = In (lmap f p)
+  lmap = \f (In p) -> In (lmap f p)
   {-# inline lmap #-}
-  x #. In p = In (x #. p)
+  (#.) = \x (In p) -> In (x #. p)
   {-# inline (#.) #-}
-  In p .# y = In (p .# y)
+  (.#) = \(In p) y -> In (p .# y)
   {-# inline (.#) #-}
