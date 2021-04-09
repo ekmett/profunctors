@@ -47,17 +47,22 @@ deriving stock instance (Foldable f, Foldable (p a)) => Foldable (Cayley f p a)
 deriving stock instance (Traversable f, Traversable (p a)) => Traversable (Cayley f p a)
 
 instance Functor f => ProfunctorFunctor (Cayley f) where
-  promap f = Cayley #. fmap f .# runCayley
+  promap = \f -> Cayley #. fmap f .# runCayley
+  {-# inline promap #-}
 
 -- | Cayley transforms Monads in @Hask@ into monads on @Prof@
 instance Monad f => ProfunctorMonad (Cayley f) where
   proreturn = Cayley #. return
-  projoin m = Cayley $ runCayley m >>= runCayley
+  {-# inline proreturn #-}
+  projoin = \m -> Cayley $ runCayley m >>= runCayley
+  {-# inline projoin #-}
 
 -- | Cayley transforms Comonads in @Hask@ into comonads on @Prof@
 instance Comonad f => ProfunctorComonad (Cayley f) where
   proextract = extract .# runCayley
+  {-# inline proextract #-}
   produplicate = Cayley #. extend Cayley .# runCayley
+  {-# inline produplicate #-}
 
 instance (Functor f, Profunctor p) => Profunctor (Cayley f p) where
   dimap = \f g -> Cayley #. fmap (dimap f g) .# runCayley
