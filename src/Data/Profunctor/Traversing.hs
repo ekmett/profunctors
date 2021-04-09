@@ -3,7 +3,6 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE Safe #-}
 module Data.Profunctor.Traversing

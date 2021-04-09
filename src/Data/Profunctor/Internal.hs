@@ -144,7 +144,7 @@ class (forall a. Functor (p a)) => Profunctor p where
   --
   -- @('Profuctor.Unsafe.#.') ≡ \\_ -> \\p -> p \`seq\` 'rmap' 'coerce' p@
   (#.) :: forall a b c q. Coercible c b => q b c -> p a b -> p a c
-  (#.) = \_ -> \p -> p `seq` rmap (coerce (id :: c -> c) :: b -> c) p
+  (#.) = \_ p -> p `seq` rmap (coerce (id :: c -> c) :: b -> c) p
   {-# INLINE (#.) #-}
 
   -- | Strictly map the first argument argument

@@ -1,30 +1,9 @@
-- extensions:
-  - default: false # all extension are banned by default
-  - name:
-    - CPP
-    - DeriveFunctor
-    - FlexibleContexts
-    - FlexibleInstances
-    - FunctionalDependencies
-    - GADTs
-    - InstanceSigs
-    - MultiParamTypeClasses
-    - PolyKinds
-    - RankNTypes
-    - Safe
-    - ScopedTypeVariables
-    - Trustworthy
-    - TypeFamilies
-    - TypeOperators
-    - UndecidableInstances
 
 - functions:
   - {name: unsafeCoerce, within: []} # banned
 
 - ignore:
     name: Use const
-    within:
-    - Data.Profunctor.Types
 
 - ignore:
     name: Avoid lambda
@@ -45,7 +24,6 @@
 
 - ignore:
     name: Redundant lambda
-    within: Data.Profunctor.Unsafe
 
 - ignore:
     name: Collapse lambdas
