@@ -196,7 +196,9 @@ instance (Applicative (Rep p), Representable p) => Applicative (Prep p) where
     go (xf',xa') = sieve pf xf' <*> sieve pa xa'
 
 instance (Monad (Rep p), Representable p) => Monad (Prep p) where
+#if !(MIN_VERSION_base(4,11,0))
   return a = Prep () $ tabulate $ const $ return a
+#endif
   Prep xa pa >>= f = Prep xa $ tabulate $ sieve pa >=> \a -> case f a of
     Prep xb pb -> sieve pb xb
 
