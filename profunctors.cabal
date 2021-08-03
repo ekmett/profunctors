@@ -43,7 +43,7 @@ library
     contravariant       >= 1.5.3   && < 2,
     distributive        >= 0.5.2   && < 1,
     tagged              >= 0.8.6.1 && < 1,
-    transformers        >= 0.3     && < 0.6
+    transformers        >= 0.3     && < 0.7
 
   if !impl(ghc >= 8.0)
     build-depends: semigroups >= 0.18.5 && < 0.20
