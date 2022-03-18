@@ -15,7 +15,7 @@
 ----------------------------------------------------------------------------
 module Data.Profunctor.Lan
   ( Lan(..)
-  -- , decomposeLan
+  , decomposeLan
   -- , precomposeLan
   -- , curryLan
   -- , uncurryLan
@@ -25,7 +25,7 @@ module Data.Profunctor.Lan
 
 import Control.Category
 import Data.Profunctor
--- import Data.Profunctor.Composition
+import Data.Profunctor.Composition
 -- import Data.Profunctor.Functor
 -- import Data.Profunctor.Monad
 -- import Data.Profunctor.Unsafe
@@ -76,12 +76,13 @@ instance p ~ q => Category (Lan p q) where
   Lan f . Lan g = Lan (g . f)
   {-# INLINE (.) #-}
 
--- -- | The 2-morphism that defines a left Kan extension.
--- --
--- -- Note: When @q@ is left adjoint to @'Lan' q (->)@ then 'decomposeLan' is the 'counit' of the adjunction.
--- decomposeLan :: Procompose (Lan q p) q :-> p
--- decomposeLan (Procompose (Lan qp) q) = qp q
--- {-# INLINE decomposeLan #-}
+-- | The 2-morphism that defines a left Kan extension.
+--
+-- Note: When @q@ is left adjoint to @'Lan' q (->)@ then 'decomposeLan' is the 'counit' of the adjunction.
+-- TODO: ^ Check that this still holds true (or do left adjoints become right adjoints or something)
+decomposeLan :: Procompose p (Lan p q) :-> q
+decomposeLan (Procompose p (Lan pq)) = pq p
+{-# INLINE decomposeLan #-}
 
 -- precomposeLan :: Profunctor q => Procompose q (Lan p (->)) :-> Lan p q
 -- precomposeLan (Procompose p pf) = Lan (\pxa -> runLan pf pxa `lmap` p)
