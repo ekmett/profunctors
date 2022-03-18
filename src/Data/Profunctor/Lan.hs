@@ -26,8 +26,8 @@ module Data.Profunctor.Lan
 import Control.Category
 import Data.Profunctor
 import Data.Profunctor.Composition
--- import Data.Profunctor.Functor
--- import Data.Profunctor.Monad
+import Data.Profunctor.Functor
+import Data.Profunctor.Monad
 -- import Data.Profunctor.Unsafe
 import Prelude hiding (id,(.))
 
@@ -46,12 +46,12 @@ import Prelude hiding (id,(.))
 -- Lan :: (k1 -> k2 -> Type) -> (k1 -> k3 -> Type) -> (k2 -> k3 -> Type)
 newtype Lan p q a b = Lan { runLan :: forall y. p b y -> q a y }
 
--- instance Profunctor p => ProfunctorFunctor (Lan p) where
---   promap f (Lan g) = Lan (f . g)
+instance Profunctor p => ProfunctorFunctor (Lan p) where
+  promap f (Lan g) = Lan (f . g)
 
--- instance (Profunctor p, Category p) => ProfunctorComonad (Lan p) where
---   proextract (Lan f) = f id
---   produplicate (Lan f) = Lan $ \ p -> Lan $ \q -> f (p . q)
+instance (Profunctor p, Category p) => ProfunctorComonad (Lan p) where
+  proextract (Lan f) = f id
+  produplicate (Lan f) = Lan $ \ p -> Lan $ \q -> f (q . p)
 
 instance (Profunctor p, Profunctor q) => Profunctor (Lan p q) where
   dimap ca bd f = Lan (lmap ca . runLan f . lmap bd)
