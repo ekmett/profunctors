@@ -17,8 +17,8 @@ module Data.Profunctor.Lan
   ( Lan(..)
   , decomposeLan
   -- , precomposeLan
-  -- , curryLan
-  -- , uncurryLan
+  , curryLan
+  , uncurryLan
   -- , Codensity(..)
   -- , decomposeCodensity
   ) where
@@ -88,13 +88,13 @@ decomposeLan (Procompose p (Lan pq)) = pq p
 -- precomposeLan (Procompose p pf) = Lan (\pxa -> runLan pf pxa `lmap` p)
 -- {-# INLINE precomposeLan #-}
 
--- curryLan :: (Procompose p q :-> r) -> p :-> Lan q r
--- curryLan f p = Lan $ \q -> f (Procompose p q)
--- {-# INLINE curryLan #-}
+curryLan :: (Procompose p q :-> r) -> q :-> Lan p r
+curryLan f q = Lan $ \p -> f (Procompose p q)
+{-# INLINE curryLan #-}
 
--- uncurryLan :: (p :-> Lan q r) -> Procompose p q :-> r
--- uncurryLan f (Procompose p q) = runLan (f p) q
--- {-# INLINE uncurryLan #-}
+uncurryLan :: (q :-> Lan p r) -> Procompose p q :-> r
+uncurryLan f (Procompose p q) = runLan (f q) p
+{-# INLINE uncurryLan #-}
 
 -- --------------------------------------------------------------------------------
 -- -- * Codensity
