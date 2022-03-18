@@ -28,7 +28,7 @@ import Data.Profunctor
 import Data.Profunctor.Composition
 import Data.Profunctor.Functor
 import Data.Profunctor.Monad
--- import Data.Profunctor.Unsafe
+import Data.Profunctor.Unsafe
 import Prelude hiding (id,(.))
 
 --------------------------------------------------------------------------------
@@ -60,10 +60,10 @@ instance (Profunctor p, Profunctor q) => Profunctor (Lan p q) where
   {-# INLINE lmap #-}
   rmap bd f = Lan (runLan f . lmap bd)
   {-# INLINE rmap #-}
-  -- bd #. f = Lan (\p -> bd #. runLan f p)
-  -- {-# INLINE (#.) #-}
-  -- f .# ca = Lan (\p -> runLan f (ca #. p))
-  -- {-# INLINE (.#) #-}
+  bd #. f = Lan (\p -> runLan f (p .# bd))
+  {-# INLINE (#.) #-}
+  f .# ca = Lan (\p -> runLan f p .# ca)
+  {-# INLINE (.#) #-}
 
 instance Profunctor p => Functor (Lan p q a) where
   fmap bd f = Lan (runLan f . lmap bd)
