@@ -19,8 +19,6 @@ module Data.Profunctor.Lan
   , postcomposeLan
   , curryLan
   , uncurryLan
-  -- , Codensity(..)
-  -- , decomposeCodensity
   ) where
 
 import Control.Category
@@ -93,42 +91,3 @@ curryLan f q = Lan $ \p -> f (Procompose p q)
 uncurryLan :: (q :-> Lan p r) -> Procompose p q :-> r
 uncurryLan f (Procompose p q) = runLan (f q) p
 {-# INLINE uncurryLan #-}
-
--- --------------------------------------------------------------------------------
--- -- * Codensity
--- --------------------------------------------------------------------------------
-
--- -- | This represents the right Kan extension of a 'Profunctor' @p@ along
--- -- itself. This provides a generalization of the \"difference list\" trick to
--- -- profunctors.
--- --
--- -- 'Codensity' has a polymorphic kind since @5.6@.
-
--- -- Codensity :: (k1 -> k2 -> Type) -> (k2 -> k2 -> Type)
--- newtype Codensity p a b = Codensity { runCodensity :: forall x. p x a -> p x b }
-
--- instance Profunctor p => Profunctor (Codensity p) where
---   dimap ca bd f = Codensity (rmap bd . runCodensity f . rmap ca)
---   {-# INLINE dimap #-}
---   lmap ca f = Codensity (runCodensity f . rmap ca)
---   {-# INLINE lmap #-}
---   rmap bd f = Codensity (rmap bd . runCodensity f)
---   {-# INLINE rmap #-}
---   bd #. f = Codensity (\p -> bd #. runCodensity f p)
---   {-# INLINE (#.) #-}
---   f .# ca = Codensity (\p -> runCodensity f (ca #. p))
---   {-# INLINE (.#) #-}
-
--- instance Profunctor p => Functor (Codensity p a) where
---   fmap bd f = Codensity (rmap bd . runCodensity f)
---   {-# INLINE fmap #-}
-
--- instance Category (Codensity p) where
---   id = Codensity id
---   {-# INLINE id #-}
---   Codensity f . Codensity g = Codensity (f . g)
---   {-# INLINE (.) #-}
-
--- decomposeCodensity :: Procompose (Codensity p) p a b -> p a b
--- decomposeCodensity (Procompose (Codensity pp) p) = pp p
--- {-# INLINE decomposeCodensity #-}
