@@ -16,7 +16,7 @@
 module Data.Profunctor.Lan
   ( Lan(..)
   , decomposeLan
-  -- , precomposeLan
+  , postcomposeLan
   , curryLan
   , uncurryLan
   -- , Codensity(..)
@@ -84,9 +84,9 @@ decomposeLan :: Procompose p (Lan p q) :-> q
 decomposeLan (Procompose p (Lan pq)) = pq p
 {-# INLINE decomposeLan #-}
 
--- precomposeLan :: Profunctor q => Procompose q (Lan p (->)) :-> Lan p q
--- precomposeLan (Procompose p pf) = Lan (\pxa -> runLan pf pxa `lmap` p)
--- {-# INLINE precomposeLan #-}
+postcomposeLan :: Profunctor q => Procompose (Lan p (->)) q :-> Lan p q
+postcomposeLan (Procompose pf q) = Lan (\pyb -> runLan pf pyb `rmap` q)
+{-# INLINE postcomposeLan #-}
 
 curryLan :: (Procompose p q :-> r) -> q :-> Lan p r
 curryLan f q = Lan $ \p -> f (Procompose p q)
