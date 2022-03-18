@@ -5,7 +5,7 @@
 {-# LANGUAGE Safe #-}
 -----------------------------------------------------------------------------
 -- |
--- Copyright   :  (C) 2013-2015 Edward Kmett and Dan Doel
+-- Copyright   :  (C) 2011-2022 Edward Kmett
 -- License     :  BSD-style (see the file LICENSE)
 --
 -- Maintainer  :  Edward Kmett <ekmett@gmail.com>
