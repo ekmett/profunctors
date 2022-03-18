@@ -69,12 +69,12 @@ instance Profunctor p => Functor (Lan p q a) where
   fmap bd f = Lan (runLan f . lmap bd)
   {-# INLINE fmap #-}
 
--- -- | @'Lan' p p@ forms a 'Monad' in the 'Profunctor' 2-category, which is isomorphic to a Haskell 'Category' instance.
--- instance p ~ q => Category (Lan p q) where
---   id = Lan id
---   {-# INLINE id #-}
---   Lan f . Lan g = Lan (f . g)
---   {-# INLINE (.) #-}
+-- | @'Lan' p p@ forms a 'Monad' in the 'Profunctor' 2-category, which is isomorphic to a Haskell 'Category' instance.
+instance p ~ q => Category (Lan p q) where
+  id = Lan id
+  {-# INLINE id #-}
+  Lan f . Lan g = Lan (g . f)
+  {-# INLINE (.) #-}
 
 -- -- | The 2-morphism that defines a left Kan extension.
 -- --
