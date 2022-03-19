@@ -1,3 +1,4 @@
+- arguments: [-XCPP]
 
 - functions:
   - {name: unsafeCoerce, within: []} # banned
