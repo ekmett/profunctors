@@ -1,3 +1,5 @@
+- arguments: [-XCPP]
+
 - extensions:
   - default: false # all extension are banned by default
   - name:
