@@ -1,4 +1,5 @@
 {-# LANGUAGE BlockArguments #-}
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE Safe #-}
 {-# LANGUAGE ViewPatterns #-}
 
@@ -17,7 +18,9 @@ module Data.Profunctor.Monoidal
 
 import Control.Arrow (Arrow(..), Kleisli(..))
 import Control.Comonad (Cokleisli(..))
-import Control.Applicative (Applicative(..))
+#if !MIN_VERSION_base(4,18,0)
+import Control.Applicative (Applicative(liftA2))
+#endif
 import Data.Bifunctor.Joker
 import Data.Bifunctor.Clown
 import Data.Bifunctor.Biff
