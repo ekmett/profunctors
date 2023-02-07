@@ -19,6 +19,8 @@ module Data.Profunctor.Strong
   , uncurry'
   , strong
   , lensVL
+  , splitStrong
+  , fanOut
   , Tambara(..)
   , tambara, untambara
   , Pastro(..)
@@ -105,6 +107,14 @@ strong f x = dimap (\a -> (a, a)) (\(b, a) -> f a b) (first' x)
 lensVL :: Strong p => (forall f. (a -> f b) -> s -> f t) -> p a b -> p s t
 lensVL l = dimap (getCompose #. l (\a -> Compose (a, id))) (uncurry (flip id)) . first'
 {-# INLINE lensVL #-}
+
+splitStrong :: (Category p, Strong p) => p a b -> p c d -> p (a, c) (b, d)
+splitStrong l r = first' l . second' r
+{-# INLINE splitStrong #-}
+
+fanOut :: (Category p, Strong p) => p a b -> p a c -> p a (b, c)
+fanOut l r = (l `splitStrong` r) . rmap (\a -> (a, a)) id
+{-# INLINE fanOut #-}
 
 instance Strong (->) where
   first' ab ~(a, c) = (ab a, c)
