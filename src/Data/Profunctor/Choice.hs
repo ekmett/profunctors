@@ -16,6 +16,8 @@ module Data.Profunctor.Choice
 (
 -- * Strength
   Choice(..)
+, splitChoice
+, fanIn
 , TambaraSum(..)
 , tambaraSum, untambaraSum
 , PastroSum(..)
@@ -99,6 +101,14 @@ class Profunctor p => Choice p where
   {-# inline right' #-}
 
   {-# MINIMAL left' | right' #-}
+
+splitChoice :: (Category p, Choice p) => p a b -> p c d -> p (Either a c) (Either b d)
+splitChoice l r = left' l . right' r
+{-# INLINE splitChoice #-}
+
+fanIn :: (Category p, Choice p) => p a c -> p b c -> p (Either a b) c
+fanIn l r = lmap (either id id) id . splitChoice l r
+{-# INLINE fanIn #-}
 
 instance Choice (->) where
   left' = \ab -> \case
