@@ -102,10 +102,18 @@ class Profunctor p => Choice p where
 
   {-# MINIMAL left' | right' #-}
 
+-- | When `p` is also an instance of `Category`, we can use it to process
+-- alternatively the components of a sum.
+--
+-- `splitStrong` is analogous to `Control.Arrow.+++`.
 splitChoice :: (Category p, Choice p) => p a b -> p c d -> p (Either a c) (Either b d)
 splitChoice l r = left' l . right' r
 {-# INLINE splitChoice #-}
 
+-- | When `p` is also an instance of `Category`, we can use it to process
+-- alternatively the components of a sum, obtaining a single output value.
+--
+-- `fanOut` is analogous to `Control.Arrow.|||`
 fanIn :: (Category p, Choice p) => p a c -> p b c -> p (Either a b) c
 fanIn l r = lmap (either id id) id . splitChoice l r
 {-# INLINE fanIn #-}
