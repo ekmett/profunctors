@@ -244,3 +244,14 @@ instance Semigroup r => Semigroup (Forget r a b) where
 instance Monoid r => Monoid (Forget r a b) where
   mempty = Forget mempty
   {-# INLINE mempty #-}
+
+-- | Via @Monoid r => (a -> r)@
+--
+-- >>> let printer = (,) <$> fst `lmap` Forget id <*> snd `lmap` Forget show
+-- >>> runForget printer ("string",True)
+-- "stringTrue"
+instance Monoid r => Applicative (Forget r a) where
+  pure _ = Forget mempty
+  {-# INLINE pure #-}
+  Forget f <*> Forget g = Forget (f <> g)
+  {-# INLINE (<*>) #-}
