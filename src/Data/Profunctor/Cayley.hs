@@ -1,7 +1,7 @@
-{-# LANGUAGE DeriveTraversable #-}
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE StandaloneDeriving #-}
@@ -21,11 +21,13 @@ import Control.Arrow as A
 import Control.Category
 import Control.Comonad
 import Data.Biapplicative
+import Data.Bifoldable
 import Data.Bifunctor as B
 import Data.Bifunctor.Functor
-import Data.Bifoldable
 import Data.Bitraversable
 import Data.Data
+import Data.Functor.Compose
+import Data.Kind
 import Data.Profunctor
 import Data.Profunctor.Functor
 import Data.Profunctor.Monad
@@ -45,6 +47,11 @@ newtype Cayley f p a b = Cayley { runCayley :: f (p a b) }
 deriving stock instance (Functor f, Functor (p a)) => Functor (Cayley f p a)
 deriving stock instance (Foldable f, Foldable (p a)) => Foldable (Cayley f p a)
 deriving stock instance (Traversable f, Traversable (p a)) => Traversable (Cayley f p a)
+
+deriving via Compose f (p a :: Type -> Type)
+  instance (Applicative f, Applicative (p a)) => Applicative (Cayley f p a)
+deriving via Compose f (p a :: Type -> Type)
+  instance (Alternative f, Applicative (p a)) => Alternative (Cayley f p a)
 
 instance Functor f => ProfunctorFunctor (Cayley f) where
   promap = \f -> Cayley #. fmap f .# runCayley

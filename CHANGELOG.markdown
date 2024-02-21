@@ -1,5 +1,6 @@
 6 [unreleased]
 --------------
+* `Applicative`, `Alternative` instances for `Cayley`
 * Removed support for GHC < 8.6
 * Inverted dependency between `distributive` v1 and `profunctors` v6
 * `Data.Profunctor.Mapping`, `Data.Profunctor.Closed`, `Data.Profunctor.Rep`
