@@ -21,7 +21,7 @@
 --
 -- For a good explanation of profunctors in Haskell see Dan Piponi's article:
 --
--- <http://blog.sigfpe.com/2011/07/profunctors-in-haskell.html>
+-- <https://github.com/dpiponi/StableBlog/blob/main/Profunctors/Profunctors.pdf>
 --
 -- This module includes /unsafe/ composition operators that are useful in
 -- practice when it comes to generating optimal core in GHC.
