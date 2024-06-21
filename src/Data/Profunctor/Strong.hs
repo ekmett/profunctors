@@ -380,6 +380,12 @@ instance Costrong (->) where
   unfirst f a = b where (b, d) = f (a, d)
   unsecond f a = b where (d, b) = f (d, a)
 
+instance MonadFix f => Costrong (Star f) where
+  unfirst (Star f) = Star $ \x -> fst <$> mfix (\ ~(_, y) -> f (x, y))
+  {-# INLINE unfirst #-}
+  unsecond (Star f) = Star $ \x -> snd <$> mfix (\ ~(y, _) -> f (y, x))
+  {-# INLINE unsecond #-}
+
 instance Functor f => Costrong (Costar f) where
   unfirst (Costar f) = Costar f'
     where f' fa = b where (b, d) = f ((\a -> (a, d)) <$> fa)
@@ -390,6 +396,7 @@ instance Costrong Tagged where
   unfirst (Tagged bd) = Tagged (fst bd)
   unsecond (Tagged db) = Tagged (snd db)
 
+-- | 'ArrowLoop' is a 'Costrong' 'Arrow'.
 instance ArrowLoop p => Costrong (WrappedArrow p) where
   unfirst (WrapArrow k) = WrapArrow (loop k)
 

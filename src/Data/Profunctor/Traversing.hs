@@ -22,7 +22,8 @@ module Data.Profunctor.Traversing
   ) where
 
 import Control.Applicative
-import Control.Arrow (Kleisli(..))
+import Control.Arrow
+import Control.Category
 import Data.Bifunctor.Tannen
 import Data.Functor.Compose
 import Data.Functor.Identity
@@ -35,6 +36,7 @@ import Data.Profunctor.Types
 import Data.Profunctor.Unsafe
 import Data.Traversable
 import Data.Tuple (swap)
+import Prelude hiding ((.), id)
 
 firstTraversing :: Traversing p => p a b -> p (a, c) (b, c)
 firstTraversing = dimap swap swap . traverse'
@@ -167,6 +169,42 @@ instance ProfunctorFunctor CofreeTraversing where
 instance ProfunctorComonad CofreeTraversing where
   proextract (CofreeTraversing p) = runIdentity #. p .# Identity
   produplicate (CofreeTraversing p) = CofreeTraversing (CofreeTraversing (dimap Compose getCompose p))
+
+instance Category p => Category (CofreeTraversing p) where
+  id = CofreeTraversing id
+  {-# INLINE id #-}
+  CofreeTraversing f . CofreeTraversing g = CofreeTraversing (f . g)
+  {-# INLINE (.) #-}
+
+instance (Category p, Profunctor p) => Arrow (CofreeTraversing p) where
+  arr f = lmap f id
+  {-# INLINE arr #-}
+  first = first'
+  {-# INLINE first #-}
+  second = second'
+  {-# INLINE second #-}
+  (***) = splitStrong
+  {-# INLINE (***) #-}
+  (&&&) = fanOut
+  {-# INLINE (&&&) #-}
+
+instance (ArrowZero p, Profunctor p) => ArrowZero (CofreeTraversing p) where
+  zeroArrow = CofreeTraversing zeroArrow
+  {-# INLINE zeroArrow #-}
+
+instance (ArrowPlus p, Profunctor p) => ArrowPlus (CofreeTraversing p) where
+  CofreeTraversing f <+> CofreeTraversing g = CofreeTraversing (f <+> g)
+  {-# INLINE (<+>) #-}
+
+instance (Category p, Profunctor p) => ArrowChoice (CofreeTraversing p) where
+  left = left'
+  {-# INLINE left #-}
+  right = right'
+  {-# INLINE right #-}
+  (+++) = splitChoice
+  {-# INLINE (+++) #-}
+  (|||) = fanIn
+  {-# INLINE (|||) #-}
 
 -- | @FreeTraversing -| CofreeTraversing@
 data FreeTraversing p a b where

@@ -18,11 +18,14 @@ module Data.Profunctor.Yoneda
   , Coyoneda(..), returnCoyoneda, joinCoyoneda
   ) where
 
+import Control.Arrow
 import Control.Category
 import Data.Coerce (Coercible, coerce)
 import Data.Profunctor
+import Data.Profunctor.Choice
 import Data.Profunctor.Functor
 import Data.Profunctor.Monad
+import Data.Profunctor.Strong
 import Data.Profunctor.Traversing
 import Data.Profunctor.Unsafe
 import Prelude hiding (id,(.))
@@ -121,6 +124,48 @@ instance Traversing p => Traversing (Yoneda p) where
   wander f = proreturn . wander f . extractYoneda
   {-# INLINE wander #-}
 
+instance (Arrow p, Profunctor p) => Arrow (Yoneda p) where
+  arr f = lmap f id
+  {-# INLINE arr #-}
+  first = promap unwrapArrow . first' . promap WrapArrow
+  {-# INLINE first #-}
+  second = promap unwrapArrow . second' . promap WrapArrow
+  {-# INLINE second #-}
+  p *** q = promap unwrapArrow $
+    splitStrong (promap WrapArrow p) (promap WrapArrow q)
+  {-# INLINE (***) #-}
+  p &&& q = promap unwrapArrow $
+    fanOut (promap WrapArrow p) (promap WrapArrow q)
+  {-# INLINE (&&&) #-}
+
+instance (ArrowZero p, Profunctor p) => ArrowZero (Yoneda p) where
+  zeroArrow = proreturn zeroArrow
+  {-# INLINE zeroArrow #-}
+
+instance (ArrowPlus p, Profunctor p) => ArrowPlus (Yoneda p) where
+  p <+> q = proreturn (extractYoneda p <+> extractYoneda q)
+  {-# INLINE (<+>) #-}
+
+instance (ArrowChoice p, Profunctor p) => ArrowChoice (Yoneda p) where
+  left = promap unwrapArrow . left' . promap WrapArrow
+  {-# INLINE left #-}
+  right = promap unwrapArrow . right' . promap WrapArrow
+  {-# INLINE right #-}
+  p +++ q = promap unwrapArrow
+    (splitChoice (promap WrapArrow p) (promap WrapArrow q))
+  {-# INLINE (+++) #-}
+  p ||| q = promap unwrapArrow
+    (fanIn (promap WrapArrow p) (promap WrapArrow q))
+  {-# INLINE (|||) #-}
+
+instance (ArrowApply p, Profunctor p) => ArrowApply (Yoneda p) where
+  app = proreturn $ lmap (first extractYoneda) app
+  {-# INLINE app #-}
+
+instance (ArrowLoop p, Profunctor p) => ArrowLoop (Yoneda p) where
+  loop = promap unwrapArrow . unfirst . promap WrapArrow
+  {-# INLINE loop #-}
+
 --------------------------------------------------------------------------------
 -- * Coyoneda
 --------------------------------------------------------------------------------
@@ -214,3 +259,45 @@ instance Traversing p => Traversing (Coyoneda p) where
   {-# INLINE traverse' #-}
   wander f = returnCoyoneda . wander f . proextract
   {-# INLINE wander #-}
+
+instance (Arrow p, Profunctor p) => Arrow (Coyoneda p) where
+  arr f = lmap f id
+  {-# INLINE arr #-}
+  first = promap unwrapArrow . first' . promap WrapArrow
+  {-# INLINE first #-}
+  second = promap unwrapArrow . second' . promap WrapArrow
+  {-# INLINE second #-}
+  p *** q = promap unwrapArrow $
+    splitStrong (promap WrapArrow p) (promap WrapArrow q)
+  {-# INLINE (***) #-}
+  p &&& q = promap unwrapArrow $
+    fanOut (promap WrapArrow p) (promap WrapArrow q)
+  {-# INLINE (&&&) #-}
+
+instance (ArrowZero p, Profunctor p) => ArrowZero (Coyoneda p) where
+  zeroArrow = returnCoyoneda zeroArrow
+  {-# INLINE zeroArrow #-}
+
+instance (ArrowPlus p, Profunctor p) => ArrowPlus (Coyoneda p) where
+  p <+> q = returnCoyoneda (proextract p <+> proextract q)
+  {-# INLINE (<+>) #-}
+
+instance (ArrowChoice p, Profunctor p) => ArrowChoice (Coyoneda p) where
+  left = promap unwrapArrow . left' . promap WrapArrow
+  {-# INLINE left #-}
+  right = promap unwrapArrow . right' . promap WrapArrow
+  {-# INLINE right #-}
+  p +++ q = promap unwrapArrow $
+    splitChoice (promap WrapArrow p) (promap WrapArrow q)
+  {-# INLINE (+++) #-}
+  p ||| q = promap unwrapArrow $
+    fanIn (promap WrapArrow p) (promap WrapArrow q)
+  {-# INLINE (|||) #-}
+
+instance (ArrowApply p, Profunctor p) => ArrowApply (Coyoneda p) where
+  app = returnCoyoneda $ lmap (first proextract) app
+  {-# INLINE app #-}
+
+instance (ArrowLoop p, Profunctor p) => ArrowLoop (Coyoneda p) where
+  loop = promap unwrapArrow . unfirst . promap WrapArrow
+  {-# INLINE loop #-}
