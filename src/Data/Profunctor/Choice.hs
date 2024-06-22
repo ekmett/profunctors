@@ -153,6 +153,7 @@ instance Choice Tagged where
   right' = \(Tagged b) -> Tagged (Right b)
   {-# inline right' #-}
 
+-- | 'ArrowChoice' is a 'Choice' 'Arrow'.
 instance ArrowChoice p => Choice (WrappedArrow p) where
   left' = \(WrapArrow k) -> WrapArrow (left k)
   {-# inline left' #-}
@@ -199,7 +200,7 @@ instance Choice p => Choice (Tambara p) where
       hither = \case
         (Left y, s) -> Left (y, s)
         (Right z, s) -> Right (z, s)
-  
+
       yon :: Either (a, c) (b, c) -> (Either a b, c)
       yon = \case
         Left (y, s) -> (Left y, s)
@@ -231,7 +232,7 @@ instance ProfunctorComonad TambaraSum where
       hither (Left (Left x))   = Left x
       hither (Left (Right y))  = Right (Left y)
       hither (Right z)         = Right (Right z)
-  
+
       yon    :: Either a (Either b c) -> Either (Either a b) c
       yon    (Left x)          = Left (Left x)
       yon    (Right (Left y))  = Left (Right y)
@@ -247,10 +248,98 @@ instance Profunctor p => Choice (TambaraSum p) where
   left' = \p -> runTambaraSum $ produplicate p
   {-# inline left' #-}
 
+instance Strong p => Strong (TambaraSum p) where
+  first' (TambaraSum f) = TambaraSum $ dimap hither yon $ first' f
+    where
+      hither :: Either (a, b) c -> (Either a c, Either b c)
+      hither (Left (a, b)) = (Left a, Left b)
+      hither (Right c) = (Right c, Right c)
+
+      yon :: (Either a c, Either b c) -> Either (a, b) c
+      yon (Left a, Left b) = Left (a, b)
+      yon (Right c, _) = Right c
+      yon (_, Right c) = Right c
+  {-# INLINE first' #-}
+
+  second' (TambaraSum f) = TambaraSum $ dimap hither yon $ second' f
+    where
+      hither :: Either (a, b) c -> (Either a c, Either b c)
+      hither (Left (a, b)) = (Left a, Left b)
+      hither (Right c) = (Right c, Right c)
+
+      yon :: (Either a c, Either b c) -> Either (a, b) c
+      yon (Left a, Left b) = Left (a, b)
+      yon (Right c, _) = Right c
+      yon (_, Right c) = Right c
+  {-# INLINE second' #-}
+
+instance Costrong p => Costrong (TambaraSum p) where
+  unfirst (TambaraSum f) = TambaraSum $ unfirst $ dimap hither yon f
+    where
+      hither :: (Either a c, Either b c) -> Either (a, b) c
+      hither (Left a, Left b) = Left (a, b)
+      hither (Right c, _) = Right c
+      hither (_, Right c) = Right c
+
+      yon :: Either (a, b) c -> (Either a c, Either b c)
+      yon (Left (a, b)) = (Left a, Left b)
+      yon (Right c) = (Right c, Right c)
+  {-# INLINE unfirst #-}
+
+  unsecond (TambaraSum f) = TambaraSum $ unsecond $ dimap hither yon f
+    where
+      hither :: (Either a c, Either b c) -> Either (a, b) c
+      hither (Left a, Left b) = Left (a, b)
+      hither (Right c, _) = Right c
+      hither (_, Right c) = Right c
+
+      yon :: Either (a, b) c -> (Either a c, Either b c)
+      yon (Left (a, b)) = (Left a, Left b)
+      yon (Right c) = (Right c, Right c)
+  {-# INLINE unsecond #-}
+
 instance Category p => Category (TambaraSum p) where
   id = TambaraSum id
   (.) = \(TambaraSum p) (TambaraSum q) -> TambaraSum (p . q)
   {-# inline (.) #-}
+
+instance Arrow p => Arrow (TambaraSum p) where
+  arr f = promap unwrapArrow $ lmap f id
+  {-# INLINE arr #-}
+  first (TambaraSum f) = promap unwrapArrow $ first' (TambaraSum $ WrapArrow f)
+  {-# INLINE first #-}
+  second (TambaraSum f) = promap unwrapArrow $ second' (TambaraSum $ WrapArrow f)
+  {-# INLINE second #-}
+  TambaraSum f *** TambaraSum g = promap unwrapArrow
+    $ splitStrong (TambaraSum $ WrapArrow f) (TambaraSum $ WrapArrow g)
+  {-# INLINE (***) #-}
+  TambaraSum f &&& TambaraSum g = promap unwrapArrow
+    $ fanOut (TambaraSum $ WrapArrow f) (TambaraSum $ WrapArrow g)
+  {-# INLINE (&&&) #-}
+
+instance ArrowZero p => ArrowZero (TambaraSum p) where
+  zeroArrow = TambaraSum zeroArrow
+  {-# INLINE zeroArrow #-}
+
+instance ArrowPlus p => ArrowPlus (TambaraSum p) where
+  TambaraSum p <+> TambaraSum q = TambaraSum (p <+> q)
+  {-# INLINE (<+>) #-}
+
+instance Arrow p => ArrowChoice (TambaraSum p) where
+  left (TambaraSum f) = promap unwrapArrow $ left' (TambaraSum $ WrapArrow f)
+  {-# INLINE left #-}
+  right (TambaraSum f) = promap unwrapArrow $ right' (TambaraSum $ WrapArrow f)
+  {-# INLINE right #-}
+  TambaraSum f +++ TambaraSum g = promap unwrapArrow
+    $ splitChoice (TambaraSum $ WrapArrow f) (TambaraSum $ WrapArrow g)
+  {-# INLINE (+++) #-}
+  TambaraSum f ||| TambaraSum g = promap unwrapArrow
+    $ fanIn (TambaraSum $ WrapArrow f) (TambaraSum $ WrapArrow g)
+  {-# INLINE (|||) #-}
+
+instance (Arrow p, Costrong p) => ArrowLoop (TambaraSum p) where
+  loop = unfirst
+  {-# INLINE loop #-}
 
 instance Profunctor p => Functor (TambaraSum p a) where
   fmap = rmap
@@ -310,7 +399,7 @@ instance ProfunctorFunctor PastroSum where
 instance ProfunctorMonad PastroSum where
   proreturn = \p -> PastroSum fromEither p Left
   projoin = \(PastroSum l (PastroSum m n o) q) ->
-    let 
+    let
       oq a = case q a of
         Left b -> Left <$> o b
         Right z -> Right (Right z)
@@ -326,12 +415,34 @@ instance Choice (PastroSum p) where
       l' (Right (Left z))  = Left (l (Right z))
       l' (Right (Right c)) = Right c
     in PastroSum l' m r'
-  right' = \(PastroSum l m r) -> let 
+
+  right' = \(PastroSum l m r) -> let
       r' = either (Right . Left) (fmap Right . r)
       l' (Right (Left c))  = Left c
       l' (Right (Right z)) = Right (l (Right z))
       l' (Left y)          = Right (l (Left y))
     in PastroSum l' m r'
+
+instance Strong p => Strong (PastroSum p) where
+  first' (PastroSum l m r) = PastroSum l' m' r'
+    where
+      l' (Left (a, c)) = (l (Left a), c)
+      l' (Right (b, c)) = (l (Right b), c)
+      m' = first' m
+      r' (e, c) = case r e of
+        Left a -> Left (a, c)
+        Right b -> Right (b, c)
+  {-# INLINE first' #-}
+
+  second' (PastroSum l m r) = PastroSum l' m' r'
+    where
+      l' (Left (c, a)) = (c, l (Left a))
+      l' (Right (c, b)) = (c, l (Right b))
+      m' = second' m
+      r' (c, e) = case r e of
+        Left a -> Left (c, a)
+        Right b -> Right (c, b)
+  {-# INLINE second' #-}
 
 --------------------------------------------------------------------------------
 -- * Costrength for Either

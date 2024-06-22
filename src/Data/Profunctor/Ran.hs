@@ -76,6 +76,18 @@ instance p ~ q => Category (Ran p q) where
   Ran f . Ran g = Ran (f . g)
   {-# INLINE (.) #-}
 
+instance (Strong p, Costrong q) => Costrong (Ran p q) where
+  unfirst (Ran h) = Ran $ unfirst . h . first'
+  {-# INLINE unfirst #-}
+  unsecond (Ran h) = Ran $ unsecond . h . second'
+  {-# INLINE unsecond #-}
+
+instance (Choice p, Cochoice q) => Cochoice (Ran p q) where
+  unleft (Ran h) = Ran $ unleft . h . left'
+  {-# INLINE unleft #-}
+  unright (Ran h) = Ran $ unright . h . right'
+  {-# INLINE unright #-}
+
 -- | The 2-morphism that defines a right Kan extension.
 --
 -- Note: When @q@ is left adjoint to @'Ran' q (->)@ then 'decomposeRan' is the 'counit' of the adjunction.
@@ -129,6 +141,18 @@ instance Category (Codensity p) where
   {-# INLINE id #-}
   Codensity f . Codensity g = Codensity (f . g)
   {-# INLINE (.) #-}
+
+instance (Strong p, Costrong p) => Costrong (Codensity p) where
+  unfirst (Codensity h) = Codensity $ unfirst . h . first'
+  {-# INLINE unfirst #-}
+  unsecond (Codensity h) = Codensity $ unsecond . h . second'
+  {-# INLINE unsecond #-}
+
+instance (Choice p, Cochoice p) => Cochoice (Codensity p) where
+  unleft (Codensity h) = Codensity $ unleft . h . left'
+  {-# INLINE unleft #-}
+  unright (Codensity h) = Codensity $ unright . h . right'
+  {-# INLINE unright #-}
 
 decomposeCodensity :: Procompose (Codensity p) p a b -> p a b
 decomposeCodensity (Procompose (Codensity pp) p) = pp p

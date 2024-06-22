@@ -82,6 +82,55 @@ instance Monoidal p => ProfunctorMonad (Day p) where
       q
   {-# inline projoin #-}
 
+-- | Use @q@'s strength. To use @p@'s strength see 'swapped'.
+instance (Profunctor p, Strong q) => Strong (Day p q) where
+  first' (Day f g p q) = Day
+    (\(f -> (a, c), x) -> (a, (c, x)))
+    (\(b, (d, x)) -> (g (b, d), x))
+    p
+    (first' q)
+  {-# INLINE first' #-}
+
+  second' (Day f g p q) = Day
+    (\(x, f -> (a, c)) -> (a, (x, c)))
+    (\(b, (x, d)) -> (x, g (b, d)))
+    p
+    (second' q)
+  {-# INLINE second' #-}
+
+instance (Choice p, Choice q) => Choice (Day p q) where
+  left' (Day f g p q) = Day
+    (hither . left' f)
+    (left' g . yon)
+    (left' p)
+    (left' q)
+    where
+      hither :: Either (a, b) c -> (Either a c, Either b c)
+      hither (Left (a, b)) = (Left a, Left b)
+      hither (Right c) = (Right c, Right c)
+
+      yon :: (Either a c, Either b c) -> Either (a, b) c
+      yon (Left a, Left b) = Left (a, b)
+      yon (Right c, _) = Right c
+      yon (_, Right c) = Right c
+  {-# INLINE left' #-}
+
+  right' (Day f g p q) = Day
+    (hither . right' f)
+    (right' g . yon)
+    (right' p)
+    (right' q)
+    where
+      hither :: Either c (a, b) -> (Either c a, Either c b)
+      hither (Right (a, b)) = (Right a, Right b)
+      hither (Left c) = (Left c, Left c)
+
+      yon :: (Either c a, Either c b) -> Either c (a, b)
+      yon (Right a, Right b) = Right (a, b)
+      yon (Left c, _) = Left c
+      yon (_, Left c) = Left c
+  {-# INLINE right' #-}
+
 assoc :: Day (Day p q) r :-> Day p (Day q r)
 assoc = \(Day i h (Day g f p q) r) -> Day
   (\(i -> (g -> (a1,c1), c)) -> (a1, (c1, c)))

@@ -34,6 +34,7 @@ import Control.Arrow
 import Control.Category
 import Control.Comonad
 import Control.Monad (MonadPlus(..), (>=>))
+import Control.Monad.Fix
 import Data.Bifunctor.Functor ((:->))
 import Data.Coerce (Coercible, coerce)
 import Data.Foldable
@@ -93,6 +94,40 @@ instance Monad f => Category (Star f) where
   id = Star return
   Star f . Star g = Star $ g >=> f
 
+instance Monad f => Arrow (Star f) where
+  arr f = Star (pure . f)
+  {-# INLINE arr #-}
+  first (Star f) = Star $ \ ~(a, c) -> (\b' -> (b', c)) <$> f a
+  {-# INLINE first #-}
+  second (Star f) = Star $ \ ~(c, a) -> (,) c <$> f a
+  {-# INLINE second #-}
+  Star f *** Star g = Star $ \ ~(x, y) -> liftA2 (flip (,)) (g y) (f x)
+  {-# INLINE (***) #-}
+  Star f &&& Star g = Star $ \ x -> liftA2 (flip (,)) (g x) (f x)
+  {-# INLINE (&&&) #-}
+
+instance MonadPlus f => ArrowZero (Star f) where
+  zeroArrow = Star $ \_ -> mzero
+  {-# INLINE zeroArrow #-}
+
+instance MonadPlus f => ArrowPlus (Star f) where
+  Star f <+> Star g = Star $ \x -> mplus (f x) (g x)
+  {-# INLINE (<+>) #-}
+
+instance Monad f => ArrowChoice (Star f) where
+  left (Star f) = Star $ either (fmap Left . f) (pure . Right)
+  {-# INLINE left #-}
+  right (Star f) = Star $ either (pure . Left) (fmap Right . f)
+  {-# INLINE right #-}
+
+instance Monad f => ArrowApply (Star f) where
+  app = Star $ \ ~(Star f, x) -> f x
+  {-# INLINE app #-}
+
+instance MonadFix f => ArrowLoop (Star f) where
+  loop (Star f) = Star $ \x -> fst <$> mfix (\ ~(_, y) -> f (x, y))
+  {-# INLINE loop #-}
+
 instance Contravariant f => Contravariant (Star f a) where
   contramap f (Star g) = Star (contramap f . g)
   {-# INLINE contramap #-}
@@ -136,11 +171,25 @@ instance Monad (Costar f a) where
   return = pure
   Costar m >>= f = Costar $ \ x -> runCostar (f (m x)) x
 
+instance Comonad f => Category (Costar f) where
+  id = Costar extract
+  {-# INLINE id #-}
+  Costar f . Costar g = Costar (f =<= g)
+  {-# INLINE (.) #-}
+
 ------------------------------------------------------------------------------
 -- Wrapped Profunctors
 ------------------------------------------------------------------------------
 
--- | Wrap an arrow for use as a 'Profunctor'.
+-- | This newtype allows 'Profunctor' classes to be used with types that only
+-- implement @base@'s arrow classes.
+--
+-- - 'Arrow' is equivalent to 'Category'
+--   && t'Data.Profunctor.Strong.Strong'.
+-- - 'ArrowChoice' is equivalent to 'Category'
+--   && t'Data.Profunctor.Strong.Strong' && t'Data.Profunctor.Choice.Choice'.
+-- - 'ArrowLoop' is equivalent to 'Category'
+--   && t'Data.Profunctor.Strong.Strong' && t'Data.Profunctor.Strong.Costrong'.
 --
 -- 'WrappedArrow' has a polymorphic kind since @5.6@.
 
@@ -172,6 +221,10 @@ instance Arrow p => Arrow (WrappedArrow p) where
 instance ArrowZero p => ArrowZero (WrappedArrow p) where
   zeroArrow = WrapArrow zeroArrow
   {-# INLINE zeroArrow #-}
+
+instance ArrowPlus p => ArrowPlus (WrappedArrow p) where
+  WrapArrow p <+> WrapArrow q = WrapArrow (p <+> q)
+  {-# INLINE (<+>) #-}
 
 instance ArrowChoice p => ArrowChoice (WrappedArrow p) where
   left = WrapArrow . left . unwrapArrow

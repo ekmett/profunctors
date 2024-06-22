@@ -252,6 +252,18 @@ instance p ~ q => Category (Rift p q) where
   Rift f . Rift g = Rift (g . f)
   {-# INLINE (.) #-}
 
+instance (Strong p, Costrong q) => Costrong (Rift p q) where
+  unfirst (Rift h) = Rift $ unfirst . h . first'
+  {-# INLINE unfirst #-}
+  unsecond (Rift h) = Rift $ unsecond . h . second'
+  {-# INLINE unsecond #-}
+
+instance (Choice p, Cochoice q) => Cochoice (Rift p q) where
+  unleft (Rift h) = Rift $ unleft . h . left'
+  {-# INLINE unleft #-}
+  unright (Rift h) = Rift $ unright . h . right'
+  {-# INLINE unright #-}
+
 -- | The 2-morphism that defines a left Kan lift.
 --
 -- Note: When @p@ is right adjoint to @'Rift' p (->)@ then 'decomposeRift' is the 'counit' of the adjunction.
