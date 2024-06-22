@@ -12,7 +12,36 @@
 * Re-export Data.Bifunctor.Functor's (:->) rather than supply our own
   so the two definitions do not conflict.
 * Added fixpoints of ProfunctorFunctors.
-* Add `instance Monoid r => Applicative (Forget r a)`.
+* Added `instance Monoid r => Applicative (Forget r a)`.
+* Added a number of (co)strength instances:
+  * `MonadFix f => Costrong (Star f)`
+  * `Strong p => Strong (TambaraSum p)`
+  * `Costrong p => Costrong (TambaraSum p)`
+  * `Strong p => Strong (PastroSum p)`
+  * `(Strong p, Costrong q) => Costrong (Rift p q)`
+  * `(Choice p, Cochoice q) => Cochoice (Rift p q)`
+  * `(Strong p, Costrong q) => Costrong (Ran p q)`
+  * `(Choice p, Cochoice q) => Cochoice (Ran p q)`
+  * `(Strong p, Costrong p) => Costrong (Codensity p)`
+  * `(Choice p, Cochoice p) => Cochoice (Codensity p)`
+  * `(Profunctor p, Strong q) => Strong (Day p q)`
+  * `(Choice p, Choice q) => Choice (Day p q)`
+* Added `Arrow`, `ArrowChoice`, and `ArrowLoop` instances to all types that have appropriate (co)strength.
+* Added `ArrowPlus p => ArrowPlus (WrappedArrow p)`
+* Added other arrow isntances:
+  * `MonadPlus f => ArrowZero (Star f)`
+  * `MonadPlus f => ArrowPlus (Star f)`
+  * `Monad f => ArrowApply (Star f)`
+  * `(ArrowZero p, Profunctor p) => ArrowZero (CofreeTraversing p)`
+  * `(ArrowPlus p, Profunctor p) => ArrowPlus (CofreeTraversing p)`
+  * `ArrowZero p => ArrowZero (TambaraSum p)`
+  * `ArrowPlus p => ArrowPlus (TambaraSum p)`
+  * `(ArrowZero p, Profunctor p) => ArrowZero (Yoneda p)`
+  * `(ArrowPlus p, Profunctor p) => ArrowPlus (Yoneda p)`
+  * `(ArrowApply p, Profunctor p) => ArrowApply (Yoneda p)`
+  * `(ArrowZero p, Profunctor p) => ArrowZero (Coyoneda p)`
+  * `(ArrowPlus p, Profunctor p) => ArrowPlus (Coyoneda p)`
+  * `(ArrowApply p, Profunctor p) => ArrowApply (Coyoneda p)`
 
 5.6.2 [2021.02.17]
 ------------------

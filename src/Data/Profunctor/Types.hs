@@ -181,16 +181,15 @@ instance Comonad f => Category (Costar f) where
 -- Wrapped Profunctors
 ------------------------------------------------------------------------------
 
--- |
+-- | This newtype allows 'Profunctor' classes to be used with types that only
+-- implement @base@'s arrow classes.
+--
 -- - 'Arrow' is equivalent to 'Category'
 --   && t'Data.Profunctor.Strong.Strong'.
 -- - 'ArrowChoice' is equivalent to 'Category'
 --   && t'Data.Profunctor.Strong.Strong' && t'Data.Profunctor.Choice.Choice'.
 -- - 'ArrowLoop' is equivalent to 'Category'
 --   && t'Data.Profunctor.Strong.Strong' && t'Data.Profunctor.Strong.Costrong'.
---
--- This newtype allows 'Profunctor' classes to be used with types that only
--- implement @base@'s arrow classes.
 --
 -- 'WrappedArrow' has a polymorphic kind since @5.6@.
 
