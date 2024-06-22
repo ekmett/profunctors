@@ -28,7 +28,7 @@
   * `(Choice p, Choice q) => Choice (Day p q)`
 * Added `Arrow`, `ArrowChoice`, and `ArrowLoop` instances to all types that have appropriate (co)strength.
 * Added `ArrowPlus p => ArrowPlus (WrappedArrow p)`
-* Added other arrow isntances:
+* Added other arrow instances:
   * `MonadPlus f => ArrowZero (Star f)`
   * `MonadPlus f => ArrowPlus (Star f)`
   * `Monad f => ArrowApply (Star f)`
