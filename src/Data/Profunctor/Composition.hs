@@ -63,7 +63,7 @@ type Iso s t a b = forall p f. (Profunctor p, Functor f) => p a (f b) -> p s (f 
 -- For a good explanation of 'Profunctor' composition in Haskell
 -- see Dan Piponi's article:
 --
--- <http://blog.sigfpe.com/2011/07/profunctors-in-haskell.html>
+-- <https://github.com/dpiponi/StableBlog/blob/main/Profunctors/Profunctors.pdf>
 --
 -- 'Procompose' has a polymorphic kind since @5.6@.
 

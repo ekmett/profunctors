@@ -14,7 +14,7 @@
 --
 -- For a good explanation of profunctors in Haskell see Dan Piponi's article:
 --
--- <http://blog.sigfpe.com/2011/07/profunctors-in-haskell.html>
+-- <https://github.com/dpiponi/StableBlog/blob/main/Profunctors/Profunctors.pdf>
 --
 -- For more information on strength and costrength, see:
 --
