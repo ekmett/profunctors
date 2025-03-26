@@ -105,7 +105,9 @@ class Profunctor p => Choice p where
 -- | When `p` is also an instance of `Category`, we can use it to process
 -- alternatively the components of a sum.
 --
--- `splitStrong` is analogous to `Control.Arrow.+++`.
+-- `splitChoice` has a type signature similar to `Control.Arrow.+++`, but keep
+-- in mind that there could be profunctors `p` with an instance for `Category`
+-- and `Choice` but without a lawful instance for `ArrowChoice`.
 splitChoice :: (Category p, Choice p) => p a b -> p c d -> p (Either a c) (Either b d)
 splitChoice l r = left' l . right' r
 {-# INLINE splitChoice #-}
@@ -113,7 +115,9 @@ splitChoice l r = left' l . right' r
 -- | When `p` is also an instance of `Category`, we can use it to process
 -- alternatively the components of a sum, obtaining a single output value.
 --
--- `fanOut` is analogous to `Control.Arrow.|||`
+-- `fanIn` has a type signature similar to `Control.Arrow.|||`, but keep
+-- in mind that there could be profunctors `p` with an instance for `Category`
+-- and `Choice` but without a lawful instance for `ArrowChoice`.
 fanIn :: (Category p, Choice p) => p a c -> p b c -> p (Either a b) c
 fanIn l r = lmap (either id id) id . splitChoice l r
 {-# INLINE fanIn #-}

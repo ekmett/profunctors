@@ -111,7 +111,11 @@ lensVL l = dimap (getCompose #. l (\a -> Compose (a, id))) (uncurry (flip id)) .
 -- | When `p` is also an instance of `Category`, we can use it to process
 -- independently the items of a tuple.
 --
--- `splitStrong` is analogous to `Control.Arrow.***`.
+-- `splitStrong` has a type signature similar to `Control.Arrow.***`, but using
+-- it to define an `Arrow` instance could lead to an unlawful instance.
+-- A counter-example of a profunctor `p` having instances for `Category` and
+-- `Strong` but with an unlawful instance for `Arrow` is presented in
+-- https://www.eyrie.org/~zednenem/2017/07/twist.
 splitStrong :: (Category p, Strong p) => p a b -> p c d -> p (a, c) (b, d)
 splitStrong l r = first' l . second' r
 {-# INLINE splitStrong #-}
@@ -120,7 +124,10 @@ splitStrong l r = first' l . second' r
 -- the input and feed it into two independent computations, collecting the
 -- outputs into a tuple.
 --
--- `fanOut` is analogous to `Control.Arrow.&&&`
+-- `fanOut` has a type signature similar to `Control.Arrow.&&&`, but bear in
+-- mind that there could be profunctors `p` having instances for `Category` and
+-- `Strong` but with an unlawful instance for `Arrow`. A counter-example is
+-- presented in https://www.eyrie.org/~zednenem/2017/07/twist.
 fanOut :: (Category p, Strong p) => p a b -> p a c -> p a (b, c)
 fanOut l r = (l `splitStrong` r) . rmap (\a -> (a, a)) id
 {-# INLINE fanOut #-}
