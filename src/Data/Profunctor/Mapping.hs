@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE DeriveFunctor #-}
@@ -36,9 +35,6 @@ import Data.Profunctor.Strong
 import Data.Profunctor.Traversing
 import Data.Profunctor.Types
 import Data.Profunctor.Unsafe
-#if __GLASGOW_HASKELL__ < 710
-import Control.Applicative
-#endif
 
 class (Traversing p, Closed p) => Mapping p where
   -- | Laws:
@@ -68,21 +64,7 @@ instance Mapping (->) where
 
 instance (Monad m, Distributive m) => Mapping (Kleisli m) where
   map' (Kleisli f) = Kleisli (collect f)
-#if __GLASGOW_HASKELL__ >= 710
   roam f = Kleisli #. genMap f .# runKleisli
-#else
-  -- We could actually use this implementation everywhere, but it's kind of a
-  -- warty mess, and there have been rumblings of WrappedMonad deprecation.
-  -- If/when GHC 7.8 moves out of the support window, this will vanish in a
-  -- puff of cleanup.
-  roam f = (Kleisli . (unwrapMonad .)) #. genMapW f .# ((WrapMonad .) . runKleisli)
-    where
-      genMapW
-        :: (Monad m, Distributive m)
-        => ((a -> b) -> s -> t)
-        -> (a -> WrappedMonad m b) -> s -> WrappedMonad m t
-      genMapW abst amb s = WrapMonad $ (\ab -> abst ab s) <$> distribute (unwrapMonad #. amb)
-#endif
 
 genMap :: Distributive f => ((a -> b) -> s -> t) -> (a -> f b) -> s -> f t
 genMap abst afb s = fmap (\ab -> abst ab s) (distribute afb)

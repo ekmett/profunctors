@@ -45,10 +45,6 @@ import Data.Profunctor.Unsafe
 import Data.Traversable
 import Prelude hiding (id,(.))
 
-#if !(MIN_VERSION_base(4,8,0))
-import Data.Monoid (Monoid(..))
-#endif
-
 #if !(MIN_VERSION_base(4,11,0))
 import Data.Semigroup (Semigroup(..))
 #endif
@@ -97,9 +93,6 @@ instance Alternative f => Alternative (Star f a) where
   Star f <|> Star g = Star $ \a -> f a <|> g a
 
 instance Monad f => Monad (Star f a) where
-#if __GLASGOW_HASKELL__ < 710
-  return a = Star $ \_ -> return a
-#endif
   Star m >>= f = Star $ \ e -> do
     a <- m e
     runStar (f a) e

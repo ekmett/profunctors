@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeOperators #-}
@@ -57,11 +56,7 @@ class ProfunctorFunctor t => ProfunctorMonad t where
   proreturn :: Profunctor p => p :-> t p
   projoin   :: Profunctor p => t (t p) :-> t p
 
-#if __GLASGOW_HASKELL__ < 710
-instance (Functor f, Monad f) => ProfunctorMonad (Tannen f) where
-#else
 instance Monad f => ProfunctorMonad (Tannen f) where
-#endif
   proreturn = Tannen . return
   projoin (Tannen m) = Tannen $ m >>= runTannen
 

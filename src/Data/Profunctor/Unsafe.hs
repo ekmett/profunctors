@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE Trustworthy #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 -----------------------------------------------------------------------------
@@ -41,9 +40,6 @@ import Data.Bifunctor.Product (Product(..))
 import Data.Bifunctor.Sum (Sum(..))
 import Data.Bifunctor.Tannen (Tannen(..))
 import Data.Coerce (Coercible, coerce)
-#if __GLASGOW_HASKELL__ < 710
-import Data.Functor
-#endif
 import Data.Functor.Contravariant (Contravariant(..))
 import Data.Tagged
 import Prelude hiding (id,(.))

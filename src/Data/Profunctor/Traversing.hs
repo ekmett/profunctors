@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE DeriveFunctor #-}
@@ -32,12 +31,6 @@ import Data.Profunctor.Types
 import Data.Profunctor.Unsafe
 import Data.Traversable
 import Data.Tuple (swap)
-
-#if __GLASGOW_HASKELL__ < 710
-import Data.Monoid (Monoid)
-import Data.Foldable
-import Prelude hiding (mapM)
-#endif
 
 firstTraversing :: Traversing p => p a b -> p (a, c) (b, c)
 firstTraversing = dimap swap swap . traverse'
