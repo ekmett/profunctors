@@ -101,7 +101,7 @@ class (forall a. Functor (p a)) => Profunctor p where
   --
   -- @'dimap' f g ≡ 'lmap' f '.' 'rmap' g@
   dimap :: (a -> b) -> (c -> d) -> p b c -> p a d
-  dimap f g = lmap f . rmap g
+  dimap f g = lmap f . fmap g
   {-# INLINE dimap #-}
 
   -- | Map the first argument contravariantly.
@@ -110,13 +110,6 @@ class (forall a. Functor (p a)) => Profunctor p where
   lmap :: (a -> b) -> p b c -> p a c
   lmap f = dimap f id
   {-# INLINE lmap #-}
-
-  -- | Map the second argument covariantly.
-  --
-  -- @'rmap' ≡ 'dimap' 'id'@
-  rmap :: (b -> c) -> p a b -> p a c
-  rmap = dimap id
-  {-# INLINE rmap #-}
 
   -- | Strictly map the second argument argument
   -- covariantly with a function that is assumed
@@ -173,8 +166,14 @@ class (forall a. Functor (p a)) => Profunctor p where
   (.#) = \p -> p `seq` \_ -> lmap (coerce (id :: b -> b) :: a -> b) p
   {-# INLINE (.#) #-}
 
-  {-# MINIMAL dimap | (lmap, rmap) #-}
+  {-# MINIMAL dimap | lmap #-}
 
+  -- | Map the second argument covariantly.
+  --
+  -- @'rmap' ≡ 'dimap' 'id'@
+  rmap :: Profunctor p => (b -> c) -> p a b -> p a c
+  rmap = fmap
+  {-# INLINE rmap #-}
 instance Profunctor (->) where
   dimap ab cd bc = cd . bc . ab
   {-# INLINE dimap #-}
