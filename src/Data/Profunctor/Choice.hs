@@ -18,6 +18,7 @@ module Data.Profunctor.Choice
   Choice(..)
 , splitChoice
 , fanIn
+, if_
 , TambaraSum(..)
 , tambaraSum, untambaraSum
 , PastroSum(..)
@@ -36,6 +37,7 @@ import Data.Bifunctor.Joker (Joker(..))
 import Data.Bifunctor.Product (Product(..))
 import Data.Bifunctor.Sum (Sum(..))
 import Data.Bifunctor.Tannen (Tannen(..))
+import Data.Bool (bool)
 import Data.Monoid hiding (Product, Sum)
 import Data.Profunctor.Adjunction
 import Data.Profunctor.Functor
@@ -121,6 +123,18 @@ splitChoice l r = left' l . right' r
 fanIn :: (Category p, Choice p) => p a c -> p b c -> p (Either a b) c
 fanIn l r = lmap (either id id) id . splitChoice l r
 {-# INLINE fanIn #-}
+
+-- | We can use 'fanIn' to lift 'if' into profunctors:
+-- 
+-- > lmap (bool <$> Left <*> Right <*> pred) $ fanIn l r = if_
+--
+-- 'if_' follows the following laws:
+-- 
+-- > proIf (const False) f t ~ f
+-- > proIf (const True) f t ~ t
+if_ :: (Category p, Choice p) => (a -> Bool) -> p a b -> p a b -> p a b
+if_ p l r = dimap (bool <$> Left <*> Right <*> p) (either id id) $ splitChoice l r
+{-# INLINE if_ #-}
 
 instance Choice (->) where
   left' = \ab -> \case
