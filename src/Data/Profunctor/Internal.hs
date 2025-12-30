@@ -67,7 +67,10 @@ infixl 8 .#
 -- | Formally, the class 'Profunctor' represents a profunctor
 -- from @Hask@ -> @Hask@.
 --
--- Intuitively it is a bifunctor where the first argument is contravariant
+-- Intuitively, it encodes a transformation between two types. (`(->)` is a
+-- profunctor)
+--
+-- Concretely, it is a bifunctor where the first argument is contravariant
 -- and the second argument is covariant.
 --
 -- You can define a 'Profunctor' by either defining 'dimap' or by defining both
