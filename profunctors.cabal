@@ -59,6 +59,7 @@ library
     Data.Profunctor.Monad
     Data.Profunctor.Ran
     Data.Profunctor.Rep
+    Data.Profunctor.Rift
     Data.Profunctor.Sieve
     Data.Profunctor.Strong
     Data.Profunctor.Traversing
@@ -87,3 +88,13 @@ library
     InstanceSigs
     UndecidableInstances
     TypeFamilies
+
+test-suite rift-laws
+  type: exitcode-stdio-1.0
+  main-is: Rift.hs
+  hs-source-dirs: tests
+  build-depends:
+    base >= 4.9 && < 5,
+    profunctors
+  ghc-options: -Wall
+  default-language: Haskell2010

@@ -1,3 +1,9 @@
+next
+----
+* Add `Data.Profunctor.Rift`, re-exporting the existing right Kan lift and
+  providing `postcomposeRift`, `curryRift`, and `uncurryRift`.
+* Correct the description of `decomposeRift` and its adjunction orientation.
+
 5.6.3 [2025.06.17]
 ------------------
 * Drop support for pre-8.0 versions of GHC.
